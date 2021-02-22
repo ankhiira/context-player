@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/blankFragment">
+    app:startDestination="@id/homeFragment">
 
     <fragment
-        android:id="@+id/blankFragment"
-        android:name="com.gabchmel.contextmusicplayer.BlankFragment"
+        android:id="@+id/homeFragment"
+        android:name="com.gabchmel.contextmusicplayer.HomeFragment"
         android:label="fragment_blank"
         tools:layout="@layout/fragment_home" />
     <fragment
-        android:id="@+id/blankFragment2"
+        android:id="@+id/song_list_Fragment"
         android:name="com.gabchmel.contextmusicplayer.BlankFragment2"
         android:label="fragment_blank2"
         tools:layout="@layout/fragment_song_list" />

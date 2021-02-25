@@ -6,12 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".HomeFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -20,12 +14,21 @@
             android:id="@+id/tv_song_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="180dp"
             android:text="Song Title"
             android:textSize="26sp"
-            app:layout_constraintBottom_toTopOf="@+id/btn_pause"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_song_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Author"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_song_title" />
 
         <ImageView
             android:id="@+id/imageView"
@@ -34,7 +37,7 @@
             android:layout_marginTop="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_song_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_song_author"
             tools:src="@tools:sample/avatars" />
 
         <SeekBar
@@ -43,9 +46,9 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="18dp"
             android:layout_marginTop="18dp"
+            android:progress="50"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:progress="50"
             app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
         <Button
@@ -78,32 +81,5 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_play" />
 
-        <Button
-            android:id="@+id/btn_pause"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginBottom="64dp"
-            android:background="@drawable/ic_pause_black_24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/btn_play"
-            app:layout_constraintTop_toBottomOf="@+id/btn_prev" />
-
-        <Button
-            android:id="@+id/btn_stop"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginLeft="32dp"
-            android:background="@drawable/ic_stop_black_24dp"
-            app:layout_constraintBaseline_toBaselineOf="@+id/btn_pause"
-            app:layout_constraintStart_toEndOf="@+id/btn_pause" />
-
-
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 </FrameLayout>

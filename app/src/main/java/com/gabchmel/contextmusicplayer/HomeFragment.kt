@@ -5,10 +5,13 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.support.v4.media.session.MediaSessionCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -127,6 +130,10 @@ class HomeFragment : Fragment() {
         const val CHANNEL_ID = "channel"
         const val notificationID = 1234
 
+        const val ACTION_PREVIOUS = "actionprev"
+        const val CHANNEL_PLAY = "actionplay"
+        const val CHANNEL_NEXT = "actionnext"
+
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
@@ -167,30 +174,33 @@ class HomeFragment : Fragment() {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         }
 
+        // Specification of activity that will be executed after click on the notification will be performed
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
+        // Definition of the intent execution that execute the according activity
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
+        // Bitmap for album art on notification
+        val albumArt = BitmapFactory.decodeResource(resources, R.raw.context_player_icon)
+
+        // Definition of notification layout
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_baseline_headset_24)
-            .setContentTitle("My notification")
-            .setContentText("Hello World!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentTitle("Track title")
+            .setContentText("Author")
+            .setStyle(androidx.media.app.NotificationCompat.MediaStyle())
+            .addAction(R.drawable.ic_skip_previous_black_24dp, "Prev", pendingIntent)
+            .addAction(R.drawable.ic_play_arrow_black_24dp, "Play", pendingIntent)
+            .addAction(R.drawable.ic_skip_next_black_24dp, "Next", pendingIntent)
+            .setLargeIcon(albumArt)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
 
+        // Creates notification object with set parameters
         with(NotificationManagerCompat.from(context)) {
             notify(notificationID, builder.build())
         }
     }
-
-//    fun setTimeLabel(time : Int) : String {
-//        val min = time / 1000 / 60
-//        val sec = time / 1000 % 60
-//
-//        var label = "$min"
-//        if ()
-//    }
 }

@@ -82,4 +82,9 @@
             app:layout_constraintStart_toEndOf="@+id/btn_play" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </FrameLayout>

@@ -1,17 +1,19 @@
-package com.gabchmel.contextmusicplayer
+package com.gabchmel.contextmusicplayer.homeScreen
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.media.session.MediaSessionCompat
+import android.os.Looper
+import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +22,12 @@ import android.widget.SeekBar
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
+import androidx.media.session.MediaButtonReceiver
+import com.gabchmel.contextmusicplayer.MainActivity
+import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.databinding.FragmentHomeBinding
 import kotlinx.android.synthetic.main.fragment_home.*
 
 // TODO: Rename parameter arguments, choose names that match
@@ -38,10 +46,14 @@ class HomeFragment : Fragment() {
     private var param2: String? = null
 
     lateinit var runnable: Runnable
-    private var handler = Handler()
+    private var handler = Handler(Looper.getMainLooper())
 
     lateinit var notificationChannel: NotificationChannel
     lateinit var builder: NotificationCompat.Builder
+
+    private lateinit var binding: FragmentHomeBinding
+
+    private val viewModel: NowPlayingViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,16 +66,27 @@ class HomeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
+        val view = binding.root
+
+        binding.tvSongTitle.text = viewModel.musicMetadata.title
+        binding.tvSongAuthor.text = viewModel.musicMetadata.artist
+
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_home, container, false)
+//        val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         if (container != null) {
             createNotificationChannel(container.context)
         }
 
         // Media Player
-        val mediaPlayer = MediaPlayer.create(activity, R.raw.careful)
+        val mediaPlayer = MediaPlayer.create(
+            activity,
+            Uri.parse("https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/First_Rebirth/Last_Runaway/First_Rebirth_-_01_-_Prisoner_Of_Infinity.mp3?download=1&name=First%20Rebirth%20-%20Prisoner%20Of%20Infinity.mp3")
+        )
+
 
         val btnPlay = view.findViewById<Button>(R.id.btn_play)
 
@@ -91,7 +114,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
 
                 if (fromUser) {
@@ -130,10 +153,6 @@ class HomeFragment : Fragment() {
         const val CHANNEL_ID = "channel"
         const val notificationID = 1234
 
-        const val ACTION_PREVIOUS = "actionprev"
-        const val CHANNEL_PLAY = "actionplay"
-        const val CHANNEL_NEXT = "actionnext"
-
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
@@ -162,7 +181,7 @@ class HomeFragment : Fragment() {
                 description = descriptionText
             }
 
-            val notificationManager : NotificationManager =
+            val notificationManager: NotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             notificationManager.createNotificationChannel(notificationChannel)
@@ -188,15 +207,36 @@ class HomeFragment : Fragment() {
         // Definition of notification layout
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_baseline_headset_24)
-            .setContentTitle("Track title")
-            .setContentText("Author")
+            .setContentTitle(viewModel.musicMetadata.title)
+            .setContentText(viewModel.musicMetadata.artist)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle())
-            .addAction(R.drawable.ic_skip_previous_black_24dp, "Prev", pendingIntent)
-            .addAction(R.drawable.ic_play_arrow_black_24dp, "Play", pendingIntent)
-            .addAction(R.drawable.ic_skip_next_black_24dp, "Next", pendingIntent)
+            .addAction(
+                R.drawable.ic_skip_previous_black_24dp, "Prev",
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    context,
+                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                )
+            )
+            .addAction(
+                R.drawable.ic_play_arrow_black_24dp,
+                "Play",
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    context,
+                    PlaybackStateCompat.ACTION_PLAY_PAUSE
+                )
+            )
+            .addAction(
+                R.drawable.ic_skip_next_black_24dp,
+                "Next",
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    context,
+                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                )
+            )
             .setLargeIcon(albumArt)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
+
 
         // Creates notification object with set parameters
         with(NotificationManagerCompat.from(context)) {

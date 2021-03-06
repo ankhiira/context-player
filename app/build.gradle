@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 30
@@ -19,6 +20,10 @@ android {
     buildFeatures {
         // Enables Jetpack Compose for this module
         compose true
+
+        // Enables viewBinding and dataBinding
+        viewBinding true
+        dataBinding true
     }
 
     // Set both the Java and Kotlin compilers to target Java 8.
@@ -87,6 +92,9 @@ dependencies {
     implementation "androidx.media:media:1.2.1"
 
     // Exoplayer
-    implementation 'com.google.android.exoplayer:exoplayer:2.X.X'
+    implementation 'com.google.android.exoplayer:exoplayer:2.13.2'
+    implementation 'com.google.android.exoplayer:extension-mediasession:2.11.5'
 
+    // For data binding
+//    kapt 'groupId:artifactId:1.5.0'
 }

@@ -15,14 +15,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
-            Greeting("Android")
-        }
+//        setContent {
+//            Greeting("Android")
+//        }
 
         setContentView(R.layout.activity_main)
 
         // Adjust music volume with volume controls
-        volumeControlStream =AudioManager.STREAM_MUSIC
+//        volumeControlStream =AudioManager.STREAM_MUSIC
 
         // Bottom navigation
         val navHostFragment =

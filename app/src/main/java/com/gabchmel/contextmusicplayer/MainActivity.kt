@@ -1,8 +1,11 @@
 package com.gabchmel.contextmusicplayer
 
+import android.content.ComponentName
 import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.session.MediaControllerCompat
 import androidx.activity.compose.setContent
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -10,6 +13,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import android.content.Intent
+
+
+
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,8 +28,11 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
+//        intent = Intent(this, MediaPlayerActivity::class.java)
+//        startActivity(intent)
+
         // Adjust music volume with volume controls
-//        volumeControlStream =AudioManager.STREAM_MUSIC
+        volumeControlStream =AudioManager.STREAM_MUSIC
 
         // Bottom navigation
         val navHostFragment =

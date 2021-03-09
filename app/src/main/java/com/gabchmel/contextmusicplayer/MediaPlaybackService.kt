@@ -1,52 +1,143 @@
 package com.gabchmel.contextmusicplayer
 
+import android.content.Context
+import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.core.app.NotificationCompat
+import androidx.media.AudioManagerCompat
 import androidx.media.MediaBrowserServiceCompat
+import androidx.media.session.MediaButtonReceiver
+import com.gabchmel.contextmusicplayer.homeScreen.HomeFragment
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+
+private const val MY_MEDIA_ROOT_ID = "media_root_id"
 
 
 class MediaPlaybackService : MediaBrowserServiceCompat() {
 
-    private lateinit var MY_MEDIA_ROOT_ID: String
-
-    protected lateinit var mediaSession : MediaSessionCompat
-    protected lateinit var mediaSessionConnector: MediaSessionConnector
+    private lateinit var mediaSession : MediaSessionCompat
+    private lateinit var mediaSessionConnector: MediaSessionConnector
 
     private lateinit var stateBuilder : PlaybackStateCompat.Builder
     private lateinit var notificationManager : NotificationManager
     private lateinit var mediaSource: MediaMetadataCompat
+    private lateinit var audioFocusRequest: AudioFocusRequest
+    private lateinit var afChangeListener: AudioManager.OnAudioFocusChangeListener
+    private lateinit var player: MediaPlayer
+    private lateinit var service: MediaBrowserServiceCompat
 
     override fun onCreate() {
         super.onCreate()
 
-        // Create and initialize the media session
+        player = MediaPlayer.create(
+            baseContext,
+//            Uri.parse("https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/First_Rebirth/Last_Runaway/First_Rebirth_-_01_-_Prisoner_Of_Infinity.mp3?download=1&name=First%20Rebirth%20-%20Prisoner%20Of%20Infinity.mp3")
+            Uri.parse("android.resource://com.gabchmel.contextmusicplayer/" + R.raw.gaga)
+        )
+
+        // Create and initialize MediaSessionCompat
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
             .apply {
 
-//            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-//            or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+//                deprecated
+//                Support BT headphones
+            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+//                    support Android Wear, Android Auto
+            or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
 
-            // Initial PlaybackState set to ACTION_PLAY, so the media buttons can start the player
+            // Set of initial PlaybackState set to ACTION_PLAY, so the media buttons can start the player
+            // (current operational state of the player - transport state - playing, paused, buffering)
             stateBuilder = PlaybackStateCompat.Builder()
                 .setActions(PlaybackStateCompat.ACTION_PLAY
-                or PlaybackStateCompat.ACTION_PLAY_PAUSE)
+                or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                or PlaybackStateCompat.ACTION_PAUSE
+                or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
 
             setPlaybackState(stateBuilder.build())
 
-//            setCallback(MySessionCallback())
+//            val controller = mediaSession.controller
+
+            val mediaSessionCallback = object : MediaSessionCompat.Callback() {
+                override fun onPlay() {
+                    val am = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+                            setOnAudioFocusChangeListener(afChangeListener)
+                            setAudioAttributes(AudioAttributes.Builder().run {
+                                setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                build()
+                            })
+                            build()
+                        }
+
+                        val result = am.requestAudioFocus(audioFocusRequest)
+                        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                            // Start the service
+                            startService(Intent(applicationContext, MediaBrowserServiceCompat::class.java))
+
+                            // Set session active, set to use media buttons now
+                            isActive = true
+
+                            // Start the player
+                            player.start()
+
+//                            service.startForeground(HomeFragment.notificationID, notificationManager.builder)
+                        }
+                    }
+                }
+
+                override fun onStop() {
+                    val am = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        am.abandonAudioFocusRequest(audioFocusRequest)
+
+                        service.stopSelf()
+
+                        isActive = false
+
+                        player.stop()
+
+//                        TODO create foreground service in onPlay and onStop
+//                        service.stopForeground(false)
+                    }
+                }
+
+                override fun onPause() {
+                    val am = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+                    player.pause()
+
+//                    TODO dodelat
+//                    // unregister BECOME_NOISY BroadcastReceiver
+//                    unregisterReceiver(myNoisyAudioStreamReceiver)
+//                    // Take the service out of the foreground, retain the notification
+//                    service.stopForeground(false)
+                }
+            }
+
+            setCallback(mediaSessionCallback)
 
             // Set session token, so the client activities can communicate with it
             setSessionToken(sessionToken)
         }
 
         // Handling the notification with session token
-        notificationManager = NotificationManager ()
+        notificationManager = NotificationManager (baseContext, mediaSession.sessionToken, mediaSession)
 
-        mediaSessionConnector = MediaSessionConnector(mediaSession)
+//        mediaSessionConnector = MediaSessionConnector(mediaSession!!)
 
     }
 
@@ -64,12 +155,22 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        TODO("Not yet implemented")
 
+        val mediaItems = emptyList<MediaBrowserCompat.MediaItem>()
+
+        result.sendResult(mediaItems as MutableList<MediaBrowserCompat.MediaItem>?)
     }
 
-//    override fun MediaSessionCompat.Callback.onPlay() {
-//            //todo
-//    }
+    override fun onDestroy() {
+        mediaSession.run {
+            isActive = false
+            release()
+        }
+    }
 
+//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+//        MediaButtonReceiver.handleIntent(mediaSession, intent)
+//
+//        return super.onStartCommand(intent, flags, startId)
+//    }
 }

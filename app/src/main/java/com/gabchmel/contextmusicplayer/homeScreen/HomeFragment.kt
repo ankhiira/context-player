@@ -1,9 +1,6 @@
 package com.gabchmel.contextmusicplayer.homeScreen
 
-import android.app.PendingIntent
 import android.content.ComponentName
-import android.media.session.PlaybackState.STATE_PLAYING
-import android.media.session.PlaybackState.STATE_STOPPED
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -16,12 +13,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
-import androidx.media.session.MediaButtonReceiver
-import com.gabchmel.contextmusicplayer.MainActivity
 import com.gabchmel.contextmusicplayer.MediaPlaybackService
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.databinding.FragmentHomeBinding
@@ -43,7 +37,7 @@ class HomeFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
-    lateinit var runnable: Runnable
+    private lateinit var runnable: Runnable
     private var handler = Handler(Looper.getMainLooper())
 
     private lateinit var mediaBrowser: MediaBrowserCompat
@@ -74,7 +68,6 @@ class HomeFragment : Fragment() {
         binding.tvSongAuthor.text = viewModel.musicMetadata.artist
 
         val seekBar = binding.seekBar
-        val btnPlay = binding.btnPlay
 
         mediaBrowser = MediaBrowserCompat(
             activity,
@@ -166,7 +159,6 @@ class HomeFragment : Fragment() {
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
 
         var playPause = btn_play.setOnClickListener {
-            Log.d("TAG", "buildTransportControls: onlclick")
             val pbState = mediaController.playbackState.state
             if (pbState == PlaybackStateCompat.STATE_PLAYING) {
                 mediaController.transportControls.pause()
@@ -180,7 +172,7 @@ class HomeFragment : Fragment() {
 
         // Display initial state
         val metadata = mediaController.metadata
-        val pbstate = mediaController.playbackState
+        val pbState = mediaController.playbackState
 
         // Register a callback to stay in sync
         mediaController.registerCallback(controllerCallback)
@@ -196,9 +188,8 @@ class HomeFragment : Fragment() {
             Log.d("TAG", "playback state changed")
 
 //            super.onPlaybackStateChanged(state)
-            Toast.makeText(context,"ndksd", Toast.LENGTH_SHORT).show()
 
-            playbackState.postValue((state ?: STATE_PLAYING) as PlaybackStateCompat?)
+//            playbackState.postValue((state ?: STATE_PLAYING) as PlaybackStateCompat?)
 
         }
     }

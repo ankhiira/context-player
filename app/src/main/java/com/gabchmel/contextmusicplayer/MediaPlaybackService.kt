@@ -6,6 +6,7 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -13,12 +14,17 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media.AudioManagerCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.gabchmel.contextmusicplayer.homeScreen.HomeFragment
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import android.media.session.MediaSession
+
+
+
 
 private const val MY_MEDIA_ROOT_ID = "media_root_id"
 
@@ -70,9 +76,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
             val mediaSessionCallback = object : MediaSessionCompat.Callback() {
                 override fun onPlay() {
+
                     val am = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
                         audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
                             setOnAudioFocusChangeListener(afChangeListener)
                             setAudioAttributes(AudioAttributes.Builder().run {
@@ -93,7 +101,59 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                             // Start the player
                             player.start()
 
-//                            service.startForeground(HomeFragment.notificationID, notificationManager.builder)
+                            val state = PlaybackState.Builder()
+                                .setState(
+                                    PlaybackState.STATE_PLAYING,
+                                    player.currentPosition.toLong(), 1.0F
+                                )
+                                .build()
+                            setPlaybackState(PlaybackStateCompat.fromPlaybackState(state))
+
+                            //service.startForeground(HomeFragment.notificationID, notificationManager.builder)
+                        }
+                    } else {
+
+                        var afChangeListener : AudioManager.OnAudioFocusChangeListener? = null
+
+//                        // Request audio focus for playback
+//                        val result: Int = am.requestAudioFocus(
+//                            afChangeListener,
+//                            // Use the music stream.
+//                            AudioManager.STREAM_MUSIC,
+//                            // Request permanent focus.
+//                            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+//                        )
+
+                        // Request audio focus for playback
+                        val result: Int = am.requestAudioFocus(
+                            afChangeListener,
+                            // Use the music stream.
+                            AudioManager.STREAM_MUSIC,
+                            // Request permanent focus.
+                            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+                        )
+
+                        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                            startService(
+                                Intent(
+                                    applicationContext,
+                                    MediaBrowserServiceCompat::class.java
+                                )
+                            )
+
+                            // Set session active, set to use media buttons now
+                            isActive = true
+
+                            // Start the player
+                            player.start()
+
+                            val state = PlaybackState.Builder()
+                                .setState(
+                                    PlaybackState.STATE_PLAYING,
+                                    player.currentPosition.toLong(), 1.0F
+                                )
+                                .build()
+                            setPlaybackState(PlaybackStateCompat.fromPlaybackState(state))
                         }
                     }
                 }
@@ -110,8 +170,32 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                         player.stop()
 
+                        val state = PlaybackState.Builder()
+                            .setState(
+                                PlaybackState.STATE_STOPPED,
+                                player.currentPosition.toLong(), 1.0F
+                            )
+                            .build()
+                        setPlaybackState(PlaybackStateCompat.fromPlaybackState(state))
+
 //                        TODO create foreground service in onPlay and onStop
 //                        service.stopForeground(false)
+                    } else {
+                        am.abandonAudioFocus(afChangeListener)
+
+                        service.stopSelf()
+
+                        isActive = false
+
+                        player.stop()
+
+                        val state = PlaybackState.Builder()
+                            .setState(
+                                PlaybackState.STATE_STOPPED,
+                                player.currentPosition.toLong(), 1.0F
+                            )
+                            .build()
+                        setPlaybackState(PlaybackStateCompat.fromPlaybackState(state))
                     }
                 }
 
@@ -120,12 +204,21 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                     player.pause()
 
+                    val state = PlaybackState.Builder()
+                        .setState(
+                            PlaybackState.STATE_PAUSED,
+                            player.currentPosition.toLong(), 1.0F
+                        )
+                        .build()
+                    setPlaybackState(PlaybackStateCompat.fromPlaybackState(state))
+
 //                    TODO dodelat
 //                    // unregister BECOME_NOISY BroadcastReceiver
 //                    unregisterReceiver(myNoisyAudioStreamReceiver)
 //                    // Take the service out of the foreground, retain the notification
 //                    service.stopForeground(false)
                 }
+
             }
 
             setCallback(mediaSessionCallback)
@@ -168,9 +261,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         }
     }
 
-//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        MediaButtonReceiver.handleIntent(mediaSession, intent)
-//
-//        return super.onStartCommand(intent, flags, startId)
-//    }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        MediaButtonReceiver.handleIntent(mediaSession, intent)
+
+        return super.onStartCommand(intent, flags, startId)
+    }
 }

@@ -3,48 +3,34 @@ package com.gabchmel.contextmusicplayer.homeScreen
 import android.app.Application
 import android.content.ComponentName
 import android.media.MediaMetadataRetriever
-import android.util.Log
-import androidx.lifecycle.ViewModel
 import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.widget.Button
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.viewbinding.ViewBindings
 import com.gabchmel.contextmusicplayer.*
+import kotlinx.android.synthetic.main.fragment_home.*
 
 
-class NowPlayingViewModel(val app : Application) : AndroidViewModel(app) {
+class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
-    var uri = Uri.parse("android.resource://com.gabchmel.contextmusicplayer/" + R.raw.gaga)
-
-    val musicMetadata: MusicMetadata
+    private var uri = Uri.parse("android.resource://com.gabchmel.contextmusicplayer/" + R.raw.gaga)
 
     private lateinit var mediaBrowser: MediaBrowserCompat
+    private var mediaBrowserConnectionCallback = MediaBrowserCompat.ConnectionCallback()
 
-    init {
-        val metadataRetriever = MediaMetadataRetriever()
-        metadataRetriever.setDataSource(app,uri)
-        musicMetadata = metadataRetriever.toMusicMetadata()
+    lateinit var mediaController: MediaControllerCompat
 
-//        mediaBrowser = MediaBrowserCompat(
-//            app,
-//            ComponentName(app, MediaPlaybackService::class.java),
-//            connectionCallbacks,
-//            null // optional
-//        )
-//
-//        mediaBrowser.connect()
-    }
+    private val _musicState = MutableLiveData<PlaybackStateCompat>()
+    val musicState: LiveData<PlaybackStateCompat> = _musicState
 
-    override fun onCleared() {
-        super.onCleared()
+    private val _musicMetadata = MutableLiveData<MediaMetadataCompat>()
+    val musicMetadata: LiveData<MediaMetadataCompat> = _musicMetadata
 
-//        MediaControllerCompat.getMediaController(requireactivity)?.unregisterCallback(controllerCallback)
-//        mediaBrowserConnectionCallback.onConnectionSuspended()
-        mediaBrowser.disconnect()
-    }
 
     private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
@@ -52,17 +38,22 @@ class NowPlayingViewModel(val app : Application) : AndroidViewModel(app) {
             mediaBrowser.sessionToken.also { token ->
 
                 // Create MediaControllerCompat
-                val mediaController = MediaControllerCompat(
+                mediaController = MediaControllerCompat(
                     app,
                     token
                 )
 
-//                MediaControllerCompat.setMediaController(app, mediaController)
-
                 mediaController.registerCallback(controllerCallback)
             }
 
-//            buildTransportControls()
+            // Display initial state
+            val metadata = mediaController.metadata
+            val pbstate = mediaController.playbackState
+
+            _musicState.value = pbstate
+
+            // Register a callback to stay in sync
+            mediaController.registerCallback(controllerCallback)
         }
 
         override fun onConnectionSuspended() {
@@ -74,48 +65,48 @@ class NowPlayingViewModel(val app : Application) : AndroidViewModel(app) {
         }
     }
 
-//    fun buildTransportControls() {
-//
-////        val mediaController = MediaControllerCompat.getMediaController(app)
-//
-////        runOnUiThread {
-////            var playPause = findViewById<Button>(R.id.btn_play).apply {
-////                setOnClickListener {
-////                    val pbState = mediaController.playbackState.state
-////                    if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-////                        mediaController.transportControls.pause()
-////                    } else {
-////                        mediaController.transportControls.play()
-////                    }
-////                }
-////            }
-////        }
-//
-//        // Display initial state
-//        val metadata = mediaController.metadata
-//        val pbstate = mediaController.playbackState
-//
-//        // Register a callback to stay in sync
-//        mediaController.registerCallback(controllerCallback)
-//    }
+    init {
+        // Setting MediaBrowser for connecting to the MediaBrowserService
+        mediaBrowser = MediaBrowserCompat(
+            app,
+            ComponentName(app, MediaPlaybackService::class.java),
+            connectionCallbacks,
+            null // optional
+        )
+
+        // Connects to the MediaBrowseService
+        mediaBrowser.connect()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        mediaController.unregisterCallback(controllerCallback)
+        mediaBrowserConnectionCallback.onConnectionSuspended()
+        mediaBrowser.disconnect()
+    }
 
     private var controllerCallback = object : MediaControllerCompat.Callback() {
 
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-            super.onMetadataChanged(metadata)
+        override fun onMetadataChanged(metadata: MediaMetadataCompat) {
+            _musicMetadata.value = metadata
         }
 
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            super.onPlaybackStateChanged(state)
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
+            _musicState.value = state
         }
     }
 
-//    fun playBtnPlay () {
-//        val pbState = mediaController.playbackState.state
-//        if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-//            mediaController.transportControls.pause()
-//        } else {
-//            mediaController.transportControls.play()
-//        }
-//    }
+    fun play() {
+        mediaController.transportControls.play()
+    }
+
+    fun pause() {
+        mediaController.transportControls.pause()
+    }
+
+    fun setMusicProgress(progress: Int) {
+        mediaController.transportControls.seekTo(progress.toLong())
+    }
+
 }

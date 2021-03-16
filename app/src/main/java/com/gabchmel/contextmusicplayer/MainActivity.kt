@@ -4,8 +4,6 @@ import android.content.ComponentName
 import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.session.MediaControllerCompat
 import androidx.activity.compose.setContent
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -13,9 +11,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import android.content.Intent
-
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,18 +23,15 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-//        intent = Intent(this, MediaPlayerActivity::class.java)
-//        startActivity(intent)
-
         // Adjust music volume with volume controls
-        volumeControlStream =AudioManager.STREAM_MUSIC
+        volumeControlStream = AudioManager.STREAM_MUSIC
 
         // Bottom navigation
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
 
-        val bottomNavigationView : BottomNavigationView = findViewById(R.id.bottom_nav_view)
+        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
 
         NavigationUI.setupWithNavController(bottomNavigationView, navController)
     }
@@ -47,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun Greeting(name: String) {
-    Text (text = "Hello $name!")
+    Text(text = "Hello $name!")
 }
 
 @Preview

@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.12613981762917933" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_home.xml" value="0.1" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_song_list.xml" value="0.1" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/menu/bottom_nav_menu.xml" value="0.15648148148148147" />
       </map>
     </option>
   </component>

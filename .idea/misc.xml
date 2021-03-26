@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector.xml" value="0.24351851851851852" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_baseline_headset_24.xml" value="0.24351851851851852" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.12613981762917933" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_home.xml" value="0.1" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_song_list.xml" value="0.1" />

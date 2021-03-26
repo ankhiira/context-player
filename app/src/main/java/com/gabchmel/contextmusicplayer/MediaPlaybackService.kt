@@ -1,6 +1,7 @@
 package com.gabchmel.contextmusicplayer
 
 import android.app.Notification
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -17,10 +18,10 @@ import androidx.media.session.MediaButtonReceiver
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import com.gabchmel.contextmusicplayer.homeScreen.HomeFragment
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
-
 
 
 class MediaPlaybackService : MediaBrowserServiceCompat() {
@@ -34,13 +35,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private lateinit var metadataBuilder: MediaMetadataCompat.Builder
 
     private lateinit var audioFocusRequest: AudioFocusRequest
-    private lateinit var afChangeListener: AudioManager.OnAudioFocusChangeListener
-
     private lateinit var player: MediaPlayer
 
     private lateinit var notification: Notification
 
-    private lateinit var timer : Timer
+    private lateinit var timer: Timer
+
+//    private val noisyAudioStreamReceiver = BroadcastReceiver()
+
+    // Update metadata
+    private val metadataRetriever = MediaMetadataRetriever()
 
     private var uri = Uri.parse("android.resource://com.gabchmel.contextmusicplayer/" + R.raw.gaga)
 //            Uri.parse("https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/First_Rebirth/Last_Runaway/First_Rebirth_-_01_-_Prisoner_Of_Infinity.mp3?download=1&name=First%20Rebirth%20-%20Prisoner%20Of%20Infinity.mp3")
@@ -53,13 +57,14 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             uri
         )
 
-//        if(player== MediaPlayer()) {
-////             After the song finishes go to the initial design
-////        player.setOnCompletionListener {
-////            btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
-////            seekBar.progress = 0
-////        }
-//        }
+        metadataRetriever.setDataSource(applicationContext, uri)
+
+        if (player == MediaPlayer()) {
+            // After the song finishes go to the initial design
+            player.setOnCompletionListener {
+                // TODO
+            }
+        }
 
         // Create and initialize MediaSessionCompat
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
@@ -78,7 +83,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 stateBuilder = PlaybackStateCompat.Builder()
                     .setActions(
                         PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                        PlaybackStateCompat.ACTION_PLAY
+                                PlaybackStateCompat.ACTION_PLAY
                                 or PlaybackStateCompat.ACTION_PAUSE
                                 or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
                                 or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
@@ -88,12 +93,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                 val mediaSessionCallback = object : MediaSessionCompat.Callback() {
 
+                    val am =
+                        applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+                    val afChangeListener: AudioManager.OnAudioFocusChangeListener =
+                        AudioManager.OnAudioFocusChangeListener { }
+
                     override fun onPlay() {
 
-                        val am =
-                            applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-                        val result : Int
+                        val result: Int
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
@@ -109,8 +117,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                             result = am.requestAudioFocus(audioFocusRequest)
                         } else {
-
-                            val afChangeListener: AudioManager.OnAudioFocusChangeListener? = null
 
                             // Request audio focus for playback
                             result = am.requestAudioFocus(
@@ -138,14 +144,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         player.start()
 
                         updateState()
+                        updateNotification(true)
                         startForeground(NotificationManager.notificationID, notification)
                     }
 
                     override fun onStop() {
-                        val am =
-                            applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-                        val afChangeListener: AudioManager.OnAudioFocusChangeListener? = null
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             am.abandonAudioFocusRequest(audioFocusRequest)
@@ -153,20 +156,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                             am.abandonAudioFocus(afChangeListener)
                         }
                         stopForeground(true)
-                        stopSelf()
 
                         isActive = false
-
-                        player.stop()
                     }
 
                     override fun onPause() {
-                        val am =
-                            applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
                         player.pause()
 
                         updateState()
+                        updateNotification(false)
                         // Take the service out of foreground, keep the notification
                         stopForeground(false)
 
@@ -200,18 +199,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     fun updateState() {
         // Update playback state
 //        val newPlaybackState = PlaybackStateCompat.Builder(mediaSession)
-        mediaSession.setPlaybackState(player.toPlaybackStateBuilder().setActions(
+        mediaSession.setPlaybackState(
+            player.toPlaybackStateBuilder().setActions(
                 PlaybackStateCompat.ACTION_PLAY_PAUSE or
                         PlaybackStateCompat.ACTION_PLAY
                         or PlaybackStateCompat.ACTION_PAUSE
                         or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
                         or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                         or PlaybackStateCompat.ACTION_STOP
-                ).build())
-
-        // Update metadata
-        val metadataRetriever = MediaMetadataRetriever()
-        metadataRetriever.setDataSource(applicationContext, uri)
+            ).build()
+        )
 
         metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadataRetriever.getTitle())
@@ -222,7 +219,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
         }
         mediaSession.setMetadata(metadataBuilder.build())
+    }
 
+    fun updateNotification(isPlaying: Boolean) {
         // Update notification
         notification = NotificationManager.createNotification(
             baseContext,
@@ -231,16 +230,12 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             metadataRetriever.getArtist() ?: "unknown",
             metadataRetriever.getAlbumArt() ?: BitmapFactory.decodeResource(
                 resources,
-                R.raw.context_player_icon
-            )
+                R.raw.album_cover_clipart
+            ),
+            isPlaying
         )
 
         NotificationManager.displayNotification(baseContext, notification)
-
-    }
-
-    fun updateNotification() {
-
     }
 
     // controls access to the service
@@ -263,8 +258,22 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         result.sendResult(mediaItems as MutableList<MediaBrowserCompat.MediaItem>?)
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+
+        player.stop()
+        stopSelf()
+
+        super.onTaskRemoved(rootIntent)
+
+    }
+
     override fun onDestroy() {
-        timer.cancel()
+
+        player.stop()
+        player.seekTo(0)
+
+        stopSelf()
+
         mediaSession.run {
             isActive = false
             release()
@@ -275,5 +284,4 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         MediaButtonReceiver.handleIntent(mediaSession, intent)
         return super.onStartCommand(intent, flags, startId)
     }
-
 }

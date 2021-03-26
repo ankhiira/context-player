@@ -63,8 +63,6 @@ class HomeFragment : Fragment() {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         val view = binding.root
 
-
-
         seekBar = binding.seekBar
         btnPlay = binding.btnPlay
 
@@ -130,10 +128,12 @@ class HomeFragment : Fragment() {
         })
     }
 
+    fun onSongCompletion() {
+        btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+        seekBar.progress = 0
+    }
+
     companion object {
-
-
-
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.

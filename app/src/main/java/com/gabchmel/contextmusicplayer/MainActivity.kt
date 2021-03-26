@@ -1,6 +1,7 @@
 package com.gabchmel.contextmusicplayer
 
 import android.content.ComponentName
+import android.content.Intent
 import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -34,6 +35,11 @@ class MainActivity : AppCompatActivity() {
         val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
 
         NavigationUI.setupWithNavController(bottomNavigationView, navController)
+    }
+
+    override fun onDestroy() {
+//        stopService(Intent(this, MediaPlaybackService::class.java))
+        super.onDestroy()
     }
 }
 

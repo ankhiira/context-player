@@ -8,6 +8,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -81,6 +82,8 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     override fun onCleared() {
         super.onCleared()
 
+        Log.d("viewmodel", "fnjshkdf")
+
         mediaController.unregisterCallback(controllerCallback)
         mediaBrowserConnectionCallback.onConnectionSuspended()
         mediaBrowser.disconnect()
@@ -108,5 +111,4 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     fun setMusicProgress(progress: Int) {
         mediaController.transportControls.seekTo(progress.toLong())
     }
-
 }

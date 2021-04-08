@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_home" />
     <fragment
         android:id="@+id/song_list_Fragment"
-        android:name="com.gabchmel.contextmusicplayer.BlankFragment2"
+        android:name="com.gabchmel.contextmusicplayer.playlist.SongListFragment"
         android:label="fragment_blank2"
         tools:layout="@layout/fragment_song_list" />
 </navigation>

@@ -1,14 +1,8 @@
 package com.gabchmel.contextmusicplayer
 
-import android.content.Context
 import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.graphics.BitmapFactory
-
 import android.graphics.Bitmap
-
-
-
 
 
 fun MediaMetadataRetriever.getTitle() = extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)

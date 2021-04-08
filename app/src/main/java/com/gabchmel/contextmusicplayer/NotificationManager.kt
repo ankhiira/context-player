@@ -60,7 +60,8 @@ object NotificationManager {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentText(artist)
             .addAction(
-                R.drawable.ic_skip_previous_black_24dp, "Prev",
+                R.drawable.ic_skip_previous_black_24dp,
+                "Prev",
                 MediaButtonReceiver.buildMediaButtonPendingIntent(
                     context,
                     PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS

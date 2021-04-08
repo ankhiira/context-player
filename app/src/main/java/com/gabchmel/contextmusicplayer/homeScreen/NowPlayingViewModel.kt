@@ -82,8 +82,6 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     override fun onCleared() {
         super.onCleared()
 
-        Log.d("viewmodel", "fnjshkdf")
-
         mediaController.unregisterCallback(controllerCallback)
         mediaBrowserConnectionCallback.onConnectionSuspended()
         mediaBrowser.disconnect()

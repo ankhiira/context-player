@@ -1,7 +1,6 @@
 package com.gabchmel.contextmusicplayer
 
 import android.app.Notification
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -15,11 +14,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.widget.Toast
-import com.gabchmel.contextmusicplayer.homeScreen.HomeFragment
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
 

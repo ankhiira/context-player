@@ -93,6 +93,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     val afChangeListener: AudioManager.OnAudioFocusChangeListener =
                         AudioManager.OnAudioFocusChangeListener { }
 
+
+                    override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
+                        super.onPlayFromUri(uri, extras)
+                    }
                     override fun onPlay() {
 
                         val result: Int

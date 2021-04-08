@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.annotation.RequiresPermission
 import androidx.core.database.getStringOrNull
+import java.util.concurrent.TimeUnit
 
 object SongScanner {
 
@@ -14,6 +15,13 @@ object SongScanner {
     fun loadSongs(context: Context) : List<Song> {
 
         val songList = mutableListOf<Song>()
+
+        // Show only videos that are at least 5 minutes in duration.
+        val selection = "${MediaStore.Video.Media.DURATION} >= ?"
+        val selectionArgs = arrayOf(
+            TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES).toString()
+        )
+
 
         context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,

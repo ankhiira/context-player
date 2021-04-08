@@ -2,6 +2,7 @@ package com.gabchmel.contextmusicplayer.playlist
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,21 +13,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [SongListFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SongListFragment : Fragment() {
 
     private val viewModel: SongListViewModel by viewModels()
@@ -77,16 +72,29 @@ class SongListFragment : Fragment() {
                 }
             } else {
 
-
-            LazyColumn {
-                items(viewModel.songs) { song ->
-                    Text(text = "Song: title ${song.title}")
+            Column() {
+                Text(text = "Tvoje pesncky")
+                LazyColumn {
+                    items(viewModel.songs) { song ->
+                        SongRow(song)
+                    }
                 }
             }
+
             }
 
 
         } }
     }
 
+}
+
+@Composable
+fun SongRow(song: Song) {
+    Text(text = "Title: ${song.title}", fontWeight = FontWeight.Bold)
+}
+@Preview
+@Composable
+fun ExampleSongRow() {
+    SongRow(Song("Blala", Uri.EMPTY))
 }

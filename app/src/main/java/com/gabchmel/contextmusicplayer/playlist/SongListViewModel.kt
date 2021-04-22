@@ -12,11 +12,11 @@ import androidx.lifecycle.AndroidViewModel
 class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
     var songs by mutableStateOf(emptyList<Song>())
-    val texts = "bla"
 
     init {
         loadSongs()
 
+//        to play a song
 //        app.contentResolver.openAssetFileDescriptor(songs[2].URI,"r")
     }
 

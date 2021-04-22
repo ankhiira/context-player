@@ -41,23 +41,24 @@ class HomeFragment : Fragment() {
             if (pbState == PlaybackStateCompat.STATE_PLAYING) {
                 viewModel.pause()
 
-                //                Preemptively set icon
+                // Preemptively set icon
                 binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
             } else {
                 viewModel.play()
 
-                //                Preemptively set icon
+                // Preemptively set icon
                 binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
             }
-
         }
 
         seekBar.progress = 0
 
         subscribeSeekBar()
 
+        // Observe change of musicState from viewModel
         viewModel.musicState.observe(viewLifecycleOwner) { state ->
 
+            // Set seekBar Progress according to the current state
             seekBar.progress = state.getCurrentPosition(null).toInt()
 
             binding.btnPlay.setBackgroundResource(

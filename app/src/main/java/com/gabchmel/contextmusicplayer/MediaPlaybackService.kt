@@ -1,8 +1,10 @@
 package com.gabchmel.contextmusicplayer
 
+import android.Manifest
 import android.app.Notification
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.*
 import android.net.Uri
@@ -12,10 +14,17 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.core.app.ActivityCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
+import com.gabchmel.contextmusicplayer.playlist.Song
+import com.gabchmel.contextmusicplayer.playlist.SongScanner
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
+
 
 
 class MediaPlaybackService : MediaBrowserServiceCompat() {
@@ -40,11 +49,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // Update metadata
     private val metadataRetriever = MediaMetadataRetriever()
 
+    var songs by mutableStateOf(emptyList<Song>())
+
     private var uri = Uri.parse("android.resource://com.gabchmel.contextmusicplayer/" + R.raw.gaga)
 //            Uri.parse("https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/First_Rebirth/Last_Runaway/First_Rebirth_-_01_-_Prisoner_Of_Infinity.mp3?download=1&name=First%20Rebirth%20-%20Prisoner%20Of%20Infinity.mp3")
 
     override fun onCreate() {
         super.onCreate()
+
+        loadSongs()
 
         player = MediaPlayer.create(
             baseContext,
@@ -194,6 +207,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         }
     }
 
+    // Function to update playback state of the service
     fun updateState() {
         // Update playback state
 //        val newPlaybackState = PlaybackStateCompat.Builder(mediaSession)
@@ -281,5 +295,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         MediaButtonReceiver.handleIntent(mediaSession, intent)
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    fun loadSongs() {
+        if (ActivityCompat.checkSelfPermission(
+                baseContext,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) return
+
+        songs = SongScanner.loadSongs(baseContext)
     }
 }

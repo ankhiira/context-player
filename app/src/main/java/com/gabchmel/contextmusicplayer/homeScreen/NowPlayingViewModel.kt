@@ -2,24 +2,17 @@ package com.gabchmel.contextmusicplayer.homeScreen
 
 import android.app.Application
 import android.content.ComponentName
-import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.viewbinding.ViewBindings
-import com.gabchmel.contextmusicplayer.*
-import kotlinx.android.synthetic.main.fragment_home.*
+import com.gabchmel.contextmusicplayer.MediaPlaybackService
 
 
 class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
-
-    private var uri = Uri.parse("android.resource://com.gabchmel.contextmusicplayer/" + R.raw.gaga)
 
     private lateinit var mediaBrowser: MediaBrowserCompat
     private var mediaBrowserConnectionCallback = MediaBrowserCompat.ConnectionCallback()
@@ -32,7 +25,6 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     private val _musicMetadata = MutableLiveData<MediaMetadataCompat>()
     val musicMetadata: LiveData<MediaMetadataCompat> = _musicMetadata
 
-
     private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
 
@@ -44,7 +36,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
                     token
                 )
 
-                mediaController.registerCallback(controllerCallback)
+//                mediaController.registerCallback(controllerCallback)
             }
 
             // Display initial state

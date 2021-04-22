@@ -9,6 +9,7 @@ import androidx.annotation.RequiresPermission
 import androidx.core.database.getStringOrNull
 import java.util.concurrent.TimeUnit
 
+// Song retriever from local storage
 object SongScanner {
 
     @RequiresPermission(READ_EXTERNAL_STORAGE)
@@ -26,13 +27,14 @@ object SongScanner {
         context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             null,
-            null,
-            null,
+            selection,
+            selectionArgs,
             null
         )?.use { cursor ->
 
             val idColumn  = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleColumn =  cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+            val authorColumn =  cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
 
             while (cursor.moveToNext()) {
                 // Use an ID column from the projection to get
@@ -41,12 +43,13 @@ object SongScanner {
                 val songID = cursor.getLong(idColumn)
 
                 val title = cursor.getStringOrNull(titleColumn)
+                val author = cursor.getStringOrNull(authorColumn)
                 val uri: Uri = ContentUris.withAppendedId(
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                     songID
                 )
 
-                val song = Song(title, uri)
+                val song = Song(title, author, uri)
                 songList.add(song)
             }
         }

@@ -8,30 +8,38 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
 
 
 class SongListFragment : Fragment() {
 
     private val viewModel: SongListViewModel by viewModels()
 
-
     // Register the permissions callback, which handles the user's response to the
-// system permissions dialog. Save the return value, an instance of
-// ActivityResultLauncher. You can use either a val, as shown in this snippet,
-// or a lateinit var in your onAttach() or onCreate() method.
-    val requestPermissionLauncher =
+    // system permissions dialog. Save the return value, an instance of
+    // ActivityResultLauncher. You can use either a val, as shown in this snippet,
+    // or a lateinit var in your onAttach() or onCreate() method.
+    private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
@@ -53,48 +61,107 @@ class SongListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        return ComposeView(requireContext()).apply { setContent {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                JetnewsTheme {
 
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                Column {
-                    Text("Sorry potrebujem permission")
-                    Button({
+//                    fun ScaffoldDemo() {
+                    val materialBlue700 = MaterialTheme.colors.primary
+                    val scaffoldState =
+                        rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
 
-                        requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+//                    var isRefreshing by remember { mutableStateOf(false) }
 
-                    }) {
-                        Text("Get permis")
-                    }
-                }
-            } else {
+                    Scaffold(
+                        scaffoldState = scaffoldState,
+                        topBar = {
+                            TopAppBar(
+                                title = {
+                                    Text(
+                                        "Song List Name",
+                                        color = materialBlue700
+                                    )
+                                },
+                                backgroundColor = Color.White
+                            )
+                        },
+                        content = {
+                            if (ActivityCompat.checkSelfPermission(
+                                    requireContext(),
+                                    Manifest.permission.READ_EXTERNAL_STORAGE
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                Column {
+                                    Text("Sorry potrebujem permission")
+                                    Button({
 
-            Column() {
-                Text(text = "Tvoje pesncky")
-                LazyColumn {
-                    items(viewModel.songs) { song ->
-                        SongRow(song)
-                    }
+                                        requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+
+                                    }) {
+                                        Text("Get permis")
+                                    }
+                                }
+                            } else {
+                                Column {
+//                                    PullToRefresh(
+//                                        isRefreshing = isRefreshing,
+//                                        onRefresh = {
+//                                            isRefreshing = true
+//                                            // update items and set isRefreshing = false
+//                                        }
+//                                    ) {
+                                    Text(
+                                        "Song list name",
+                                        color = materialBlue700,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp,
+                                        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                                    )
+                                    LazyColumn {
+                                        items(viewModel.songs) { song ->
+                                            SongRow(song)
+                                        }
+                                    }
+//                                    }
+                                }
+                            }
+                        }
+                    )
+//                    }
                 }
             }
-
-            }
-
-
-        } }
+        }
     }
 
+    // Function for creating one song compose object row
+    @Composable
+    fun SongRow(song: Song) {
+        Column(
+            Modifier
+                .clickable(onClick = {
+                    findNavController().navigate(SongListFragmentDirections.actionSongListFragmentToHomeFragment(song.URI))
+                })
+                .padding(8.dp)
+                .fillMaxSize()
+        ) {
+            Text(
+                text = "${song.title}",
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "${song.author}",
+                fontSize = 14.sp
+            )
+        }
+    }
+
+    // Function for preview
+    @Preview
+    @Composable
+    fun ExampleSongRow() {
+        SongRow(Song("Blala", "auti", Uri.EMPTY))
+    }
 }
 
-@Composable
-fun SongRow(song: Song) {
-    Text(text = "Title: ${song.title}", fontWeight = FontWeight.Bold)
-}
-@Preview
-@Composable
-fun ExampleSongRow() {
-    SongRow(Song("Blala", Uri.EMPTY))
-}
+
+

@@ -41,7 +41,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     private lateinit var audioFocusRequest: AudioFocusRequest
 
-    private lateinit var player: MediaPlayer
+//    private lateinit var player: MediaPlayer
+    private var player = MediaPlayer()
 
     private lateinit var notification: Notification
 
@@ -74,22 +75,17 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
         loadSongs()
 
-        val uri = Uri.parse(songs[0].URI.toString())
-
         // Create MediaPlayer with the given URI
-        player = MediaPlayer.create(
-            baseContext,
-            uri
-        )
-
-        // Set source to current song
-        metadataRetriever.setDataSource(applicationContext, uri)
+//        player = MediaPlayer.create(
+//            baseContext,
+//            uri
+//        )
 
         // If the player is MediaPlayer, set OnCompletionListener
         if (player == MediaPlayer()) {
             // After the song finishes go to the initial design
             player.setOnCompletionListener {
-                // TODO
+                // TODO completiton listener
             }
         }
 
@@ -127,8 +123,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         AudioManager.OnAudioFocusChangeListener { }
 
 
-                    override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
-                        super.onPlayFromUri(uri, extras)
+                    override fun onPlayFromUri(uri: Uri, extras: Bundle?) {
+                        preparePlayer(uri)
+
+                        onPlay()
                     }
 
                     override fun onPlay() {
@@ -208,8 +206,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         updateState()
 
                         updateNotification(false)
-                        // Take the service out of foreground, keep the notification
 
+                        // Take the service out of foreground, keep the notification
                         stopForeground(false)
 
                         // unregister BECOME_NOISY BroadcastReceiver
@@ -242,6 +240,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // Function to update playback state of the service
     fun updateState() {
         // Update playback state
+        // TODO update playback state
 //        val newPlaybackState = PlaybackStateCompat.Builder(mediaSession)
         mediaSession.setPlaybackState(
             player.toPlaybackStateBuilder().setActions(
@@ -308,7 +307,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         stopSelf()
 
         super.onTaskRemoved(rootIntent)
-
     }
 
     override fun onDestroy() {
@@ -338,5 +336,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         ) return
 
         songs = SongScanner.loadSongs(baseContext)
+    }
+
+    fun preparePlayer(uri: Uri) {
+        val songUri = Uri.parse(uri.toString())
+
+        player.setDataSource(baseContext, songUri)
+
+        player.prepare()
+
+        // Set source to current song
+        metadataRetriever.setDataSource(applicationContext, songUri)
     }
 }

@@ -2,6 +2,7 @@ package com.gabchmel.contextmusicplayer.homeScreen
 
 import android.app.Application
 import android.content.ComponentName
+import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -90,8 +91,9 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun play() {
-        mediaController.transportControls.play()
+    fun play(uri: Uri) {
+//        mediaController.transportControls.play()
+        mediaController.transportControls.playFromUri(uri, null)
     }
 
     fun pause() {

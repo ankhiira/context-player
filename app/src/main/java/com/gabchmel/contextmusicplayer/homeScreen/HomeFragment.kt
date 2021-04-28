@@ -39,8 +39,6 @@ class HomeFragment : Fragment() {
         seekBar = binding.seekBar
         btnPlay = binding.btnPlay
 
-//        args.uri
-
         btnPlay.setOnClickListener {
             val pbState = viewModel.musicState.value?.state ?: return@setOnClickListener
             if (pbState == PlaybackStateCompat.STATE_PLAYING) {
@@ -49,7 +47,7 @@ class HomeFragment : Fragment() {
                 // Preemptively set icon
                 binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
             } else {
-                viewModel.play()
+                viewModel.play(args.uri)
 
                 // Preemptively set icon
                 binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)

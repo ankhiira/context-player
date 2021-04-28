@@ -14,6 +14,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,7 +25,6 @@ import com.gabchmel.contextmusicplayer.playlist.Song
 import com.gabchmel.contextmusicplayer.playlist.SongScanner
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
-
 
 
 class MediaPlaybackService : MediaBrowserServiceCompat() {
@@ -38,7 +38,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private lateinit var metadataBuilder: MediaMetadataCompat.Builder
 
     private lateinit var audioFocusRequest: AudioFocusRequest
+
+    //    private var player = MediaPlayer()
     private lateinit var player: MediaPlayer
+
 
     private lateinit var notification: Notification
 
@@ -49,23 +52,34 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // Update metadata
     private val metadataRetriever = MediaMetadataRetriever()
 
-    var songs by mutableStateOf(emptyList<Song>())
+    private var songs by mutableStateOf(emptyList<Song>())
 
-    private var uri = Uri.parse("android.resource://com.gabchmel.contextmusicplayer/" + R.raw.gaga)
-//            Uri.parse("https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/First_Rebirth/Last_Runaway/First_Rebirth_-_01_-_Prisoner_Of_Infinity.mp3?download=1&name=First%20Rebirth%20-%20Prisoner%20Of%20Infinity.mp3")
-
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate() {
         super.onCreate()
 
-        loadSongs()
+        // Check permission to load songs
+        if (ActivityCompat.checkSelfPermission(
+                baseContext,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
 
+            loadSongs()
+        }
+
+        val uri = Uri.parse(songs[0].URI.toString())
+
+        // Create MediaPlayer with the given URI
         player = MediaPlayer.create(
             baseContext,
             uri
         )
 
+        // Set source to current song
         metadataRetriever.setDataSource(applicationContext, uri)
 
+        // If the player is MediaPlayer, set OnCompletionListener
         if (player == MediaPlayer()) {
             // After the song finishes go to the initial design
             player.setOnCompletionListener {
@@ -110,6 +124,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
                         super.onPlayFromUri(uri, extras)
                     }
+
                     override fun onPlay() {
 
                         val result: Int
@@ -202,6 +217,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 setSessionToken(sessionToken)
             }
 
+        // Every one second update state of the playback
         timer = fixedRateTimer(period = 10000) {
             updateState()
         }
@@ -297,6 +313,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         return super.onStartCommand(intent, flags, startId)
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     fun loadSongs() {
         if (ActivityCompat.checkSelfPermission(
                 baseContext,

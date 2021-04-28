@@ -92,13 +92,13 @@ class SongListFragment : Fragment() {
                                 ) != PackageManager.PERMISSION_GRANTED
                             ) {
                                 Column {
-                                    Text("Sorry potrebujem permission")
+                                    Text("The permission to access external storage needed.")
                                     Button({
 
                                         requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
 
                                     }) {
-                                        Text("Get permis")
+                                        Text("Give permission")
                                     }
                                 }
                             } else {

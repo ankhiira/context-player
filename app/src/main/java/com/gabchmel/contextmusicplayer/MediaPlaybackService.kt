@@ -39,9 +39,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     private lateinit var audioFocusRequest: AudioFocusRequest
 
-    //    private var player = MediaPlayer()
     private lateinit var player: MediaPlayer
-
 
     private lateinit var notification: Notification
 
@@ -58,15 +56,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
 
-        // Check permission to load songs
-        if (ActivityCompat.checkSelfPermission(
-                baseContext,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-
-            loadSongs()
-        }
+        loadSongs()
 
         val uri = Uri.parse(songs[0].URI.toString())
 

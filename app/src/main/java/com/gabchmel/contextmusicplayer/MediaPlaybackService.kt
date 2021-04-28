@@ -2,8 +2,10 @@ package com.gabchmel.contextmusicplayer
 
 import android.Manifest
 import android.app.Notification
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.*
@@ -45,7 +47,21 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     private lateinit var timer: Timer
 
-//    private val noisyAudioStreamReceiver = BroadcastReceiver()
+    // class to detect BECOMING_NOISY broadcast
+    private inner class BecomingNoisyReceiver : BroadcastReceiver() {
+
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                // Pause the playback
+                if(player.isPlaying) {
+                    player.pause()
+                    updateState()
+                }
+            }
+        }
+    }
+
+    private val myNoisyAudioStreamReceiver = BecomingNoisyReceiver()
 
     // Update metadata
     private val metadataRetriever = MediaMetadataRetriever()
@@ -81,11 +97,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
             .apply {
 
-//                deprecated
-//                Support BT headphones
+                // deprecated
+                // Support BT headphones
                 setFlags(
                     MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-//                    support Android Wear, Android Auto
+                            // support Android Wear, Android Auto
                             or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
                 )
 
@@ -162,6 +178,12 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         updateState()
                         updateNotification(true)
                         startForeground(NotificationManager.notificationID, notification)
+
+                        // register BECOME_NOISY BroadcastReceiver
+                        registerReceiver(
+                            myNoisyAudioStreamReceiver,
+                            IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+                        )
                     }
 
                     override fun onStop() {
@@ -173,6 +195,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         }
                         stopForeground(true)
 
+                        // unregister BECOME_NOISY BroadcastReceiver
+                        unregisterReceiver(myNoisyAudioStreamReceiver)
+
                         isActive = false
                     }
 
@@ -181,13 +206,14 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         player.pause()
 
                         updateState()
+
                         updateNotification(false)
                         // Take the service out of foreground, keep the notification
+
                         stopForeground(false)
 
-//                    TODO dodelat
-//                    // unregister BECOME_NOISY BroadcastReceiver
-//                    unregisterReceiver(myNoisyAudioStreamReceiver)
+                        // unregister BECOME_NOISY BroadcastReceiver
+                        unregisterReceiver(myNoisyAudioStreamReceiver)
                     }
 
                     override fun onSeekTo(pos: Long) {

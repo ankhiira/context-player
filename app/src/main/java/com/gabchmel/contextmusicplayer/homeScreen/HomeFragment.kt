@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import com.gabchmel.contextmusicplayer.*
 import com.gabchmel.contextmusicplayer.databinding.FragmentHomeBinding
 import kotlinx.android.synthetic.main.fragment_home.*
@@ -24,6 +25,8 @@ class HomeFragment : Fragment() {
     private lateinit var seekBar: SeekBar
     private lateinit var btnPlay: Button
 
+    val args: HomeFragmentArgs by navArgs()
+
     @SuppressLint("RestrictedApi")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,6 +38,8 @@ class HomeFragment : Fragment() {
 
         seekBar = binding.seekBar
         btnPlay = binding.btnPlay
+
+//        args.uri
 
         btnPlay.setOnClickListener {
             val pbState = viewModel.musicState.value?.state ?: return@setOnClickListener

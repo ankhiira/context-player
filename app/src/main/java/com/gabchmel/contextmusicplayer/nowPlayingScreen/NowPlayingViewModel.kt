@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.homeScreen
+package com.gabchmel.contextmusicplayer.nowPlayingScreen
 
 import android.app.Application
 import android.content.ComponentName
@@ -26,6 +26,8 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     private val _musicMetadata = MutableLiveData<MediaMetadataCompat>()
     val musicMetadata: LiveData<MediaMetadataCompat> = _musicMetadata
 
+    lateinit var args: NowPlayingFragmentArgs
+
     private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
 
@@ -36,8 +38,6 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
                     app,
                     token
                 )
-
-//                mediaController.registerCallback(controllerCallback)
             }
 
             // Display initial state
@@ -48,6 +48,9 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
             // Register a callback to stay in sync
             mediaController.registerCallback(controllerCallback)
+
+            // Play after fragment is open
+            if (args.play) play(args.uri)
         }
 
         override fun onConnectionSuspended() {
@@ -65,7 +68,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
             app,
             ComponentName(app, MediaPlaybackService::class.java),
             connectionCallbacks,
-            null // optional
+            null
         )
 
         // Connects to the MediaBrowseService
@@ -92,7 +95,6 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     fun play(uri: Uri) {
-//        mediaController.transportControls.play()
         mediaController.transportControls.playFromUri(uri, null)
     }
 

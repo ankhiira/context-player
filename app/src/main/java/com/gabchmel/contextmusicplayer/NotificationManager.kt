@@ -14,7 +14,6 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
-import com.gabchmel.contextmusicplayer.homeScreen.HomeFragment
 
 object NotificationManager {
 

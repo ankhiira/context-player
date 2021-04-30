@@ -23,8 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
-import com.gabchmel.contextmusicplayer.playlist.Song
-import com.gabchmel.contextmusicplayer.playlist.SongScanner
+import com.gabchmel.contextmusicplayer.playlistScreen.Song
+import com.gabchmel.contextmusicplayer.playlistScreen.SongScanner
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
@@ -85,7 +85,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         if (player == MediaPlayer()) {
             // After the song finishes go to the initial design
             player.setOnCompletionListener {
-                // TODO completiton listener
+                // TODO completion listener
             }
         }
 

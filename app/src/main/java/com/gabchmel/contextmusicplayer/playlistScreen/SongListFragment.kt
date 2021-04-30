@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.playlist
+package com.gabchmel.contextmusicplayer.playlistScreen
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,49 +33,44 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 
 class SongListFragment : Fragment() {
 
     private val viewModel: SongListViewModel by viewModels()
 
-    // Register the permissions callback, which handles the user's response to the
-    // system permissions dialog. Save the return value, an instance of
-    // ActivityResultLauncher. You can use either a val, as shown in this snippet,
-    // or a lateinit var in your onAttach() or onCreate() method.
+    // Register the permissions callback
     @RequiresApi(Build.VERSION_CODES.Q)
     private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                // Permission is granted. Continue the action or workflow in your
-                // app.
+                // Permission is granted. Continue the action or workflow in your app.
                 viewModel.loadSongs()
             } else {
+                // TODO permission denied
                 // Explain to the user that the feature is unavailable because the
                 // features requires a permission that the user has denied. At the
-                // same time, respect the user's decision. Don't link to system
-                // settings in an effort to convince the user to change their
-                // decision.
+                // same time, respect the user's decision.
             }
         }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
+        // Create compose layout for this fragment
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
-
 //                    fun ScaffoldDemo() {
                     val materialBlue700 = MaterialTheme.colors.primary
                     val scaffoldState =
                         rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
-
-//                    var isRefreshing by remember { mutableStateOf(false) }
 
                     Scaffold(
                         scaffoldState = scaffoldState,
@@ -82,7 +79,7 @@ class SongListFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Song List Name",
-                                        color = materialBlue700
+                                        color = materialBlue700,
                                     )
                                 },
                                 backgroundColor = Color.White
@@ -106,26 +103,29 @@ class SongListFragment : Fragment() {
                                 }
                             } else {
                                 Column {
-//                                    PullToRefresh(
-//                                        isRefreshing = isRefreshing,
-//                                        onRefresh = {
-//                                            isRefreshing = true
-//                                            // update items and set isRefreshing = false
-//                                        }
-//                                    ) {
-                                    Text(
-                                        "Song list name",
-                                        color = materialBlue700,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 18.sp,
-                                        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                                    )
-                                    LazyColumn {
-                                        items(viewModel.songs) { song ->
-                                            SongRow(song)
+
+                                    val isRefreshing by viewModel.isRefreshing.collectAsState()
+
+                                    SwipeRefresh(
+                                        state = rememberSwipeRefreshState(isRefreshing),
+                                        onRefresh = { viewModel.refresh() },
+                                    ) {
+                                        Column {
+                                            Text(
+                                                "Song list name",
+                                                color = materialBlue700,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 18.sp,
+                                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                                                        .padding(vertical = 16.dp)
+                                            )
+                                            LazyColumn {
+                                                items(viewModel.songs) { song ->
+                                                    SongRow(song)
+                                                }
+                                            }
                                         }
                                     }
-//                                    }
                                 }
                             }
                         }
@@ -137,12 +137,14 @@ class SongListFragment : Fragment() {
     }
 
     // Function for creating one song compose object row
+    @RequiresApi(Build.VERSION_CODES.Q)
     @Composable
     fun SongRow(song: Song) {
         Column(
             Modifier
                 .clickable(onClick = {
-                    findNavController().navigate(SongListFragmentDirections.actionSongListFragmentToHomeFragment(song.URI))
+                    val play = true
+                    findNavController().navigate(SongListFragmentDirections.actionSongListFragmentToHomeFragment(song.URI, play))
                 })
                 .padding(8.dp)
                 .fillMaxSize()
@@ -159,10 +161,11 @@ class SongListFragment : Fragment() {
     }
 
     // Function for preview
+    @RequiresApi(Build.VERSION_CODES.Q)
     @Preview
     @Composable
     fun ExampleSongRow() {
-        SongRow(Song("Blala", "auti", Uri.EMPTY))
+        SongRow(Song("Title", "author", Uri.EMPTY))
     }
 }
 

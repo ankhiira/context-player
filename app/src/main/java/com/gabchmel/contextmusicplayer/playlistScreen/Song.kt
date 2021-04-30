@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.playlist
+package com.gabchmel.contextmusicplayer.playlistScreen
 
 import android.net.Uri
 

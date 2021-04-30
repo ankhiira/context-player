@@ -90,8 +90,8 @@ dependencies {
     // Navigation
     implementation "androidx.navigation:navigation-compose:1.0.0-alpha10"
 
-    // Pull to refresh
-    implementation 'com.puculek.pulltorefresh:pull-to-refresh-compose:1.0.5'
+    // Pull to refresh Accompanist
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.8.1"
 
 
     // UI Tests

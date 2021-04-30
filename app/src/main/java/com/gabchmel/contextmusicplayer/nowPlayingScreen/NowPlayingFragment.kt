@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.homeScreen
+package com.gabchmel.contextmusicplayer.nowPlayingScreen
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -11,12 +11,14 @@ import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
-import com.gabchmel.contextmusicplayer.*
+import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.databinding.FragmentHomeBinding
-import kotlinx.android.synthetic.main.fragment_home.*
+import com.gabchmel.contextmusicplayer.getArtist
+import com.gabchmel.contextmusicplayer.getDuration
+import com.gabchmel.contextmusicplayer.getTitle
 
 
-class HomeFragment : Fragment() {
+class NowPlayingFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
 
@@ -25,13 +27,15 @@ class HomeFragment : Fragment() {
     private lateinit var seekBar: SeekBar
     private lateinit var btnPlay: Button
 
-    val args: HomeFragmentArgs by navArgs()
+    private val args: NowPlayingFragmentArgs by navArgs()
 
     @SuppressLint("RestrictedApi")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        viewModel.args = args
+
         // Create ViewBinding for the HomeFragment
         binding = FragmentHomeBinding.inflate(inflater, container, false)
         val view = binding.root
@@ -39,19 +43,9 @@ class HomeFragment : Fragment() {
         seekBar = binding.seekBar
         btnPlay = binding.btnPlay
 
+        // Set onClickListener
         btnPlay.setOnClickListener {
-            val pbState = viewModel.musicState.value?.state ?: return@setOnClickListener
-            if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-                viewModel.pause()
-
-                // Preemptively set icon
-                binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
-            } else {
-                viewModel.play(args.uri)
-
-                // Preemptively set icon
-                binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
-            }
+            playSong()
         }
 
         seekBar.progress = 0
@@ -81,6 +75,21 @@ class HomeFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun playSong() {
+        val pbState = viewModel.musicState.value?.state ?: return
+        if (pbState == PlaybackStateCompat.STATE_PLAYING) {
+            viewModel.pause()
+
+            // Preemptively set icon
+            binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+        } else {
+            viewModel.play(args.uri)
+
+            // Preemptively set icon
+            binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+        }
     }
 
     private fun subscribeSeekBar() {

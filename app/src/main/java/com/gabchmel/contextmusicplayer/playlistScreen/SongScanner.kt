@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.playlist
+package com.gabchmel.contextmusicplayer.playlistScreen
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.content.ContentUris

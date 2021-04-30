@@ -16,6 +16,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -185,6 +186,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     }
 
                     override fun onStop() {
+
+                        Toast.makeText(baseContext,"here",Toast.LENGTH_SHORT).show()
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             am.abandonAudioFocusRequest(audioFocusRequest)

@@ -85,11 +85,19 @@ class NowPlayingFragment : Fragment() {
             // Preemptively set icon
             binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
         } else {
-            viewModel.play(args.uri)
+            if (viewModel.notPlayed) {
+                viewModel.play(args.uri)
+            } else {
+                viewModel.play()
+            }
 
             // Preemptively set icon
             binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
         }
+    }
+
+    private fun skipToNext() {
+
     }
 
     private fun subscribeSeekBar() {

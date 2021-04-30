@@ -28,6 +28,8 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
     lateinit var args: NowPlayingFragmentArgs
 
+    var notPlayed = true
+
     private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
 
@@ -50,7 +52,10 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
             mediaController.registerCallback(controllerCallback)
 
             // Play after fragment is open
-            if (args.play) play(args.uri)
+            if (args.play && notPlayed) {
+                play(args.uri)
+                notPlayed = false
+            }
         }
 
         override fun onConnectionSuspended() {
@@ -94,8 +99,14 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    // To play for the first time
     fun play(uri: Uri) {
         mediaController.transportControls.playFromUri(uri, null)
+    }
+
+    // To play any other time
+    fun play() {
+        mediaController.transportControls.play()
     }
 
     fun pause() {

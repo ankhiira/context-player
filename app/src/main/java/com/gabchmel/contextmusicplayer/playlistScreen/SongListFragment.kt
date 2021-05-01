@@ -22,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -82,7 +81,7 @@ class SongListFragment : Fragment() {
                                         color = materialBlue700,
                                     )
                                 },
-                                backgroundColor = Color.White
+//                                backgroundColor = Color.Transparent
                             )
                         },
                         content = {
@@ -140,6 +139,8 @@ class SongListFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.Q)
     @Composable
     fun SongRow(song: Song) {
+
+        val fontColor = MaterialTheme.colors.onPrimary
         Column(
             Modifier
                 .clickable(onClick = {
@@ -151,11 +152,13 @@ class SongListFragment : Fragment() {
         ) {
             Text(
                 text = "${song.title}",
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = fontColor
             )
             Text(
                 text = "${song.author}",
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = fontColor
             )
         }
     }

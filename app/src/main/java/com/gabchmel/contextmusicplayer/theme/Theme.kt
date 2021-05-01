@@ -8,7 +8,9 @@ import androidx.compose.ui.graphics.Color
 
 private val DarkColors = darkColors(
     primary = Pink500,
-    secondary = Blue700,
+    secondary = Grey400,
+    onBackground = Grey800,
+    onPrimary = Yel900
     // ...
 )
 
@@ -16,7 +18,7 @@ private val LightColors = lightColors(
     primary = Blue700,
     primaryVariant = Red900,
     onPrimary = Color.White,
-    secondary = Blue700,
+    secondary = Yel900,
     secondaryVariant = Red900,
     onSecondary = Color.White,
     error = Red800
@@ -24,5 +26,5 @@ private val LightColors = lightColors(
 
 @Composable
 fun JetnewsTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colors = LightColors, content = content)
+    MaterialTheme(colors = DarkColors, content = content)
 }

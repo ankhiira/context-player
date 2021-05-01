@@ -4,9 +4,7 @@ import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
-import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.core.database.getStringOrNull
 import java.util.concurrent.TimeUnit
@@ -14,7 +12,6 @@ import java.util.concurrent.TimeUnit
 // Song retriever from local storage
 object SongScanner {
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     @RequiresPermission(READ_EXTERNAL_STORAGE)
     fun loadSongs(context: Context): List<Song> {
 

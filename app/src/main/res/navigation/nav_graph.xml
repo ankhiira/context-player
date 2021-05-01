@@ -9,13 +9,15 @@
         android:id="@+id/homeFragment"
         android:name="com.gabchmel.contextmusicplayer.nowPlayingScreen.NowPlayingFragment"
         android:label="fragment_blank"
-        tools:layout="@layout/fragment_home" >
+        tools:layout="@layout/now_playing_fragment" >
         <argument android:name="uri"
             app:argType="android.net.Uri" />
         <argument
             android:name="play"
             app:argType="boolean"
             android:defaultValue="false" />
+        <argument android:name="id"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/song_list_Fragment"

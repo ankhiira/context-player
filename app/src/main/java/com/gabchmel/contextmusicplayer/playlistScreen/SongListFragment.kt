@@ -41,7 +41,6 @@ class SongListFragment : Fragment() {
     private val viewModel: SongListViewModel by viewModels()
 
     // Register the permissions callback
-    @RequiresApi(Build.VERSION_CODES.Q)
     private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -65,6 +64,8 @@ class SongListFragment : Fragment() {
         // Create compose layout for this fragment
         return ComposeView(requireContext()).apply {
             setContent {
+                val songs by viewModel.songs.collectAsState()
+
                 JetnewsTheme {
 //                    fun ScaffoldDemo() {
                     val materialBlue700 = MaterialTheme.colors.primary
@@ -81,7 +82,6 @@ class SongListFragment : Fragment() {
                                         color = materialBlue700,
                                     )
                                 },
-//                                backgroundColor = Color.Transparent
                             )
                         },
                         content = {
@@ -115,12 +115,17 @@ class SongListFragment : Fragment() {
                                                 color = materialBlue700,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 18.sp,
-                                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                                                        .padding(vertical = 16.dp)
+                                                modifier = Modifier
+                                                    .align(alignment = Alignment.CenterHorizontally)
+                                                    .padding(vertical = 16.dp)
                                             )
-                                            LazyColumn {
-                                                items(viewModel.songs) { song ->
-                                                    SongRow(song)
+
+                                            if (songs!=null)
+                                                LazyColumn {
+                                                var id = 0
+                                                items(songs!!) { song ->
+                                                    SongRow(song, id)
+                                                    id++
                                                 }
                                             }
                                         }
@@ -138,14 +143,20 @@ class SongListFragment : Fragment() {
     // Function for creating one song compose object row
     @RequiresApi(Build.VERSION_CODES.Q)
     @Composable
-    fun SongRow(song: Song) {
+    fun SongRow(song: Song, id: Int) {
 
         val fontColor = MaterialTheme.colors.onPrimary
         Column(
             Modifier
                 .clickable(onClick = {
                     val play = true
-                    findNavController().navigate(SongListFragmentDirections.actionSongListFragmentToHomeFragment(song.URI, play))
+                    findNavController().navigate(
+                        SongListFragmentDirections.actionSongListFragmentToHomeFragment(
+                            song.URI,
+                            play,
+                            id
+                        )
+                    )
                 })
                 .padding(8.dp)
                 .fillMaxSize()
@@ -168,7 +179,7 @@ class SongListFragment : Fragment() {
     @Preview
     @Composable
     fun ExampleSongRow() {
-        SongRow(Song("Title", "author", Uri.EMPTY))
+        SongRow(Song("Title", "author", Uri.EMPTY),0)
     }
 }
 

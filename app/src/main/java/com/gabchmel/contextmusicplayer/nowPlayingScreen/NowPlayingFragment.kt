@@ -1,9 +1,9 @@
 package com.gabchmel.contextmusicplayer.nowPlayingScreen
 
-//import com.gabchmel.contextmusicplayer.databinding.FragmentHomeBinding
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,20 +30,25 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.databinding.NowPlayingFragmentBinding
+import com.gabchmel.contextmusicplayer.getArtist
+import com.gabchmel.contextmusicplayer.getDuration
+import com.gabchmel.contextmusicplayer.getTitle
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
 
 class NowPlayingFragment : Fragment() {
 
-//    private lateinit var binding: FragmentHomeBinding
+    private lateinit var binding: NowPlayingFragmentBinding
 
     private val viewModel: NowPlayingViewModel by viewModels()
 
     private lateinit var seekBar: SeekBar
     private lateinit var btnPlay: Button
+    private lateinit var btnNext: Button
+    private lateinit var btnPrev: Button
 
     private val args: NowPlayingFragmentArgs by navArgs()
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("RestrictedApi")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,73 +56,88 @@ class NowPlayingFragment : Fragment() {
     ): View {
         viewModel.args = args
 
-//        // Create ViewBinding for the HomeFragment
-//        binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return ComposeView(requireContext()).apply {
-            setContent {
-                view()
-            }
+        // Create ViewBinding for the HomeFragment
+        binding = NowPlayingFragmentBinding.inflate(inflater, container, false)
+
+//        return ComposeView(requireContext()).apply {
+//            setContent {
+//                View()
+//            }
+//        }
+        val view = binding.root
+
+        seekBar = binding.seekBar
+        btnPlay = binding.btnPlay
+        btnNext = binding.btnNext
+        btnPrev = binding.btnPrev
+
+        // Set onClickListener
+        btnPlay.setOnClickListener {
+            playSong()
         }
-//        val view = binding.root
-//
-//        seekBar = binding.seekBar
-//        btnPlay = binding.btnPlay
-//
-//        // Set onClickListener
-//        btnPlay.setOnClickListener {
-//            playSong()
-//        }
-//
-//        seekBar.progress = 0
-//
-//        subscribeSeekBar()
-//
-//        // Observe change of musicState from viewModel
-//        viewModel.musicState.observe(viewLifecycleOwner) { state ->
-//
-//            // Set seekBar Progress according to the current state
-//            seekBar.progress = state.getCurrentPosition(null).toInt()
-//
-//            binding.btnPlay.setBackgroundResource(
-//                if (state.state == PlaybackStateCompat.STATE_PLAYING)
-//                    R.drawable.ic_pause_black_24dp
-//                else
-//                    R.drawable.ic_play_arrow_black_24dp
-//            )
-//        }
-//
-//        viewModel.musicMetadata.observe(viewLifecycleOwner) { metadata ->
-//            // Max length of the seekBar (length of the song)
-//            seekBar.max = metadata.getDuration().toInt()
-//
-//            binding.tvSongTitle.text = metadata.getTitle()
-//            binding.tvSongAuthor.text = metadata.getArtist()
-//        }
-//
-//        return view
+
+        btnNext.setOnClickListener {
+            skipToNext()
+        }
+
+        btnPrev.setOnClickListener {
+            skipToPrev()
+        }
+
+        seekBar.progress = 0
+
+        subscribeSeekBar()
+
+        // Observe change of musicState from viewModel
+        viewModel.musicState.observe(viewLifecycleOwner) { state ->
+
+            // Set seekBar Progress according to the current state
+            seekBar.progress = state.getCurrentPosition(null).toInt()
+
+            binding.btnPlay.setBackgroundResource(
+                if (state.state == PlaybackStateCompat.STATE_PLAYING)
+                    R.drawable.ic_pause_black_24dp
+                else
+                    R.drawable.ic_play_arrow_black_24dp
+            )
+        }
+
+        viewModel.musicMetadata.observe(viewLifecycleOwner) { metadata ->
+            // Max length of the seekBar (length of the song)
+            seekBar.max = metadata.getDuration().toInt()
+
+            binding.tvSongTitle.text = metadata.getTitle()
+            binding.tvSongAuthor.text = metadata.getArtist()
+        }
+
+        return view
     }
 
-//    private fun playSong() {
-//        val pbState = viewModel.musicState.value?.state ?: return
-//        if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-//            viewModel.pause()
-//
-//            // Preemptively set icon
-//            binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
-//        } else {
-//            if (viewModel.notPlayed) {
-//                viewModel.play(args.uri)
-//            } else {
-//                viewModel.play()
-//            }
-//
-//            // Preemptively set icon
-//            binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
-//        }
-//    }
+    private fun playSong() {
+        val pbState = viewModel.musicState.value?.state ?: return
+        if (pbState == PlaybackStateCompat.STATE_PLAYING) {
+            viewModel.pause()
+
+            // Preemptively set icon
+            binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+        } else {
+            if (viewModel.notPlayed) {
+                viewModel.play(args.uri)
+            } else {
+                viewModel.play()
+            }
+
+            // Preemptively set icon
+            binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+        }
+    }
 
     private fun skipToNext() {
+        viewModel.next()
+    }
 
+    private fun skipToPrev() {
+        viewModel.prev()
     }
 
     private fun subscribeSeekBar() {
@@ -147,7 +166,7 @@ class NowPlayingFragment : Fragment() {
 }
 
 @Composable
-fun view() {
+fun View() {
     JetnewsTheme {
         val materialBlue700 = MaterialTheme.colors.primary
         val materialGrey900 = MaterialTheme.colors.onBackground
@@ -282,5 +301,5 @@ fun view() {
 @Preview
 @Composable
 fun DefPrev() {
-    view()
+    View()
 }

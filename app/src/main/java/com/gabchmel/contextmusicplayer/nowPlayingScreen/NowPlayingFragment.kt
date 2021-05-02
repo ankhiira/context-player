@@ -186,7 +186,7 @@ class NowPlayingFragment : Fragment() {
                                         ) {
                                             // Display the current progress of the SeekBar when the progress changes
                                             if (fromUser) {
-                                                viewModel.setMusicProgress(progress)
+//                                                viewModel.setMusicProgress(progress)
                                             }
                                         }
 
@@ -212,11 +212,21 @@ class NowPlayingFragment : Fragment() {
                             }
                         }
 
+                        // TODO val check
+                        val songLength = musicMetadata?.getDuration() ?: 0
+                        val songPosition =  musicState?.getCurrentPosition(null)?.toFloat() ?: 1.0f
+                        val songFraction = songLength / songPosition
+                        Slider(value = songFraction, onValueChange = {
+                            viewModel.setMusicProgress((it * songLength))
+                        },
+//                            valueRange = 0f..songLength.toFloat()
+                        )
+
                         Row(
                             modifier = Modifier
                                 .padding(vertical = 16.dp, horizontal = 8.dp)
                                 .fillMaxWidth()
-                                .height(120.dp),
+                                .height(92.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {

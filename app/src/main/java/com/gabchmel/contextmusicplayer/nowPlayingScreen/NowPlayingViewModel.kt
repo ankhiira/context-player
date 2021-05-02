@@ -134,7 +134,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
         mediaController.transportControls.skipToPrevious()
     }
 
-    fun setMusicProgress(progress: Int) {
+    fun setMusicProgress(progress: Float) {
         mediaController.transportControls.seekTo(progress.toLong())
     }
 }

@@ -6,9 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI
-import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,13 +22,13 @@ class MainActivity : AppCompatActivity() {
         volumeControlStream = AudioManager.STREAM_MUSIC
 
         // Bottom navigation
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
+//        val navHostFragment =
+//            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+//        val navController = navHostFragment.navController
 
-        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
-
-        NavigationUI.setupWithNavController(bottomNavigationView, navController)
+//        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_nav_view)
+//
+//        NavigationUI.setupWithNavController(bottomNavigationView, navController)
     }
 }
 

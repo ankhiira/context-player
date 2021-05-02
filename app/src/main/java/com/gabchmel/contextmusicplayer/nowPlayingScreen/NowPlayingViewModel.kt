@@ -3,26 +3,18 @@ package com.gabchmel.contextmusicplayer.nowPlayingScreen
 import android.app.Application
 import android.content.ComponentName
 import android.net.Uri
-import android.os.Build
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.gabchmel.contextmusicplayer.MediaPlaybackService
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 
-@RequiresApi(Build.VERSION_CODES.Q)
 class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
     private lateinit var mediaBrowser: MediaBrowserCompat
@@ -30,11 +22,11 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
     lateinit var mediaController: MediaControllerCompat
 
-    private val _musicState = MutableLiveData<PlaybackStateCompat>()
-    val musicState: LiveData<PlaybackStateCompat> = _musicState
+    private val _musicState = MutableStateFlow<PlaybackStateCompat?>(null)
+    val musicState: StateFlow<PlaybackStateCompat?> = _musicState
 
-    private val _musicMetadata = MutableLiveData<MediaMetadataCompat>()
-    val musicMetadata: LiveData<MediaMetadataCompat> = _musicMetadata
+    private val _musicMetadata = MutableStateFlow<MediaMetadataCompat?>(null)
+    val musicMetadata: StateFlow<MediaMetadataCompat?> = _musicMetadata
 
     lateinit var args: NowPlayingFragmentArgs
 

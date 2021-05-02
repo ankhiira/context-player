@@ -92,7 +92,7 @@ dependencies {
 
     // Pull to refresh Accompanist
     implementation "com.google.accompanist:accompanist-swiperefresh:0.8.1"
-
+    implementation("com.google.accompanist:accompanist-glide:0.8.1")
 
     // UI Tests
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-beta05'

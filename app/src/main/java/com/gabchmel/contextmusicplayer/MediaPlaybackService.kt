@@ -299,8 +299,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
         metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadataRetriever.getTitle())
-            .putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, metadataRetriever.getArtist())
+            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, metadataRetriever.getArtist())
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, metadataRetriever.getAlbum())
+            .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, metadataRetriever.getAlbumArt())
 
         metadataRetriever.getDuration()?.let { duration ->
             metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)

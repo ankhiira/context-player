@@ -31,11 +31,11 @@ import kotlin.coroutines.suspendCoroutine
 class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     companion object {
-        private const val MY_MEDIA_ROOT_ID = "media_root_id"
+        private const val MY_MEDIA_ROOT_ID = "/"
 
         suspend fun getInstance(context: Context) = suspendCoroutine<MediaPlaybackService> { cont->
             val intent = Intent(context, MediaPlaybackService::class.java)
-            intent.putExtra("is_binding", true);
+            intent.putExtra("is_binding", true)
 
             context.bindService(intent, object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder) {
@@ -54,12 +54,13 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     private lateinit var audioFocusRequest: AudioFocusRequest
 
-//    private lateinit var player: MediaPlayer
     private var player = MediaPlayer()
 
     private lateinit var notification: Notification
 
     private lateinit var timer: Timer
+
+    private val binder = MediaBinder()
 
     // class to detect BECOMING_NOISY broadcast
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
@@ -83,7 +84,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     var songs = MutableStateFlow(emptyList<Song>())
 
     val currentSongUri = MutableStateFlow<Uri?>(null)
-    val currSongIndex = currentSongUri.filterNotNull().map { uri ->
+    private val currSongIndex = currentSongUri.filterNotNull().map { uri ->
         songs.value.indexOfFirst { song ->
             song.URI == uri
         }
@@ -102,12 +103,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         super.onCreate()
 
         loadSongs()
-
-        // Create MediaPlayer with the given URI
-//        player = MediaPlayer.create(
-//            baseContext,
-//            uri
-//        )
 
         // If the player is MediaPlayer, set OnCompletionListener
         if (player == MediaPlayer()) {
@@ -309,8 +304,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         mediaSession.setMetadata(metadataBuilder.build())
     }
 
+    // Function to update a notification
     fun updateNotification(isPlaying: Boolean) {
-        // Update notification
+        // Recreate notification
         notification = NotificationManager.createNotification(
             baseContext,
             mediaSession.sessionToken,
@@ -372,6 +368,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         return super.onStartCommand(intent, flags, startId)
     }
 
+    // Load songs from local storage
     fun loadSongs() {
         if (ActivityCompat.checkSelfPermission(
                 baseContext,
@@ -395,18 +392,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         metadataRetriever.setDataSource(applicationContext, songUri)
     }
 
-    private val binder = MediaBinder()
-
+    // Binder to a service
     inner class MediaBinder: Binder() {
         fun getService(): MediaPlaybackService = this@MediaPlaybackService
     }
 
+    // On Service bind
     override fun onBind(intent: Intent): IBinder? {
         if (intent.getBooleanExtra("is_binding", false)) {
             return binder;
         }
         return super.onBind(intent);
     }
-
-
 }

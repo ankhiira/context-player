@@ -18,6 +18,9 @@
             android:defaultValue="false" />
         <argument android:name="id"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_homeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/song_list_Fragment"
@@ -28,4 +31,16 @@
             android:id="@+id/action_song_list_Fragment_to_homeFragment"
             app:destination="@id/homeFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.gabchmel.contextmusicplayer.settingsScreen.SettingsFragment"
+        android:label="SettingsFragment" >
+        <action
+            android:id="@+id/action_settingsFragment_to_sensorScreen"
+            app:destination="@id/sensorScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/sensorScreen"
+        android:name="com.gabchmel.contextmusicplayer.settingsScreen.SensorScreen"
+        android:label="SensorScreen" />
 </navigation>

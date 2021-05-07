@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -92,7 +91,6 @@ class NowPlayingFragment : Fragment() {
 
         JetnewsTheme {
             val materialBlue700 = MaterialTheme.colors.primary
-            val materialGrey900 = MaterialTheme.colors.onBackground
             val materialGrey400 = MaterialTheme.colors.secondary
             val materialYel400 = MaterialTheme.colors.onPrimary
 
@@ -102,7 +100,6 @@ class NowPlayingFragment : Fragment() {
             Scaffold(
                 scaffoldState = scaffoldState,
                 modifier = Modifier
-                    .background(materialGrey900)
                     .fillMaxSize(),
                 topBar = {
                     TopAppBar(
@@ -122,15 +119,18 @@ class NowPlayingFragment : Fragment() {
                                     tint = materialYel400
                                 )
                             }
-                            IconButton(onClick = { findNavController().navigate(R.id.song_list_Fragment) },
+                            IconButton(onClick = { findNavController().navigate(R.id.settingsFragment) },
                             ) {
                                 Icon(
-                                    imageVector = ImageVector.vectorResource(R.drawable.ic_back),
-                                    contentDescription = "Back",
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
+                                    contentDescription = "Settings",
                                     modifier = Modifier.fillMaxHeight(0.4f),
                                     tint = materialYel400
                                 )
                             }
+                        },
+                        actions = {
+
                         },
                         // TODO shadow pryc
                         backgroundColor = Color.Transparent

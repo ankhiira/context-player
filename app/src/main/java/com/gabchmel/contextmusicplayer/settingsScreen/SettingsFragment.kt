@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -33,7 +35,7 @@ class SettingsFragment : Fragment() {
 
                     Scaffold(
                         scaffoldState = scaffoldState,
-                        modifier = androidx.compose.ui.Modifier
+                        modifier = Modifier
                             .fillMaxSize(),
                         topBar = {
                             TopAppBar(
@@ -43,7 +45,9 @@ class SettingsFragment : Fragment() {
                                         color = materialYel400,
                                         fontSize = 18.sp,
                                     )
-                                })
+                                },
+                                elevation = 0.dp,
+                                backgroundColor = Color.Transparent)
                         },
                         content = {
                             Column {

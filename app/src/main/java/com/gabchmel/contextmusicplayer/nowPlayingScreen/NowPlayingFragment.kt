@@ -119,6 +119,8 @@ class NowPlayingFragment : Fragment() {
                                     tint = materialYel400
                                 )
                             }
+                        },
+                        actions = {
                             IconButton(onClick = { findNavController().navigate(R.id.settingsFragment) },
                             ) {
                                 Icon(
@@ -129,10 +131,7 @@ class NowPlayingFragment : Fragment() {
                                 )
                             }
                         },
-                        actions = {
-
-                        },
-                        // TODO shadow pryc
+                        elevation = 0.dp,
                         backgroundColor = Color.Transparent
                     )
                 },

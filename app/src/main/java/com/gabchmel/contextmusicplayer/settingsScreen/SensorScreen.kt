@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
-import com.gabchmel.sensorprocesser.SensorReader
+import com.gabchmel.sensorprocessor.SensorReader
 
 class SensorScreen : Fragment() {
 

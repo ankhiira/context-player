@@ -1,4 +1,4 @@
 include ':app'
 rootProject.name = "ContextMusicPlayer"
 include ':predicitonmodule'
-include ':sensorprocesser'
+include ':sensorprocessor'

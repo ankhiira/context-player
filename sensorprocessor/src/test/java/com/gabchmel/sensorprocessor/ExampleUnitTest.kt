@@ -1,4 +1,4 @@
-package com.gabchmel.sensorprocesser
+package com.gabchmel.sensorprocessor
 
 import org.junit.Test
 

@@ -30,6 +30,9 @@
         <action
             android:id="@+id/action_song_list_Fragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_song_list_Fragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -38,9 +41,16 @@
         <action
             android:id="@+id/action_settingsFragment_to_sensorScreen"
             app:destination="@id/sensorScreen" />
+        <action
+            android:id="@+id/action_settingsFragment_to_sensorValuesFragment"
+            app:destination="@id/sensorValuesFragment" />
     </fragment>
     <fragment
         android:id="@+id/sensorScreen"
-        android:name="com.gabchmel.contextmusicplayer.settingsScreen.SensorScreen"
+        android:name="com.gabchmel.contextmusicplayer.settingsScreen.SensorListFragment"
         android:label="SensorScreen" />
+    <fragment
+        android:id="@+id/sensorValuesFragment"
+        android:name="com.gabchmel.contextmusicplayer.settingsScreen.SensorValuesFragment"
+        android:label="SensorValuesFragment" />
 </navigation>

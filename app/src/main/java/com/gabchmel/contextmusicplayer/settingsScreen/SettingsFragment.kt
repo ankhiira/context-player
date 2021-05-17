@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,15 +51,25 @@ class SettingsFragment : Fragment() {
                                 backgroundColor = Color.Transparent)
                         },
                         content = {
-                            Column {
+                            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)) {
                                 Text(
                                     text = "Available sensors",
+                                    color = materialYel400,
                                     modifier = Modifier
                                         .clickable(onClick = {
-                                            val play = true
                                             findNavController().navigate(
                                                 SettingsFragmentDirections
                                                     .actionSettingsFragmentToSensorScreen()
+                                            )
+                                        })
+                                )
+                                Text(
+                                    text = "Sensor values",
+                                    modifier = Modifier
+                                        .clickable(onClick = {
+                                            findNavController().navigate(
+                                                SettingsFragmentDirections
+                                                    .actionSettingsFragmentToSensorValuesFragment()
                                             )
                                         })
                                 )

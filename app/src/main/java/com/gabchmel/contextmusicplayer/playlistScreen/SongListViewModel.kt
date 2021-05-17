@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
-    val service = viewModelScope.async { MediaPlaybackService.getInstance(app)}
+    private val service = viewModelScope.async { MediaPlaybackService.getInstance(app)}
 
     var songs = flow {
         val service = service.await()

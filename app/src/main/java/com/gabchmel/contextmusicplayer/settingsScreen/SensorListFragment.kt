@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
 import com.gabchmel.sensorprocessor.SensorReader
 
-class SensorScreen : Fragment() {
+class SensorListFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,7 +41,7 @@ class SensorScreen : Fragment() {
                             TopAppBar(
                                 title = {
                                     Text(
-                                        "Settings",
+                                        "Device sensors",
                                         color = materialYel400,
                                         fontSize = 18.sp,
                                     )

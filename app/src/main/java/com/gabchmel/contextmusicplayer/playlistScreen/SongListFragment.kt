@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,8 +23,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,6 +34,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -47,13 +50,15 @@ class SongListFragment : Fragment() {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                // Permission is granted. Continue the action or workflow in your app.
+                // Permission is granted
                 viewModel.loadSongs()
             } else {
                 // TODO permission denied
                 // Explain to the user that the feature is unavailable because the
                 // features requires a permission that the user has denied. At the
                 // same time, respect the user's decision.
+
+//                Text(text = "Permission needs to be granted to list songs from local storage")
             }
         }
 
@@ -69,7 +74,9 @@ class SongListFragment : Fragment() {
 
                 JetnewsTheme {
 //                    fun ScaffoldDemo() {
-                    val materialBlue700 = MaterialTheme.colors.primary
+                    val primary = MaterialTheme.colors.primary
+                    val onPrimary = MaterialTheme.colors.onPrimary
+
                     val scaffoldState =
                         rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
 
@@ -80,11 +87,22 @@ class SongListFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Song List Name",
-                                        color = materialBlue700,
+                                        color = primary,
                                     )
                                 },
+                                actions = {
+                                    IconButton(onClick = { findNavController().navigate(R.id.settingsFragment) },
+                                    ) {
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
+                                            contentDescription = "Settings",
+                                            modifier = Modifier.fillMaxHeight(0.4f),
+                                            tint = onPrimary
+                                        )
+                                    }
+                                },
                                 elevation = 0.dp,
-                                backgroundColor = Color.Transparent
+//                                backgroundColor = Color.Transparent
                             )
                         },
                         content = {
@@ -100,7 +118,7 @@ class SongListFragment : Fragment() {
                                         requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
 
                                     }) {
-                                        Text("Give permission")
+                                        Text("Grant permission")
                                     }
                                 }
                             } else {
@@ -115,7 +133,7 @@ class SongListFragment : Fragment() {
                                         Column {
                                             Text(
                                                 "Song list name",
-                                                color = materialBlue700,
+                                                color = primary,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 18.sp,
                                                 modifier = Modifier
@@ -123,14 +141,14 @@ class SongListFragment : Fragment() {
                                                     .padding(vertical = 16.dp)
                                             )
 
-                                            if (songs!=null)
+                                            if (songs != null)
                                                 LazyColumn {
-                                                var id = 0
-                                                items(songs!!) { song ->
-                                                    SongRow(song, id)
-                                                    id++
+                                                    var id = 0
+                                                    items(songs!!) { song ->
+                                                        SongRow(song, id)
+                                                        id++
+                                                    }
                                                 }
-                                            }
                                         }
                                     }
                                 }
@@ -144,7 +162,6 @@ class SongListFragment : Fragment() {
     }
 
     // Function for creating one song compose object row
-    @RequiresApi(Build.VERSION_CODES.Q)
     @Composable
     fun SongRow(song: Song, id: Int) {
 
@@ -178,11 +195,10 @@ class SongListFragment : Fragment() {
     }
 
     // Function for preview
-    @RequiresApi(Build.VERSION_CODES.Q)
     @Preview
     @Composable
     fun ExampleSongRow() {
-        SongRow(Song("Title", "author", Uri.EMPTY),0)
+        SongRow(Song("Title", "author", Uri.EMPTY), 0)
     }
 }
 

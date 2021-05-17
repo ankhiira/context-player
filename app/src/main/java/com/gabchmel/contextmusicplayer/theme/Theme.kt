@@ -9,8 +9,10 @@ import androidx.compose.ui.graphics.Color
 private val DarkColors = darkColors(
     primary = Pink500,
     secondary = Grey400,
-    onBackground = Grey800,
-    onPrimary = Yel900
+    // On objets - text color
+    onBackground = Yel900,
+    onPrimary = Yel900,
+    onSecondary = Yel900
     // ...
 )
 

@@ -7,9 +7,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Button
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.core.app.ActivityCompat
 
@@ -19,7 +16,7 @@ class PermissionsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            ExampleScreen()
+            PermissionsScreen()
         }
     }
 
@@ -32,7 +29,7 @@ class PermissionsActivity : AppCompatActivity() {
         }
 
     @Composable
-    fun ExampleScreen() {
+    fun PermissionsScreen() {
 
         val requestCode = 1
         val permissions = arrayOf(
@@ -59,14 +56,15 @@ class PermissionsActivity : AppCompatActivity() {
 
                 // Start the main activity
                 startActivity(intent)
-            } else {
-                Column {
-                    Text(text = "Permissions needs to be granted")
-                    Button(onClick = { /*TODO*/ }) {
-
-                    }
-                }
             }
+//            else {
+//                Column {
+//                    Text(text = "Permissions needs to be granted")
+//                    Button(onClick = { /*TODO*/ }) {
+//                        Text("Grant Permissions")
+//                    }
+//                }
+//            }
         // Permissions granted
         } else {
             startActivity(intent)

@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabchmel.contextmusicplayer.MediaPlaybackService
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -35,7 +34,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    @ExperimentalCoroutinesApi
     fun loadSongs() {
         try {service.getCompleted().loadSongs()} catch (e:Exception){}
     }

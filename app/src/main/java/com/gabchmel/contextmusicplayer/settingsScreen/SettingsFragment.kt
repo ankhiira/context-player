@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,7 +51,8 @@ class SettingsFragment : Fragment() {
                                 backgroundColor = Color.Transparent)
                         },
                         content = {
-                            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.fillMaxSize()) {
                                 Text(
                                     text = "Available sensors",
                                     color = materialYel400,

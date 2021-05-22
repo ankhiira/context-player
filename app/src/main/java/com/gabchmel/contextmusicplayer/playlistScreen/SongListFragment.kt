@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
@@ -51,9 +52,11 @@ class SongListFragment : Fragment() {
         ) { isGranted: Boolean ->
             if (isGranted) {
                 // Permission is granted
+                Toast.makeText(context,"granted",Toast.LENGTH_SHORT).show()
                 viewModel.loadSongs()
             } else {
                 // TODO permission denied
+                Toast.makeText(context,"denied",Toast.LENGTH_SHORT).show()
                 // Explain to the user that the feature is unavailable because the
                 // features requires a permission that the user has denied. At the
                 // same time, respect the user's decision.

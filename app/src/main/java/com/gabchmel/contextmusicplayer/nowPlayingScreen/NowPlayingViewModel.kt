@@ -35,7 +35,9 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     val service = CompletableDeferred<MediaPlaybackService>()
 
     private var songs = flow {
+        // Service awaits for complete call
         val service = service.await()
+        // Collects values from songs from services
         emitAll(service.songs)
     }.stateIn(viewModelScope, SharingStarted.Lazily,null)
 

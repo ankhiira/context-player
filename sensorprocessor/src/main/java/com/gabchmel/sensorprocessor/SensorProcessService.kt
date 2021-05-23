@@ -2,6 +2,7 @@ package com.gabchmel.sensorprocessor
 
 import android.Manifest
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.io.IOException
 import java.util.*
+import kotlin.concurrent.fixedRateTimer
 
 
 class SensorProcessService : Service() {
@@ -41,9 +43,8 @@ class SensorProcessService : Service() {
         fun getService(): SensorProcessService = this@SensorProcessService
     }
 
-    override fun onBind(intent: Intent): IBinder {
-
-        // TODO maybe move to init part - maybe doesn't belong here
+    override fun onCreate() {
+        super.onCreate()
 
         // Persistent LocationManager reference
         locationManager = this.getSystemService(LOCATION_SERVICE) as LocationManager?
@@ -68,20 +69,15 @@ class SensorProcessService : Service() {
 
         // Get current time
         _time.value = Calendar.getInstance().time
+    }
 
-        try {
-            // Write to csv file
-            val csvFile =
-                File(this.filesDir, "text.csv")
-            csvFile.appendText(
-                time.value.toString() + "," + location.value?.longitude.toString() +
-                        "," + location.value?.latitude.toString() + "\n"
-            )
-
-        } catch (e: IOException) {
-            Log.e("Err", "not fn", e)
-        }
+    override fun onBind(intent: Intent): IBinder {
         return binder
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        writeToFile(this)
+        return super.onStartCommand(intent, flags, startId)
     }
 
     // Location change listener
@@ -93,5 +89,25 @@ class SensorProcessService : Service() {
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
+    }
+
+    private fun writeToFile(context: Context) {
+
+        fixedRateTimer(period = 100000) {
+
+            // TODO Make check that we have a value - maybe we don't have to have value idk
+            try {
+                // Write to csv file
+                val csvFile =
+                    File(context.filesDir, "data.csv")
+                csvFile.appendText(
+                    time.value.toString() + "," + location.value?.longitude.toString() +
+                            "," + location.value?.latitude.toString() + "\n"
+                )
+
+            } catch (e: IOException) {
+                Log.e("Err", "Couldn't write to file", e)
+            }
+        }
     }
 }

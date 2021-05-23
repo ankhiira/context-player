@@ -8,14 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -23,7 +21,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -75,12 +72,6 @@ class NowPlayingFragment : Fragment() {
         }
     }
 
-
-//    fun onSongCompletion() {
-//        btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
-//        seekBar.progress = 0
-//    }
-
     @SuppressLint("RestrictedApi")
     @Composable
     fun View() {
@@ -88,9 +79,7 @@ class NowPlayingFragment : Fragment() {
         val musicState by viewModel.musicState.collectAsState()
         val musicMetadata by viewModel.musicMetadata.collectAsState()
 
-
         JetnewsTheme {
-            val materialBlue700 = MaterialTheme.colors.primary
             val materialGrey400 = MaterialTheme.colors.secondary
             val materialYel400 = MaterialTheme.colors.onPrimary
 
@@ -121,7 +110,8 @@ class NowPlayingFragment : Fragment() {
                             }
                         },
                         actions = {
-                            IconButton(onClick = { findNavController().navigate(R.id.settingsFragment) },
+                            IconButton(
+                                onClick = { findNavController().navigate(R.id.settingsFragment) },
                             ) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
@@ -143,6 +133,7 @@ class NowPlayingFragment : Fragment() {
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
+
                         // Album art
                         Image(
                             painter = musicMetadata?.getAlbumArt()?.let {
@@ -184,12 +175,13 @@ class NowPlayingFragment : Fragment() {
                             // TODO val check
                             var sliderPosition by remember { mutableStateOf(0f) }
 
-                            val songLength = musicMetadata?.getDuration() ?: 0
+                            val songLength = musicMetadata?.getDuration()?.toFloat() ?: 0.0f
                             val songPosition =
                                 musicState?.getCurrentPosition(null)?.toFloat() ?: 0.0f
 
                             LaunchedEffect(songPosition) {
-                                val pbState = viewModel.musicState.value?.state ?: PlaybackStateCompat.STATE_PAUSED
+                                val pbState = viewModel.musicState.value?.state
+                                    ?: PlaybackStateCompat.STATE_PAUSED
                                 if (pbState == PlaybackStateCompat.STATE_PLAYING) {
                                     sliderPosition = songPosition
                                 }
@@ -201,7 +193,7 @@ class NowPlayingFragment : Fragment() {
                                     sliderPosition = it
                                     viewModel.setMusicProgress(it)
                                 },
-                                valueRange = 0f..songLength.toFloat()
+                                valueRange = 0f..songLength
                             )
 
                             Row(
@@ -261,77 +253,12 @@ class NowPlayingFragment : Fragment() {
                                         tint = materialGrey400,
                                         modifier = Modifier.fillMaxHeight(0.6f)
                                     )
-
                                 }
                             }
                         }
                     }
                 }
             )
-        }
-    }
-
-    @Preview
-    @Composable
-    fun DefPrev() {
-//        View()
-        Row(
-            modifier = Modifier
-                .padding(vertical = 16.dp, horizontal = 8.dp)
-                .fillMaxWidth()
-                .height(120.dp),
-//                            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.Center
-        ) {
-//            IconButton(
-//                onClick = {
-//                    viewModel.prev()
-//                },
-//            ) {
-//                Icon(
-//                    imageVector =
-//                    ImageVector.vectorResource(R.drawable.ic_skip_prev),
-//                    contentDescription = "Skip to previous",
-////                    tint = materialGrey400,
-//                    modifier = Modifier.fillMaxHeight(0.6f)
-//                )
-//            }
-
-            IconButton(
-                onClick = {
-                    playSong()
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                Image(
-                    painter =
-                    rememberVectorPainter(
-                        ImageVector.vectorResource(
-//                        if (musicState?.state == PlaybackStateCompat.STATE_PLAYING)
-//                            R.drawable.ic_pause_filled
-//                        else
-                            R.drawable.ic_play_filled
-                        )
-                    ),
-                    contentDescription = "Play",
-                    modifier = Modifier
-//                        .fillMaxHeight()
-                        .shadow(elevation = 8.dp, shape = CircleShape)
-                )
-
-            }
-
-//            IconButton(onClick = { viewModel.next() }) {
-//                Icon(
-//                    imageVector =
-//                    ImageVector.vectorResource(R.drawable.ic_skip_next),
-//                    contentDescription = "Skip to next",
-////                    tint = materialGrey400,
-//                    modifier = Modifier.fillMaxHeight(0.6f)
-//                )
-//
-//            }
         }
     }
 }

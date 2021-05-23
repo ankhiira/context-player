@@ -102,15 +102,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
 
+        // Load list of songs from local storage
         loadSongs()
-
-        // If the player is MediaPlayer, set OnCompletionListener
-        if (player == MediaPlayer()) {
-            // After the song finishes go to the initial design
-            player.setOnCompletionListener {
-                // TODO completion listener
-            }
-        }
 
         // Create and initialize MediaSessionCompat
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
@@ -195,6 +188,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         // Set session active, set to use media buttons now
                         isActive = true
 
+                        player.setOnCompletionListener {
+                            updateState()
+                        }
+
                         // Start the player
                         player.start()
 
@@ -270,7 +267,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 setSessionToken(sessionToken)
             }
 
-        // Every one second update state of the playback
+        // Every second update state of the playback
         timer = fixedRateTimer(period = 10000) {
             updateState()
         }

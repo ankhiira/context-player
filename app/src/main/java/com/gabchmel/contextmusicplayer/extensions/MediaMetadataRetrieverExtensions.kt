@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer
+package com.gabchmel.contextmusicplayer.extensions
 
 import android.media.MediaMetadataRetriever
 import android.graphics.BitmapFactory

@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector.xml" value="0.24351851851851852" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_back.xml" value="0.15555555555555556" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_baseline_headset_24.xml" value="0.24351851851851852" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_home_black_24dp.xml" value="0.3148148148148148" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_launcher_background.xml" value="0.3148148148148148" />
@@ -17,12 +18,17 @@
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_plus_48px.xml" value="0.22864583333333333" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_next.xml" value="0.3148148148148148" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_next_black_24dp.xml" value="0.3148148148148148" />
-        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.12613981762917933" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_prev.xml" value="0.15555555555555556" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_previous_black_24dp.xml" value="0.15555555555555556" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_stop_black_24dp.xml" value="0.15555555555555556" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_home.xml" value="0.18" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_song_list.xml" value="0.1" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/seekbar.xml" value="0.1953125" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/menu-v29/bottom_nav_menu.xml" value="0.19479166666666667" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/menu/bottom_nav_menu.xml" value="0.15648148148148147" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.15555555555555556" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.15555555555555556" />
       </map>
     </option>
   </component>

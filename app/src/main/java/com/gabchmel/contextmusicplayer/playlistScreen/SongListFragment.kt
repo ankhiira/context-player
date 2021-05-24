@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
@@ -39,29 +37,25 @@ import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 class SongListFragment : Fragment() {
 
     private val viewModel: SongListViewModel by viewModels()
 
-    // Register the permissions callback
+    private var _isPermGranted = MutableStateFlow(false)
+    private var isPermGranted: StateFlow<Boolean> = _isPermGranted
+
+    // permissions callback
     private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                // Permission is granted
-                Toast.makeText(context,"granted",Toast.LENGTH_SHORT).show()
-                viewModel.loadSongs()
-            } else {
-                // TODO permission denied
-                Toast.makeText(context,"denied",Toast.LENGTH_SHORT).show()
-                // Explain to the user that the feature is unavailable because the
-                // features requires a permission that the user has denied. At the
-                // same time, respect the user's decision.
-
-//                Text(text = "Permission needs to be granted to list songs from local storage")
+                // permission is granted
+                _isPermGranted.value = true
             }
         }
 
@@ -70,31 +64,27 @@ class SongListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Create compose layout for this fragment
+        // compose layout for this fragment
         return ComposeView(requireContext()).apply {
             setContent {
                 val songs by viewModel.songs.collectAsState()
 
                 JetnewsTheme {
 //                    fun ScaffoldDemo() {
-                    val primary = MaterialTheme.colors.primary
                     val onPrimary = MaterialTheme.colors.onPrimary
 
-                    val scaffoldState =
-                        rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
-
                     Scaffold(
-                        scaffoldState = scaffoldState,
                         topBar = {
                             TopAppBar(
                                 title = {
                                     Text(
-                                        "Song List Name",
-                                        color = primary,
+                                        "Song List",
+                                        fontWeight = FontWeight.Bold
                                     )
                                 },
                                 actions = {
-                                    IconButton(onClick = { findNavController().navigate(R.id.settingsFragment) },
+                                    IconButton(
+                                        onClick = { findNavController().navigate(R.id.settingsFragment) },
                                     ) {
                                         Icon(
                                             imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
@@ -109,10 +99,12 @@ class SongListFragment : Fragment() {
                             )
                         },
                         content = {
-                            if (ActivityCompat.checkSelfPermission(
+                            val granted by isPermGranted.collectAsState()
+
+                            if ((ActivityCompat.checkSelfPermission(
                                     requireContext(),
                                     Manifest.permission.READ_EXTERNAL_STORAGE
-                                ) != PackageManager.PERMISSION_GRANTED
+                                ) != PackageManager.PERMISSION_GRANTED) && !granted
                             ) {
                                 Column {
                                     Text("The permission to access external storage needed.")
@@ -124,25 +116,31 @@ class SongListFragment : Fragment() {
                                         Text("Grant permission")
                                     }
                                 }
-                            } else {
+                            } else if (granted || (ActivityCompat.checkSelfPermission(
+                                    requireContext(),
+                                    Manifest.permission.READ_EXTERNAL_STORAGE
+                                ) == PackageManager.PERMISSION_GRANTED)
+                            ) {
                                 Column {
 
                                     val isRefreshing by viewModel.isRefreshing.collectAsState()
+
+                                    viewModel.loadSongs()
 
                                     SwipeRefresh(
                                         state = rememberSwipeRefreshState(isRefreshing),
                                         onRefresh = { viewModel.refresh() },
                                     ) {
                                         Column {
-                                            Text(
-                                                "Song list name",
-                                                color = primary,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 18.sp,
-                                                modifier = Modifier
-                                                    .align(alignment = Alignment.CenterHorizontally)
-                                                    .padding(vertical = 16.dp)
-                                            )
+//                                            Text(
+//                                                "Song list name",
+//                                                color = primary,
+//                                                fontWeight = FontWeight.Bold,
+//                                                fontSize = 18.sp,
+//                                                modifier = Modifier
+//                                                    .align(alignment = Alignment.CenterHorizontally)
+//                                                    .padding(vertical = 16.dp)
+//                                            )
 
                                             if (songs != null)
                                                 LazyColumn {
@@ -186,12 +184,13 @@ class SongListFragment : Fragment() {
         ) {
             Text(
                 text = "${song.title}",
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.W300,
                 color = fontColor
             )
             Text(
                 text = "${song.author}",
                 fontSize = 14.sp,
+                fontWeight = FontWeight.W200,
                 color = fontColor
             )
         }

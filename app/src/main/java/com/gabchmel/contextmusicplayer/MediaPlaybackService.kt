@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
+import com.gabchmel.contextmusicplayer.extensions.*
 import com.gabchmel.contextmusicplayer.playlistScreen.Song
 import com.gabchmel.contextmusicplayer.playlistScreen.SongScanner
 import kotlinx.coroutines.GlobalScope
@@ -118,7 +119,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 )
 
                 // Set of initial PlaybackState set to ACTION_PLAY, so the media buttons can start the player
-                // (current operational state of the player - transport state - playing, paused, buffering)
+                // (current operational state of the player - transport state - playing, paused)
                 stateBuilder = PlaybackStateCompat.Builder()
                     .setActions(
                         PlaybackStateCompat.ACTION_PLAY_PAUSE or
@@ -137,7 +138,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                     val afChangeListener: AudioManager.OnAudioFocusChangeListener =
                         AudioManager.OnAudioFocusChangeListener { }
-
 
                     override fun onPlayFromUri(uri: Uri, extras: Bundle?) {
                         preparePlayer(uri)
@@ -289,15 +289,18 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             ).build()
         )
 
+        // provide metadata
         metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadataRetriever.getTitle())
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, metadataRetriever.getArtist())
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, metadataRetriever.getAlbum())
             .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, metadataRetriever.getAlbumArt())
 
+        // set song duration
         metadataRetriever.getDuration()?.let { duration ->
             metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
         }
+
         mediaSession.setMetadata(metadataBuilder.build())
     }
 
@@ -397,8 +400,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // On Service bind
     override fun onBind(intent: Intent): IBinder? {
         if (intent.getBooleanExtra("is_binding", false)) {
-            return binder;
+            return binder
         }
-        return super.onBind(intent);
+        return super.onBind(intent)
     }
 }

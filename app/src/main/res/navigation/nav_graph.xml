@@ -8,8 +8,7 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.gabchmel.contextmusicplayer.nowPlayingScreen.NowPlayingFragment"
-        android:label="fragment_blank"
-        tools:layout="@layout/now_playing_fragment" >
+        android:label="fragment_blank">
         <argument android:name="uri"
             app:argType="android.net.Uri" />
         <argument
@@ -25,8 +24,7 @@
     <fragment
         android:id="@+id/song_list_Fragment"
         android:name="com.gabchmel.contextmusicplayer.playlistScreen.SongListFragment"
-        android:label="fragment_blank2"
-        tools:layout="@layout/fragment_song_list" >
+        android:label="fragment_blank2">
         <action
             android:id="@+id/action_song_list_Fragment_to_homeFragment"
             app:destination="@id/homeFragment" />

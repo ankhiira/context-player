@@ -3,17 +3,15 @@ package com.gabchmel.contextmusicplayer.playlistScreen
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,10 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,7 +59,6 @@ class SongListFragment : Fragment() {
             }
         }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -79,7 +78,9 @@ class SongListFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Song List",
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center
                                     )
                                 },
                                 actions = {
@@ -144,10 +145,8 @@ class SongListFragment : Fragment() {
 
                                             if (songs != null)
                                                 LazyColumn {
-                                                    var id = 0
                                                     items(songs!!) { song ->
-                                                        SongRow(song, id)
-                                                        id++
+                                                        SongRow(song)
                                                     }
                                                 }
                                         }
@@ -164,7 +163,7 @@ class SongListFragment : Fragment() {
 
     // Function for creating one song compose object row
     @Composable
-    fun SongRow(song: Song, id: Int) {
+    fun SongRow(song: Song) {
 
         val fontColor = MaterialTheme.colors.onPrimary
         Column(
@@ -174,24 +173,26 @@ class SongListFragment : Fragment() {
                     findNavController().navigate(
                         SongListFragmentDirections.actionSongListFragmentToHomeFragment(
                             song.URI,
-                            play,
-                            id
+                            play
                         )
                     )
                 })
+//                .padding(horizontal = 8.dp)
                 .padding(8.dp)
-                .fillMaxSize()
+                .fillMaxWidth()
         ) {
             Text(
                 text = "${song.title}",
                 fontWeight = FontWeight.W300,
                 color = fontColor
+
             )
             Text(
                 text = "${song.author}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.W200,
-                color = fontColor
+                fontSize = 12.sp,
+                fontWeight = FontWeight.W300,
+                color = fontColor,
+                modifier = Modifier.alpha(0.54f)
             )
         }
     }
@@ -200,7 +201,7 @@ class SongListFragment : Fragment() {
     @Preview
     @Composable
     fun ExampleSongRow() {
-        SongRow(Song("Title", "author", Uri.EMPTY), 0)
+        SongRow(Song("Title", "author", Uri.EMPTY))
     }
 }
 

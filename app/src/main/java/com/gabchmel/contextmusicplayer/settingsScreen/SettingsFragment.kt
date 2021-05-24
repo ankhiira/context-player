@@ -8,7 +8,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -31,11 +35,7 @@ class SettingsFragment : Fragment() {
 
                     val materialYel400 = MaterialTheme.colors.onPrimary
 
-                    val scaffoldState =
-                        rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
-
                     Scaffold(
-                        scaffoldState = scaffoldState,
                         modifier = Modifier
                             .fillMaxSize(),
                         topBar = {
@@ -48,11 +48,16 @@ class SettingsFragment : Fragment() {
                                     )
                                 },
                                 elevation = 0.dp,
-                                backgroundColor = Color.Transparent)
+                                backgroundColor = Color.Transparent
+                            )
                         },
                         content = {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier.fillMaxSize()) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp)
+                            ) {
                                 Text(
                                     text = "Available sensors",
                                     color = materialYel400,

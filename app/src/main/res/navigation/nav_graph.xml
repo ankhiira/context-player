@@ -15,8 +15,6 @@
             android:name="play"
             app:argType="boolean"
             android:defaultValue="false" />
-        <argument android:name="id"
-            app:argType="integer" />
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />

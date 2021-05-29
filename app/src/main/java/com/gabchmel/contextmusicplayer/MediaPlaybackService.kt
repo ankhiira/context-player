@@ -15,16 +15,17 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.gabchmel.contextmusicplayer.extensions.*
 import com.gabchmel.contextmusicplayer.playlistScreen.Song
 import com.gabchmel.contextmusicplayer.playlistScreen.SongScanner
+import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.concurrent.fixedRateTimer
 import kotlin.coroutines.suspendCoroutine
 
@@ -34,13 +35,13 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     companion object {
         private const val MY_MEDIA_ROOT_ID = "/"
 
-        suspend fun getInstance(context: Context) = suspendCoroutine<MediaPlaybackService> { cont->
+        suspend fun getInstance(context: Context) = suspendCoroutine<MediaPlaybackService> { cont ->
             val intent = Intent(context, MediaPlaybackService::class.java)
             intent.putExtra("is_binding", true)
 
             context.bindService(intent, object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder) {
-                    cont.resumeWith(kotlin.Result.success(( service as MediaBinder).getService()))
+                    cont.resumeWith(kotlin.Result.success((service as MediaBinder).getService()))
                 }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
@@ -63,13 +64,32 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     private val binder = MediaBinder()
 
+    // Binder to a service
+    inner class MediaBinder : Binder() {
+        fun getService(): MediaPlaybackService = this@MediaPlaybackService
+    }
+
+    private var sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
+
+    /** Defines callbacks for service binding, passed to bindService()  */
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
+            val binder = service as SensorProcessService.LocalBinder
+            sensorProcessService.value = binder.getService()
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+        }
+    }
+
     // class to detect BECOMING_NOISY broadcast
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
-
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
                 // Pause the playback
-                if(player.isPlaying) {
+                if (player.isPlaying) {
                     player.pause()
                     updateState()
                 }
@@ -84,7 +104,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     var songs = MutableStateFlow(emptyList<Song>())
 
+    // URI of current song played
     val currentSongUri = MutableStateFlow<Uri?>(null)
+
+    // retrieve index of currently played song
     private val currSongIndex = currentSongUri.filterNotNull().map { uri ->
         songs.value.indexOfFirst { song ->
             song.URI == uri
@@ -94,17 +117,34 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         songs.value.getOrNull(index)
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
     val nextSong = currSongIndex.filterNotNull().map { index ->
-        songs.value.getOrNull(index+1)
+        songs.value.getOrNull(index + 1)
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
     val prevSong = currSongIndex.filterNotNull().map { index ->
-        songs.value.getOrNull(index-1)
+        songs.value.getOrNull(index - 1)
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
+
+    var isPlaying = false
+
+    // On Service bind
+    override fun onBind(intent: Intent): IBinder? {
+        if (intent.getBooleanExtra("is_binding", false)) {
+            return binder
+        }
+        return super.onBind(intent)
+    }
 
     override fun onCreate() {
         super.onCreate()
 
         // Load list of songs from local storage
         loadSongs()
+
+        // Bind to SensorProcessService to later write to the file
+        val intent = Intent(this, SensorProcessService::class.java)
+        this.applicationContext.bindService(
+            intent, connection,
+            Context.BIND_AUTO_CREATE
+        )
 
         // Create and initialize MediaSessionCompat
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
@@ -144,12 +184,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                         currentSongUri.value = uri
 
+                        updateMetadata()
+
                         onPlay()
                     }
 
                     override fun onPlay() {
 
                         val result: Int
+
+                        isPlaying = true
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
@@ -208,7 +252,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                     override fun onStop() {
 
-                        Toast.makeText(baseContext,"here",Toast.LENGTH_SHORT).show()
+                        isPlaying = false
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             am.abandonAudioFocusRequest(audioFocusRequest)
@@ -224,6 +268,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     }
 
                     override fun onPause() {
+
+                        isPlaying = false
 
                         player.pause()
 
@@ -268,8 +314,29 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             }
 
         // Every second update state of the playback
-        timer = fixedRateTimer(period = 10000) {
+        timer = fixedRateTimer(period = 1000) {
             updateState()
+
+//            sensorProcessService.value?.writeToFile(currentSong.value!!.title!!)
+        }
+
+        val hashMap = HashMap<String, Int>()
+        var i = 0
+        songs.value.forEach { song ->
+            song.title?.let {
+                hashMap[song.title + "," + song.author] = i
+            }
+            i++
+        }
+
+        // Every 10 second write to file sensor measurements with the song ID
+        fixedRateTimer(period = 10000) {
+            if (isPlaying)
+                currentSong.value?.title?.let { title ->
+                    currentSong.value?.author?.let { author ->
+                        sensorProcessService.value?.writeToFile("$title,$author")
+                    }
+                }
         }
     }
 
@@ -288,7 +355,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         or PlaybackStateCompat.ACTION_STOP
             ).build()
         )
+    }
 
+    // Function to set metadata of the song
+    fun updateMetadata() {
         // provide metadata
         metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadataRetriever.getTitle())
@@ -355,6 +425,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         player.stop()
         player.seekTo(0)
 
+        this.applicationContext.unbindService(connection)
+
         stopSelf()
 
         mediaSession.run {
@@ -390,18 +462,5 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
         // Set source to current song
         metadataRetriever.setDataSource(applicationContext, songUri)
-    }
-
-    // Binder to a service
-    inner class MediaBinder: Binder() {
-        fun getService(): MediaPlaybackService = this@MediaPlaybackService
-    }
-
-    // On Service bind
-    override fun onBind(intent: Intent): IBinder? {
-        if (intent.getBooleanExtra("is_binding", false)) {
-            return binder
-        }
-        return super.onBind(intent)
     }
 }

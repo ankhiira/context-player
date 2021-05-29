@@ -30,7 +30,7 @@ class SensorValuesFragment : Fragment() {
     private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get SensorProcessService instance
+            // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
             val binder = service as SensorProcessService.LocalBinder
             sensorProcessService.value = binder.getService()
         }

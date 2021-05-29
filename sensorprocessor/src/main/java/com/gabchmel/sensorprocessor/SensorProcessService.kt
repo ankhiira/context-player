@@ -2,7 +2,6 @@ package com.gabchmel.sensorprocessor
 
 import android.Manifest
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -18,7 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.concurrent.fixedRateTimer
 
 
 class SensorProcessService : Service() {
@@ -31,20 +29,22 @@ class SensorProcessService : Service() {
     private val _time = MutableStateFlow<Date?>(null)
     val time: StateFlow<Date?> = _time
 
-    // Binder given to clients
+    lateinit var csvFile : File
+
+    // binder given to clients
     private val binder = LocalBinder()
 
-    /**
-     * Class used for the client Binder.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with IPC.
-     */
+    // class used for the client binder
     inner class LocalBinder : Binder() {
-        // Return this instance of LocalService so clients can call public methods
-        fun getService(): SensorProcessService = this@SensorProcessService
+        // Returns instance of SensorProcessService so clients can call public methods
+        fun getService()= this@SensorProcessService
     }
 
     override fun onCreate() {
         super.onCreate()
+
+        // CSV file with sensor measurements and context data
+        csvFile = File(this.filesDir, "data.csv")
 
         // Persistent LocationManager reference
         locationManager = this.getSystemService(LOCATION_SERVICE) as LocationManager?
@@ -60,6 +60,7 @@ class SensorProcessService : Service() {
         ) {
 
         }
+
         locationManager?.requestLocationUpdates(
             LocationManager.NETWORK_PROVIDER,
             0L,
@@ -75,11 +76,6 @@ class SensorProcessService : Service() {
         return binder
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        writeToFile(this)
-        return super.onStartCommand(intent, flags, startId)
-    }
-
     // Location change listener
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
@@ -91,23 +87,19 @@ class SensorProcessService : Service() {
         override fun onProviderDisabled(provider: String) {}
     }
 
-    private fun writeToFile(context: Context) {
+    fun writeToFile(title : String) {
 
-        fixedRateTimer(period = 100000) {
-
-            // TODO Make check that we have a value - maybe we don't have to have value idk
-            try {
-                // Write to csv file
-                val csvFile =
-                    File(context.filesDir, "data.csv")
-                csvFile.appendText(
-                    time.value.toString() + "," + location.value?.longitude.toString() +
-                            "," + location.value?.latitude.toString() + "\n"
-                )
-
-            } catch (e: IOException) {
-                Log.e("Err", "Couldn't write to file", e)
-            }
+        // TODO Make check that we have a value - maybe we don't have to have value idk
+        try {
+            // Write to csv file
+            csvFile.appendText(
+                title + "," +
+                time.value.toString() + ","
+                + location.value?.longitude.toString() + ","
+                + location.value?.latitude.toString() + "\n"
+            )
+        } catch (e: IOException) {
+            Log.e("Err", "Couldn't write to file", e)
         }
     }
 }

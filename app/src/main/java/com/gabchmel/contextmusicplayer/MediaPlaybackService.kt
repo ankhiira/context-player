@@ -25,7 +25,6 @@ import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.concurrent.fixedRateTimer
 import kotlin.coroutines.suspendCoroutine
 
@@ -152,11 +151,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                 // deprecated
                 // Support BT headphones
-                setFlags(
-                    MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-                            // support Android Wear, Android Auto
-                            or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-                )
+//                setFlags(
+//                    MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+//                            // support Android Wear, Android Auto
+//                            or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+//                )
 
                 // Set of initial PlaybackState set to ACTION_PLAY, so the media buttons can start the player
                 // (current operational state of the player - transport state - playing, paused)
@@ -316,25 +315,25 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         // Every second update state of the playback
         timer = fixedRateTimer(period = 1000) {
             updateState()
-
-//            sensorProcessService.value?.writeToFile(currentSong.value!!.title!!)
         }
 
-        val hashMap = HashMap<String, Int>()
-        var i = 0
-        songs.value.forEach { song ->
-            song.title?.let {
-                hashMap[song.title + "," + song.author] = i
-            }
-            i++
-        }
+//        val hashMap = HashMap<String, Int>()
+//        var i = 0
+//        songs.value.forEach { song ->
+//            song.title?.let {
+//                hashMap[song.title + "," + song.author] = i
+//            }
+//            i++
+//        }
 
         // Every 10 second write to file sensor measurements with the song ID
         fixedRateTimer(period = 10000) {
             if (isPlaying)
                 currentSong.value?.title?.let { title ->
                     currentSong.value?.author?.let { author ->
-                        sensorProcessService.value?.writeToFile("$title,$author")
+                        // Create a hashCode to use it as ID of the song
+                        val titleAuthor = "$title,$author".hashCode()
+                        sensorProcessService.value?.writeToFile(titleAuthor.toString())
                     }
                 }
         }

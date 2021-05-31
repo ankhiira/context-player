@@ -87,13 +87,13 @@ class SensorProcessService : Service() {
         override fun onProviderDisabled(provider: String) {}
     }
 
-    fun writeToFile(title : String) {
+    fun writeToFile(ID : String) {
 
         // TODO Make check that we have a value - maybe we don't have to have value idk
         try {
             // Write to csv file
             csvFile.appendText(
-                title + "," +
+                ID + "," +
                 time.value.toString() + ","
                 + location.value?.longitude.toString() + ","
                 + location.value?.latitude.toString() + "\n"

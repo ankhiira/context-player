@@ -317,15 +317,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             updateState()
         }
 
-//        val hashMap = HashMap<String, Int>()
-//        var i = 0
-//        songs.value.forEach { song ->
-//            song.title?.let {
-//                hashMap[song.title + "," + song.author] = i
-//            }
-//            i++
-//        }
-
         // Every 10 second write to file sensor measurements with the song ID
         fixedRateTimer(period = 10000) {
             if (isPlaying)

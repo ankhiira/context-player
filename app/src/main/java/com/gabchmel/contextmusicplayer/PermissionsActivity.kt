@@ -3,7 +3,6 @@ package com.gabchmel.contextmusicplayer
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -26,7 +25,7 @@ class PermissionsActivity : AppCompatActivity() {
             var isGranted = true
 
             permissions.entries.forEach {
-                Log.e("DEBUG", "${it.key} = ${it.value}")
+//                Log.e("DEBUG", "${it.key} = ${it.value}")
                 if (it.value == false) {
                     isGranted = false
                 }

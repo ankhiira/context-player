@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 //        val predictionModel = PredictionModel(this)
-        val predictionModel = PredictionModelonnx()
+        val predictionModel = PredictionModelonnx(this)
         predictionModel.eval()
     }
 }

@@ -41,12 +41,11 @@ dependencies {
 
     // onnx runtime
     implementation 'com.microsoft.onnxruntime:onnxruntime-mobile:1.8.0'
+//    implementation 'com.github.microsoft:onnxruntime:v1.8.0'
 
     implementation 'org.jpmml:pmml-evaluator:1.5.15'
     implementation 'com.github.jpmml.jpmml-android:jpmml-android:master-SNAPSHOT'
     implementation 'org.jpmml:pmml-model:1.5.15'
-
-    implementation 'org.simpleframework:simple-xml:2.7.1'
 
     implementation 'com.google.code.gson:gson:2.8.7'
 }

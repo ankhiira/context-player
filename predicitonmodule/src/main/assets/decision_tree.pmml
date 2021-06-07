@@ -2,7 +2,7 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
 		<Application name="JPMML-SkLearn" version="1.6.18"/>
-		<Timestamp>2021-06-04T12:53:26Z</Timestamp>
+		<Timestamp>2021-06-07T11:08:49Z</Timestamp>
 	</Header>
 	<MiningBuildTask>
 		<Extension>PMMLPipeline(steps=[('classifier', DecisionTreeClassifier())])</Extension>
@@ -12,70 +12,34 @@
 			<Value value="0"/>
 			<Value value="1"/>
 		</DataField>
-		<DataField name="coord_x" optype="continuous" dataType="float"/>
-		<DataField name="coord_z" optype="continuous" dataType="float"/>
+		<DataField name="cos_time" optype="continuous" dataType="float"/>
 	</DataDictionary>
 	<TransformationDictionary/>
 	<TreeModel functionName="classification" algorithmName="sklearn.tree._classes.DecisionTreeClassifier" missingValueStrategy="nullPrediction">
 		<MiningSchema>
 			<MiningField name="id" usageType="target"/>
-			<MiningField name="coord_z"/>
-			<MiningField name="coord_x"/>
+			<MiningField name="cos_time"/>
 		</MiningSchema>
 		<Output>
 			<OutputField name="probability(0)" optype="continuous" dataType="double" feature="probability" value="0"/>
 			<OutputField name="probability(1)" optype="continuous" dataType="double" feature="probability" value="1"/>
 		</Output>
 		<LocalTransformations>
-			<DerivedField name="double(coord_z)" optype="continuous" dataType="double">
-				<FieldRef field="coord_z"/>
-			</DerivedField>
-			<DerivedField name="double(coord_x)" optype="continuous" dataType="double">
-				<FieldRef field="coord_x"/>
+			<DerivedField name="double(cos_time)" optype="continuous" dataType="double">
+				<FieldRef field="cos_time"/>
 			</DerivedField>
 		</LocalTransformations>
 		<Node>
 			<True/>
-			<Node>
-				<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.26597046852111816"/>
-				<Node>
-					<SimplePredicate field="double(coord_x)" operator="lessOrEqual" value="-0.8724264800548553"/>
-					<Node score="1" recordCount="6083">
-						<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.26596686244010925"/>
-						<ScoreDistribution value="0" recordCount="0"/>
-						<ScoreDistribution value="1" recordCount="6083"/>
-					</Node>
-					<Node score="0" recordCount="4">
-						<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.2659680247306824"/>
-						<ScoreDistribution value="0" recordCount="4"/>
-						<ScoreDistribution value="1" recordCount="0"/>
-					</Node>
-					<Node score="1" recordCount="152">
-						<True/>
-						<ScoreDistribution value="0" recordCount="0"/>
-						<ScoreDistribution value="1" recordCount="152"/>
-					</Node>
-				</Node>
-				<Node score="0" recordCount="2">
-					<SimplePredicate field="double(coord_x)" operator="lessOrEqual" value="-0.872425764799118"/>
-					<ScoreDistribution value="0" recordCount="2"/>
-					<ScoreDistribution value="1" recordCount="0"/>
-				</Node>
-				<Node score="1" recordCount="4">
-					<True/>
-					<ScoreDistribution value="0" recordCount="0"/>
-					<ScoreDistribution value="1" recordCount="4"/>
-				</Node>
-			</Node>
-			<Node score="0" recordCount="3">
-				<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.2659713476896286"/>
-				<ScoreDistribution value="0" recordCount="3"/>
+			<Node score="0" recordCount="13">
+				<SimplePredicate field="double(cos_time)" operator="lessOrEqual" value="-0.876656711101532"/>
+				<ScoreDistribution value="0" recordCount="13"/>
 				<ScoreDistribution value="1" recordCount="0"/>
 			</Node>
-			<Node score="1" recordCount="12">
+			<Node score="1" recordCount="9">
 				<True/>
 				<ScoreDistribution value="0" recordCount="0"/>
-				<ScoreDistribution value="1" recordCount="12"/>
+				<ScoreDistribution value="1" recordCount="9"/>
 			</Node>
 		</Node>
 	</TreeModel>

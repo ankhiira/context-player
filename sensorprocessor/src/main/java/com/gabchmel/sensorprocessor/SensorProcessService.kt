@@ -89,12 +89,15 @@ class SensorProcessService : Service() {
 
     fun writeToFile(ID : String) {
 
+        // Get current time
+        val currentTime = Calendar.getInstance().time
+
         // TODO Make check that we have a value - maybe we don't have to have value idk
         try {
             // Write to csv file
             csvFile.appendText(
                 ID + "," +
-                time.value.toString() + ","
+                currentTime.toString() + ","
                 + location.value?.longitude.toString() + ","
                 + location.value?.latitude.toString() + "\n"
             )

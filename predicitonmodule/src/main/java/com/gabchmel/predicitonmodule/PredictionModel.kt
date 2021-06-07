@@ -21,6 +21,6 @@ class PredictionModel(val context: Context) {
         val result: Any = model.predict<Any>(input)
         // Convert to JSON format to print out
         val resultJSON =  Gson().toJson(result)
-        println("Result2:$resultJSON")
+        println("ResultJSON:$resultJSON")
     }
 }

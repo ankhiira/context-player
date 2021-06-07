@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.gabchmel.predicitonmodule.PredictionModelonnx
+import com.gabchmel.predicitonmodule.PredictionModel
 import com.gabchmel.sensorprocessor.SensorProcessService
 
 
@@ -37,9 +37,8 @@ class MainActivity : AppCompatActivity() {
             startService(intent)
         }
 
-//        val predictionModel = PredictionModel(this)
-        val predictionModel = PredictionModelonnx(this)
-        predictionModel.eval()
+        val predictionModel = PredictionModel(this)
+        predictionModel.predict()
     }
 }
 

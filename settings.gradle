@@ -2,3 +2,4 @@ include ':app'
 rootProject.name = "ContextMusicPlayer"
 include ':predicitonmodule'
 include ':sensorprocessor'
+include ':jaxb'

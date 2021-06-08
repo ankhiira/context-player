@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+	<Header>
+		<Application name="JPMML-SkLearn" version="1.6.18"/>
+		<Timestamp>2021-06-07T12:57:39Z</Timestamp>
+	</Header>
+	<MiningBuildTask>
+		<Extension>PMMLPipeline(steps=[('classifier', DecisionTreeClassifier())])</Extension>
+	</MiningBuildTask>
+	<DataDictionary>
+		<DataField name="id" optype="categorical" dataType="integer">
+			<Value value="0"/>
+			<Value value="1"/>
+			<Value value="2"/>
+		</DataField>
+		<DataField name="coord_x" optype="continuous" dataType="float"/>
+		<DataField name="coord_y" optype="continuous" dataType="float"/>
+		<DataField name="coord_z" optype="continuous" dataType="float"/>
+	</DataDictionary>
+	<TransformationDictionary/>
+	<TreeModel functionName="classification" algorithmName="sklearn.tree._classes.DecisionTreeClassifier" missingValueStrategy="nullPrediction">
+		<MiningSchema>
+			<MiningField name="id" usageType="target"/>
+			<MiningField name="coord_z"/>
+			<MiningField name="coord_x"/>
+			<MiningField name="coord_y"/>
+		</MiningSchema>
+		<Output>
+			<OutputField name="probability(0)" optype="continuous" dataType="double" feature="probability" value="0"/>
+			<OutputField name="probability(1)" optype="continuous" dataType="double" feature="probability" value="1"/>
+			<OutputField name="probability(2)" optype="continuous" dataType="double" feature="probability" value="2"/>
+		</Output>
+		<LocalTransformations>
+			<DerivedField name="double(coord_z)" optype="continuous" dataType="double">
+				<FieldRef field="coord_z"/>
+			</DerivedField>
+			<DerivedField name="double(coord_x)" optype="continuous" dataType="double">
+				<FieldRef field="coord_x"/>
+			</DerivedField>
+			<DerivedField name="double(coord_y)" optype="continuous" dataType="double">
+				<FieldRef field="coord_y"/>
+			</DerivedField>
+		</LocalTransformations>
+		<Node>
+			<True/>
+			<Node>
+				<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.2659670561552048"/>
+				<Node>
+					<SimplePredicate field="double(coord_x)" operator="lessOrEqual" value="-0.8724261820316315"/>
+					<Node>
+						<SimplePredicate field="double(coord_y)" operator="lessOrEqual" value="0.41005052626132965"/>
+						<Node>
+							<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.2659526467323303"/>
+							<Node score="2" recordCount="3419">
+								<SimplePredicate field="double(coord_x)" operator="lessOrEqual" value="-0.872436910867691"/>
+								<ScoreDistribution value="0" recordCount="0"/>
+								<ScoreDistribution value="1" recordCount="0"/>
+								<ScoreDistribution value="2" recordCount="3419"/>
+							</Node>
+							<Node score="0" recordCount="4">
+								<True/>
+								<ScoreDistribution value="0" recordCount="4"/>
+								<ScoreDistribution value="1" recordCount="0"/>
+								<ScoreDistribution value="2" recordCount="0"/>
+							</Node>
+						</Node>
+						<Node score="2" recordCount="4657">
+							<True/>
+							<ScoreDistribution value="0" recordCount="0"/>
+							<ScoreDistribution value="1" recordCount="0"/>
+							<ScoreDistribution value="2" recordCount="4657"/>
+						</Node>
+					</Node>
+					<Node score="0" recordCount="2">
+						<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.265949085354805"/>
+						<ScoreDistribution value="0" recordCount="2"/>
+						<ScoreDistribution value="1" recordCount="0"/>
+						<ScoreDistribution value="2" recordCount="0"/>
+					</Node>
+					<Node score="2" recordCount="2">
+						<True/>
+						<ScoreDistribution value="0" recordCount="0"/>
+						<ScoreDistribution value="1" recordCount="0"/>
+						<ScoreDistribution value="2" recordCount="2"/>
+					</Node>
+				</Node>
+				<Node score="0" recordCount="6">
+					<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.2659633308649063"/>
+					<ScoreDistribution value="0" recordCount="6"/>
+					<ScoreDistribution value="1" recordCount="0"/>
+					<ScoreDistribution value="2" recordCount="0"/>
+				</Node>
+				<Node>
+					<SimplePredicate field="double(coord_x)" operator="lessOrEqual" value="-0.8724235594272614"/>
+					<Node score="2" recordCount="4">
+						<SimplePredicate field="double(coord_y)" operator="lessOrEqual" value="0.4100463092327118"/>
+						<ScoreDistribution value="0" recordCount="0"/>
+						<ScoreDistribution value="1" recordCount="0"/>
+						<ScoreDistribution value="2" recordCount="4"/>
+					</Node>
+					<Node score="0" recordCount="2">
+						<True/>
+						<ScoreDistribution value="0" recordCount="2"/>
+						<ScoreDistribution value="1" recordCount="0"/>
+						<ScoreDistribution value="2" recordCount="0"/>
+					</Node>
+				</Node>
+				<Node score="2" recordCount="494">
+					<True/>
+					<ScoreDistribution value="0" recordCount="0"/>
+					<ScoreDistribution value="1" recordCount="0"/>
+					<ScoreDistribution value="2" recordCount="494"/>
+				</Node>
+			</Node>
+			<Node>
+				<SimplePredicate field="double(coord_x)" operator="lessOrEqual" value="-0.87241992354393"/>
+				<Node>
+					<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.2659677267074585"/>
+					<Node score="0" recordCount="2">
+						<SimplePredicate field="double(coord_z)" operator="lessOrEqual" value="0.2659674286842346"/>
+						<ScoreDistribution value="0" recordCount="2"/>
+						<ScoreDistribution value="1" recordCount="0"/>
+						<ScoreDistribution value="2" recordCount="0"/>
+					</Node>
+					<Node score="2" recordCount="1">
+						<True/>
+						<ScoreDistribution value="0" recordCount="0"/>
+						<ScoreDistribution value="1" recordCount="0"/>
+						<ScoreDistribution value="2" recordCount="1"/>
+					</Node>
+				</Node>
+				<Node score="0" recordCount="13">
+					<True/>
+					<ScoreDistribution value="0" recordCount="13"/>
+					<ScoreDistribution value="1" recordCount="0"/>
+					<ScoreDistribution value="2" recordCount="0"/>
+				</Node>
+			</Node>
+			<Node score="1" recordCount="1">
+				<True/>
+				<ScoreDistribution value="0" recordCount="0"/>
+				<ScoreDistribution value="1" recordCount="1"/>
+				<ScoreDistribution value="2" recordCount="0"/>
+			</Node>
+		</Node>
+	</TreeModel>
+</PMML>

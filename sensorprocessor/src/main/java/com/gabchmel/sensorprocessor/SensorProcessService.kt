@@ -1,9 +1,16 @@
 package com.gabchmel.sensorprocessor
 
 import android.Manifest
+import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -12,6 +19,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
@@ -31,6 +39,15 @@ class SensorProcessService : Service() {
 
     lateinit var csvFile : File
 
+    private lateinit var pendingIntent: PendingIntent
+    private lateinit var broadcastReceiver: BroadcastReceiver
+
+    private var currentState = "NONE"
+
+
+
+    private var lightSensorValue : Float = 0.0f
+
     // binder given to clients
     private val binder = LocalBinder()
 
@@ -38,6 +55,20 @@ class SensorProcessService : Service() {
     inner class LocalBinder : Binder() {
         // Returns instance of SensorProcessService so clients can call public methods
         fun getService()= this@SensorProcessService
+    }
+
+    // Sensor event listener for light sensor
+    private var sensorEventListenerLight = object: SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent?) {
+            if (event != null) {
+                // Get the value in Lux
+                lightSensorValue = event.values[0]
+                Log.d("LightVal", "light:$lightSensorValue")
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        }
     }
 
     override fun onCreate() {
@@ -56,9 +87,12 @@ class SensorProcessService : Service() {
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACTIVITY_RECOGNITION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-
+            Log.e("perm","permission not granted")
         }
 
         locationManager?.requestLocationUpdates(
@@ -70,9 +104,19 @@ class SensorProcessService : Service() {
 
         // Get current time
         _time.value = Calendar.getInstance().time
+
+        // Set ut callbacks for activity detection
+        activityDetection()
     }
 
     override fun onBind(intent: Intent): IBinder {
+
+        var sensorManager= this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        var sensorLight = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+
+        sensorManager.registerListener(sensorEventListenerLight, sensorLight,
+            SensorManager.SENSOR_DELAY_NORMAL)
+
         return binder
     }
 
@@ -104,5 +148,87 @@ class SensorProcessService : Service() {
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
         }
+    }
+
+    private fun activityDetection() {
+        //        broadcastReceiver = object : BroadcastReceiver() {
+//            override fun onReceive(context: Context, intent: Intent) {
+//                if (ActivityTransitionResult.hasResult(intent)) {
+//                    val result = ActivityTransitionResult.extractResult(intent)!!
+//                    for (event in result.transitionEvents) {
+//                        // chronological sequence of events....
+//                        Log.d("Action", "logging")
+//                    }
+//                }
+//            }
+//        }
+
+        val transitions = mutableListOf<ActivityTransition>()
+
+        transitions +=
+            ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.IN_VEHICLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
+
+        transitions +=
+            ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.IN_VEHICLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build()
+
+        transitions +=
+            ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.ON_BICYCLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
+
+        transitions +=
+            ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.ON_FOOT)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
+
+        transitions +=
+            ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.STILL)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
+
+        transitions +=
+            ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.WALKING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build()
+
+        transitions +=
+            ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.WALKING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build()
+
+        val request = ActivityTransitionRequest(transitions)
+
+        val intent = Intent(this, ActivityTransitionReceiver::class.java)
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+
+        // myPendingIntent is the instance of PendingIntent where the app receives callbacks.
+        val task= ActivityRecognition.getClient(this)
+            .requestActivityTransitionUpdates(request, pendingIntent)
+
+        // used: https://heartbeat.fritz.ai/detect-users-activity-in-android-using-activity-transition-api-f718c844efb2
+        task.addOnSuccessListener {
+            // Handle success
+            Log.d("ActivityRecognition", "Transitions Api registered with success")
+        }
+
+        task.addOnFailureListener { e: Exception ->
+            // Handle error
+            Log.d("ActivityRecognition", "Transitions Api could NOT be registered ${e.localizedMessage}")
+        }
+    }
+
+    fun writeActivity(currentActivity : String) {
+        currentState = currentActivity
     }
 }

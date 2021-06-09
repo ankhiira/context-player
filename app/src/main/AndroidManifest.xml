@@ -20,6 +20,9 @@
     <!-- Permission to start foreground service (music playback service) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <!-- Permission to detect mobile user activity-->
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -65,6 +68,18 @@
         <receiver android:name="androidx.media.session.MediaButtonReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.gabchmel.sensorprocessor.ActivityTransitionReceiver"
+            android:exported="false"
+            android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
+<!--            TODO IDK which one -->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.gabchmel.ACTION_PROCESS_ACTIVITY_TRANSITIONS" />-->
+<!--            </intent-filter>-->
+            <intent-filter>
+                <action android:name="TRANSITION_UPDATES" />
             </intent-filter>
         </receiver>
     </application>

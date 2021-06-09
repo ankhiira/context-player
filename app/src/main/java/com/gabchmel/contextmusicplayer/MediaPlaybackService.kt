@@ -323,7 +323,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 currentSong.value?.title?.let { title ->
                     currentSong.value?.author?.let { author ->
                         // Create a hashCode to use it as ID of the song
-                        val titleAuthor = "$title,$author".hashCode()
+                        val titleAuthor = "$title,$author".hashCode().toUInt()
                         sensorProcessService.value?.writeToFile(titleAuthor.toString())
                     }
                 }

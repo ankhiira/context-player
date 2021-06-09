@@ -2,6 +2,7 @@ package com.gabchmel.contextmusicplayer
 
 import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,11 +43,17 @@ class PermissionsActivity : AppCompatActivity() {
 
     @Composable
     fun PermissionsScreen() {
+        var array = arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            array += Manifest.permission.ACTIVITY_RECOGNITION
+        }
+
         requestMultiplePermissions.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
+            array
+
         )
     }
 }

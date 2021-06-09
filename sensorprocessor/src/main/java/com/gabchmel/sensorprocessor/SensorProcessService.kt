@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.io.IOException
 import java.util.*
+import kotlin.math.abs
 
 
 class SensorProcessService : Service() {
@@ -44,9 +45,11 @@ class SensorProcessService : Service() {
 
     private var currentState = "NONE"
 
-
-
     private var lightSensorValue : Float = 0.0f
+
+    private var orientSensorAzimuth_z_axis : Float = 0.0f
+    private var orientSensorPitch_x_axis : Float = 0.0f
+    private var orientSensorRoll_y_axis : Float = 0.0f
 
     // binder given to clients
     private val binder = LocalBinder()
@@ -69,6 +72,23 @@ class SensorProcessService : Service() {
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         }
+    }
+
+    private var sensorEventListenerOrientation = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent?) {
+            if (event != null) {
+                orientSensorAzimuth_z_axis = event.values[0]
+                orientSensorPitch_x_axis = event.values[1]
+                orientSensorRoll_y_axis = event.values[2]
+
+                Log.d("Orientation", "orientation:$orientSensorAzimuth_z_axis," +
+                        "$orientSensorPitch_x_axis, $orientSensorRoll_y_axis")
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        }
+
     }
 
     override fun onCreate() {
@@ -117,6 +137,11 @@ class SensorProcessService : Service() {
         sensorManager.registerListener(sensorEventListenerLight, sensorLight,
             SensorManager.SENSOR_DELAY_NORMAL)
 
+        val mySensors: List<Sensor> = sensorManager.getSensorList(Sensor.TYPE_ORIENTATION)
+
+        sensorManager.registerListener(sensorEventListenerOrientation, mySensors[0],
+        SensorManager.SENSOR_DELAY_NORMAL)
+
         return binder
     }
 
@@ -135,6 +160,9 @@ class SensorProcessService : Service() {
 
         // Get current time
         val currentTime = Calendar.getInstance().time
+        Log.d("Orientation", "write")
+
+        processOrientation()
 
         // TODO Make check that we have a value - maybe we don't have to have value idk
         try {
@@ -230,5 +258,14 @@ class SensorProcessService : Service() {
 
     fun writeActivity(currentActivity : String) {
         currentState = currentActivity
+    }
+
+    private fun processOrientation() {
+        // Get the range of acceptable values for lying device - -1.58 is exactly lying
+        if (abs(orientSensorAzimuth_z_axis) in 1.4f..1.7f) {
+            Log.d("Orientation", "Device is lying")
+        } else {
+            Log.d("Orientation", "Device is staying")
+        }
     }
 }

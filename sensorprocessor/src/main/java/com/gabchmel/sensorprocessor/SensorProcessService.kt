@@ -37,7 +37,7 @@ class SensorProcessService : Service() {
     private val _time = MutableStateFlow<Date?>(null)
     val time: StateFlow<Date?> = _time
 
-    lateinit var csvFile : File
+    private lateinit var csvFile : File
 
     private lateinit var pendingIntent: PendingIntent
     private lateinit var broadcastReceiver: BroadcastReceiver
@@ -111,8 +111,8 @@ class SensorProcessService : Service() {
 
     override fun onBind(intent: Intent): IBinder {
 
-        var sensorManager= this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        var sensorLight = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        val sensorManager= this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensorLight = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
         sensorManager.registerListener(sensorEventListenerLight, sensorLight,
             SensorManager.SENSOR_DELAY_NORMAL)
@@ -210,7 +210,7 @@ class SensorProcessService : Service() {
         val request = ActivityTransitionRequest(transitions)
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
-        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         // myPendingIntent is the instance of PendingIntent where the app receives callbacks.
         val task= ActivityRecognition.getClient(this)

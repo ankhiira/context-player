@@ -3,9 +3,12 @@ package com.gabchmel.sensorprocessor
 import android.Manifest
 import android.app.PendingIntent
 import android.app.Service
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothProfile
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -18,6 +21,7 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,6 +131,39 @@ class SensorProcessService : Service() {
 
         // Set ut callbacks for activity detection
         activityDetection()
+
+        getBluetoothDevices()
+
+        var microphonePluggedIn = false
+
+        broadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent) {
+                val action = intent.action
+                val int: Int
+                if (Intent.ACTION_HEADSET_PLUG == action) {
+                    int = intent.getIntExtra("state", -1)
+                    if (int == 0) {
+                        microphonePluggedIn = false
+                        Toast.makeText(
+                            applicationContext,
+                            "Headphones not plugged in",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    if (int == 1) {
+                        microphonePluggedIn = true
+                        Toast.makeText(
+                            applicationContext,
+                            "Headphones plugged in",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
+
+        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
+        registerReceiver(broadcastReceiver, receiverFilter)
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -266,6 +303,18 @@ class SensorProcessService : Service() {
             Log.d("Orientation", "Device is lying")
         } else {
             Log.d("Orientation", "Device is staying")
+        }
+    }
+
+    private fun getBluetoothDevices() {
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        val pairedDevices = bluetoothAdapter.bondedDevices
+
+        val s: MutableList<String> = ArrayList()
+        for (bt in pairedDevices) s.add(bt.name)
+
+        if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED == bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)) {
+            Log.d("BT", "mame headset")
         }
     }
 }

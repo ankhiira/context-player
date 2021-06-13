@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
-import com.gabchmel.sensorprocessor.SensorReader
+import com.gabchmel.sensorprocessor.SensorLister
 
 class SensorListFragment : Fragment() {
 
@@ -26,7 +26,7 @@ class SensorListFragment : Fragment() {
             setContent {
                 JetnewsTheme {
 
-                    val sensorReader = SensorReader(context)
+                    val sensorReader = SensorLister(context)
 
                     val materialYel400 = MaterialTheme.colors.onPrimary
 

@@ -15,6 +15,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
@@ -60,6 +61,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private lateinit var notification: Notification
 
     private lateinit var timer: Timer
+
+    private lateinit var broadcastReceiver: BroadcastReceiver
 
     private val binder = MediaBinder()
 
@@ -112,7 +115,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             song.URI == uri
         }
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
-    val currentSong = currSongIndex.filterNotNull().map { index ->
+    private val currentSong = currSongIndex.filterNotNull().map { index ->
         songs.value.getOrNull(index)
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
     val nextSong = currSongIndex.filterNotNull().map { index ->
@@ -145,17 +148,35 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             Context.BIND_AUTO_CREATE
         )
 
+        broadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent) {
+                val action = intent.action
+                if (Intent.ACTION_HEADSET_PLUG == action) {
+                    val headphonesPluggedIn = intent.getIntExtra("state", -1)
+                    if (headphonesPluggedIn == 0) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Headphones not plugged in",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else if (headphonesPluggedIn == 1) {
+                        player.setVolume(0.5f,0.5f)
+                        Toast.makeText(
+                            applicationContext,
+                            "Headphones plugged in",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
+
+        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
+        registerReceiver(broadcastReceiver, receiverFilter)
+
         // Create and initialize MediaSessionCompat
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
             .apply {
-
-                // deprecated
-                // Support BT headphones
-//                setFlags(
-//                    MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-//                            // support Android Wear, Android Auto
-//                            or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-//                )
 
                 // Set of initial PlaybackState set to ACTION_PLAY, so the media buttons can start the player
                 // (current operational state of the player - transport state - playing, paused)
@@ -199,6 +220,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                             audioFocusRequest =
                                 AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
                                     setOnAudioFocusChangeListener(afChangeListener)
+                                    // Set audio stream type to music
                                     setAudioAttributes(AudioAttributes.Builder().run {
                                         setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                                         build()

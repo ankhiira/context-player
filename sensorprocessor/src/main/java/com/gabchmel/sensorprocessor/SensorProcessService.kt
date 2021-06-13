@@ -23,11 +23,15 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
+import com.gabchmel.sensorprocessor.InputProcessHelper.inputProcessHelper
+import com.gabchmel.sensorprocessor.InputProcessHelper.processInputCSV
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
 
@@ -51,9 +55,17 @@ class SensorProcessService : Service() {
 
     private var lightSensorValue : Float = 0.0f
 
-    private var orientSensorAzimuth_z_axis : Float = 0.0f
-    private var orientSensorPitch_x_axis : Float = 0.0f
-    private var orientSensorRoll_y_axis : Float = 0.0f
+    private var orientSensorAzimuthZAxis : Float = 0.0f
+    private var orientSensorPitchXAxis : Float = 0.0f
+    private var orientSensorRollYAxis : Float = 0.0f
+
+    private var deviceLying = 0.0f
+
+    private var BTdeviceConnected = 0.0f
+
+    var headphonesPluggedIn = 0
+
+    private val predictionModel = PredictionModelBuiltIn(this)
 
     // binder given to clients
     private val binder = LocalBinder()
@@ -81,18 +93,17 @@ class SensorProcessService : Service() {
     private var sensorEventListenerOrientation = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
             if (event != null) {
-                orientSensorAzimuth_z_axis = event.values[0]
-                orientSensorPitch_x_axis = event.values[1]
-                orientSensorRoll_y_axis = event.values[2]
+                orientSensorAzimuthZAxis = event.values[0]
+                orientSensorPitchXAxis = event.values[1]
+                orientSensorRollYAxis = event.values[2]
 
-                Log.d("Orientation", "orientation:$orientSensorAzimuth_z_axis," +
-                        "$orientSensorPitch_x_axis, $orientSensorRoll_y_axis")
+                Log.d("Orientation", "orientation:$orientSensorAzimuthZAxis," +
+                        "$orientSensorPitchXAxis, $orientSensorRollYAxis")
             }
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         }
-
     }
 
     override fun onCreate() {
@@ -132,38 +143,8 @@ class SensorProcessService : Service() {
         // Set ut callbacks for activity detection
         activityDetection()
 
+        // Check if the BT device is connected
         getBluetoothDevices()
-
-        var microphonePluggedIn = false
-
-        broadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent) {
-                val action = intent.action
-                val int: Int
-                if (Intent.ACTION_HEADSET_PLUG == action) {
-                    int = intent.getIntExtra("state", -1)
-                    if (int == 0) {
-                        microphonePluggedIn = false
-                        Toast.makeText(
-                            applicationContext,
-                            "Headphones not plugged in",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                    if (int == 1) {
-                        microphonePluggedIn = true
-                        Toast.makeText(
-                            applicationContext,
-                            "Headphones plugged in",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
-        }
-
-        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
-        registerReceiver(broadcastReceiver, receiverFilter)
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -178,6 +159,12 @@ class SensorProcessService : Service() {
 
         sensorManager.registerListener(sensorEventListenerOrientation, mySensors[0],
         SensorManager.SENSOR_DELAY_NORMAL)
+
+        headphonesPluggedInDetection()
+
+        createModel()
+
+        triggerPrediction()
 
         return binder
     }
@@ -197,22 +184,73 @@ class SensorProcessService : Service() {
 
         // Get current time
         val currentTime = Calendar.getInstance().time
-        Log.d("Orientation", "write")
+        val dateFormatter = SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault())
+        val date = dateFormatter.format(currentTime)
+
+        Log.d("Sensor", "write")
 
         processOrientation()
+
+        val latitude: Double
+        val longitude: Double
+
+        if (location.value == null) {
+            latitude = 0.0
+            longitude = 0.0
+
+        } else {
+            latitude = location.value?.latitude!!
+            longitude = location.value?.longitude!!
+        }
 
         // TODO Make check that we have a value - maybe we don't have to have value idk
         try {
             // Write to csv file
             csvFile.appendText(
-                ID + "," +
-                currentTime.toString() + ","
-                + location.value?.longitude.toString() + ","
-                + location.value?.latitude.toString() + "\n"
+            ID + ","
+                +date + ","
+                + longitude.toString() + ","
+                + latitude.toString() + ","
+                + currentState + ","
+                + lightSensorValue + ","
+                + deviceLying + ","
+                + BTdeviceConnected + ","
+                + headphonesPluggedIn.toFloat() + "\n"
             )
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
         }
+    }
+
+    private fun getSensorData(): SensorData {
+
+        val currentTime = Calendar.getInstance().time
+
+        return SensorData(
+            currentTime,
+            location.value?.longitude,
+            location.value?.latitude,
+            currentState,
+            lightSensorValue,
+            deviceLying,
+            BTdeviceConnected,
+            headphonesPluggedIn.toFloat()
+        )
+    }
+
+    private fun triggerPrediction() {
+
+        val input = inputProcessHelper(getSensorData())
+        predictionModel.predict(input)
+    }
+
+    private fun createModel() {
+
+//        convertCSVtoarrf(this)
+
+        processInputCSV(this)
+
+        predictionModel.createModel()
     }
 
     private fun activityDetection() {
@@ -299,10 +337,12 @@ class SensorProcessService : Service() {
 
     private fun processOrientation() {
         // Get the range of acceptable values for lying device - -1.58 is exactly lying
-        if (abs(orientSensorAzimuth_z_axis) in 1.4f..1.7f) {
+        deviceLying = if (abs(orientSensorAzimuthZAxis) in 1.4f..1.7f) {
             Log.d("Orientation", "Device is lying")
+            1.0f
         } else {
             Log.d("Orientation", "Device is staying")
+            0.0f
         }
     }
 
@@ -313,8 +353,38 @@ class SensorProcessService : Service() {
         val s: MutableList<String> = ArrayList()
         for (bt in pairedDevices) s.add(bt.name)
 
-        if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED == bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)) {
+        BTdeviceConnected = if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED == bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)) {
             Log.d("BT", "mame headset")
+            1.0f
+        } else {
+            0.0f
         }
+    }
+
+    private fun headphonesPluggedInDetection() {
+        broadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent) {
+                val action = intent.action
+                if (Intent.ACTION_HEADSET_PLUG == action) {
+                    headphonesPluggedIn = intent.getIntExtra("state", -1)
+                    if (headphonesPluggedIn == 0) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Headphones not plugged in",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else if (headphonesPluggedIn == 1) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Headphones plugged in",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
+
+        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
+        registerReceiver(broadcastReceiver, receiverFilter)
     }
 }

@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.gabchmel.predicitonmodule.PredictionModel
 import com.gabchmel.sensorprocessor.SensorProcessService
 
 
@@ -37,8 +36,27 @@ class MainActivity : AppCompatActivity() {
             startService(intent)
         }
 
-        val predictionModel = PredictionModel(this)
-        predictionModel.predict()
+        val input = floatArrayOf(0.781831f,0.265953f,0.410050f,-0.872427f,-0.522189f,0.62349f,0.85283f)
+
+//        val predictionModel = PredictionModel(this)
+//        val predictionModel = PredictionModelBuiltIn(this)
+
+//        val songToPlay = predictionModel.predict(input)
+
+//        // Recreate notification
+//        val notification: Notification = NotificationManager.createNotification(
+//            baseContext,
+//            mediaSession.sessionToken,
+//            metadataRetriever.getTitle() ?: "unknown",
+//            metadataRetriever.getArtist() ?: "unknown",
+//            metadataRetriever.getAlbumArt() ?: BitmapFactory.decodeResource(
+//                resources,
+//                R.raw.album_cover_clipart
+//            ),
+//            isPlaying
+//        )
+
+//        NotificationManager.displayNotification(baseContext, notification)
     }
 }
 

@@ -35,6 +35,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.gabchmel.predicitonmodule.PredictionModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,6 +68,36 @@ class SongListFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val songs by viewModel.songs.collectAsState()
+
+                val input = floatArrayOf(
+                    0.781831f,
+                    0.265953f,
+                    0.410050f,
+                    -0.872427f,
+                    -0.522189f,
+                    0.62349f,
+                    0.85283f
+                )
+
+                val predictionModel = PredictionModel(requireContext())
+                val songToPlay = predictionModel.predict(input)
+
+//                // TODO bude vzdy not null?
+//                lateinit var songURI: Uri
+//
+//                for (song in songs!!) {
+//                    if ("$song.title,$song.author".hashCode().toUInt() == songToPlay) {
+//                        songURI = song.URI
+//                    }
+//                }
+//
+//                val play = true
+//                findNavController().navigate(
+//                    SongListFragmentDirections.actionSongListFragmentToHomeFragment(
+//                        songURI,
+//                        play
+//                    )
+//                )
 
                 JetnewsTheme {
 //                    fun ScaffoldDemo() {

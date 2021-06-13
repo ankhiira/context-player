@@ -6,9 +6,9 @@ import org.pmml4s.model.Model
 class PredictionModel(val context: Context) {
 
     // Function to predict song on the given input data
-    fun predict() {
+    fun predict(input : FloatArray) : UInt? {
         // Input data for the model
-        val input = floatArrayOf(0.781831f,0.265953f,0.410050f,-0.872427f,-0.522189f,0.62349f,0.85283f)
+//        val input = floatArrayOf(0.781831f,0.265953f,0.410050f,-0.872427f,-0.522189f,0.62349f,0.85283f)
         // TODO Maybe will do it in this formal if it works
         val inputMap = hashMapOf("day_of_week_sin" to -0.522189f,
                                                     "coord_z" to 0.85283f,
@@ -41,5 +41,7 @@ class PredictionModel(val context: Context) {
         // Print out the prediction result
         println(labelsZip)
         println(maximum)
+
+        return maximum?.value?.toUInt()
     }
 }

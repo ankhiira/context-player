@@ -184,7 +184,7 @@ class SensorProcessService : Service() {
 
         // Get current time
         val currentTime = Calendar.getInstance().time
-        val dateFormatter = SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault())
+        val dateFormatter = SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.getDefault())
         val date = dateFormatter.format(currentTime)
 
         Log.d("Sensor", "write")
@@ -241,7 +241,7 @@ class SensorProcessService : Service() {
     private fun triggerPrediction() {
 
         val input = inputProcessHelper(getSensorData())
-        predictionModel.predict(input)
+        predictionModel.predict()
     }
 
     private fun createModel() {

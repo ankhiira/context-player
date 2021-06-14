@@ -35,7 +35,7 @@ class PredictionModel(val context: Context) {
 
         // Zip output values with their labels
         val zipMap = outputNames.zip(result).toMap()
-        val maximum = zipMap.maxBy { it.value }
+        val maximum = zipMap.maxByOrNull { it.value }
         val labelsZip = outputNames.zip(result).toMap().toString()
 
         // Print out the prediction result

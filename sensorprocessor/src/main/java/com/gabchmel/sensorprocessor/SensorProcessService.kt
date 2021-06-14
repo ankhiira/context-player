@@ -5,10 +5,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothProfile
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -17,7 +14,6 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -25,7 +21,6 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.InputProcessHelper.inputProcessHelper
-import com.gabchmel.sensorprocessor.InputProcessHelper.processInputCSV
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +28,7 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 
@@ -67,13 +63,14 @@ class SensorProcessService : Service() {
 
     private val predictionModel = PredictionModelBuiltIn(this)
 
-    // binder given to clients
-    private val binder = LocalBinder()
+    private var classNames = arrayListOf<String>()
 
-    // class used for the client binder
-    inner class LocalBinder : Binder() {
-        // Returns instance of SensorProcessService so clients can call public methods
-        fun getService()= this@SensorProcessService
+    private val _prediction = MutableStateFlow<String?>(null)
+    val prediction: StateFlow<String?> = _prediction
+
+    // binder given to clients
+    private val binder = object : LocalBinder<SensorProcessService>() {
+        override fun getService() = this@SensorProcessService
     }
 
     // Sensor event listener for light sensor
@@ -194,10 +191,14 @@ class SensorProcessService : Service() {
         val latitude: Double
         val longitude: Double
 
+//        if (location.value == null) {
+//            locationManager.requestLocationUpdates(getProviderName(), 0, 0, this)
+//        }
+
+        // If the location is null, set the value to 0.0
         if (location.value == null) {
             latitude = 0.0
             longitude = 0.0
-
         } else {
             latitude = location.value?.latitude!!
             longitude = location.value?.longitude!!
@@ -238,19 +239,23 @@ class SensorProcessService : Service() {
         )
     }
 
-    private fun triggerPrediction() {
+    fun createModel() {
 
-        val input = inputProcessHelper(getSensorData())
-        predictionModel.predict()
-    }
-
-    private fun createModel() {
-
-//        convertCSVtoarrf(this)
-
-        processInputCSV(this)
+        // TODO make for other API also - from API 21
+        // Process input CSV file and save class names into ArrayList<String>
+//        classNames = processInputCSV(this)
 
         predictionModel.createModel()
+    }
+
+    fun triggerPrediction() {
+
+        Log.d("prediciton", "trigger prediction")
+
+        // Get the processed input values
+        val input = inputProcessHelper(getSensorData())
+
+        _prediction.value = predictionModel.predict(input, classNames)
     }
 
     private fun activityDetection() {
@@ -347,17 +352,29 @@ class SensorProcessService : Service() {
     }
 
     private fun getBluetoothDevices() {
-        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        val pairedDevices = bluetoothAdapter.bondedDevices
 
-        val s: MutableList<String> = ArrayList()
-        for (bt in pairedDevices) s.add(bt.name)
+        // Check if the device supports bluetooth
+        val pm: PackageManager = this.packageManager
+        val hasBluetooth = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
 
-        BTdeviceConnected = if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED == bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)) {
-            Log.d("BT", "mame headset")
-            1.0f
-        } else {
-            0.0f
+        if(hasBluetooth) {
+
+            val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            val pairedDevices = bluetoothAdapter.bondedDevices
+
+            val s: MutableList<String> = ArrayList()
+            for (bt in pairedDevices) s.add(bt.name)
+
+            BTdeviceConnected =
+                if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED == bluetoothAdapter.getProfileConnectionState(
+                        BluetoothProfile.HEADSET
+                    )
+                ) {
+                    Log.d("BT", "mame headset")
+                    1.0f
+                } else {
+                    0.0f
+                }
         }
     }
 

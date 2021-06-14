@@ -11,6 +11,7 @@ import com.gabchmel.sensorprocessor.SensorProcessService
 
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -36,11 +37,13 @@ class MainActivity : AppCompatActivity() {
             startService(intent)
         }
 
+        Intent(this@MainActivity, AutoPlaySongService::class.java).also { intent ->
+            startService(intent)
+        }
+
         val input = floatArrayOf(0.781831f,0.265953f,0.410050f,-0.872427f,-0.522189f,0.62349f,0.85283f)
 
-//        val predictionModel = PredictionModel(this)
 //        val predictionModel = PredictionModelBuiltIn(this)
-
 //        val songToPlay = predictionModel.predict(input)
 
 //        // Recreate notification

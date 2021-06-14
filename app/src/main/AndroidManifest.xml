@@ -61,6 +61,12 @@
 
         </service>
 
+        <service
+            android:name="com.gabchmel.contextmusicplayer.AutoPlaySongService"
+            android:exported="false"
+            tools:ignore="Instantiatable">
+        </service>
+
         <receiver android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="true">
             <intent-filter>

@@ -22,6 +22,7 @@ import androidx.media.session.MediaButtonReceiver
 import com.gabchmel.contextmusicplayer.extensions.*
 import com.gabchmel.contextmusicplayer.playlistScreen.Song
 import com.gabchmel.contextmusicplayer.playlistScreen.SongScanner
+import com.gabchmel.sensorprocessor.LocalBinder
 import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
@@ -78,7 +79,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
-            val binder = service as SensorProcessService.LocalBinder
+            val binder = service as LocalBinder<SensorProcessService>
             sensorProcessService.value = binder.getService()
         }
 
@@ -337,6 +338,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         // Every second update state of the playback
         timer = fixedRateTimer(period = 1000) {
             updateState()
+        }
+
+        val prediction = sensorProcessService.value?.prediction?.value
+
+        if(prediction != null) {
+            for (song in songs.value) {
+                if("$song.title,$song.author".hashCode().toUInt().toString() == prediction) {
+
+                }
+            }
         }
 
         // Every 10 second write to file sensor measurements with the song ID

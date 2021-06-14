@@ -64,12 +64,13 @@ object InputProcessHelper {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun processInputCSV(context: Context) {
+    fun processInputCSV(context: Context): ArrayList<String> {
 
         val inputFile = File(context.filesDir, "data.csv")
-
         val csvFile = File(context.filesDir, "convertedData.csv")
+        val classNames = arrayListOf<String>()
 
+        // TODO else
         if (inputFile.exists()) {
             csvReader().open(inputFile) {
 
@@ -88,6 +89,10 @@ object InputProcessHelper {
                         Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant())
                     } else {
                         formatter.parse(row[1])!!
+                    }
+
+                    if(!classNames.contains(row[0])) {
+                        classNames.add(row[0])
                     }
 
                     row[0] to SensorData(
@@ -112,17 +117,7 @@ object InputProcessHelper {
                     }
                 }
             }
-
-//        val reader = CSVReaderHeaderAware(FileReader(inputFile))
-//        val resultList = mutableListOf<Map<String, String>>()
-//        var line = reader.readMap()
-//        while (line != null) {
-//            resultList.add(line)
-//            line = reader.readMap()
-//        }
-//        println(resultList)
-//        // Line 2, by column name
-//        println(resultList[1]["my column name"])
         }
+        return classNames
     }
 }

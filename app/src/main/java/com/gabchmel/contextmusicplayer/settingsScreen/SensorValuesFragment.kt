@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.gabchmel.sensorprocessor.LocalBinder
 import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -31,7 +32,7 @@ class SensorValuesFragment : Fragment() {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
-            val binder = service as SensorProcessService.LocalBinder
+            val binder = service as LocalBinder<SensorProcessService>
             sensorProcessService.value = binder.getService()
         }
 
@@ -73,9 +74,8 @@ class SensorValuesFragment : Fragment() {
                             Column {
 
                                 sensorProcessService?.let { sensorProcessService ->
-                                    val location by sensorProcessService.location.collectAsState(
-                                        null
-                                    )
+                                    val location by
+                                    sensorProcessService.location.collectAsState(null)
                                     val time by sensorProcessService.time.collectAsState(null)
 
                                     Column {

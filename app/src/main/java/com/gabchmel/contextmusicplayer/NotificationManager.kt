@@ -21,7 +21,7 @@ object NotificationManager {
 
     fun createNotification(
         context: Context,
-        sessionToken: MediaSessionCompat.Token,
+        sessionToken: MediaSessionCompat.Token?,
         title: String,
         artist: String,
         albumArt: Bitmap,

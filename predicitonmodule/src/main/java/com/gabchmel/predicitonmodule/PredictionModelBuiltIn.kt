@@ -21,7 +21,6 @@ import java.io.File
 class PredictionModelBuiltIn(context: Context) {
 
     val context = context
-
     lateinit var forest: RandomForest
 
     // input arff file
@@ -122,10 +121,9 @@ class PredictionModelBuiltIn(context: Context) {
 
         val classes: ArrayList<String?> = object : ArrayList<String?>() {
             init {
-                add("class-1") // cls nr 1
-                add("class-2") // cls nr 2
-                add("class-3") // cls nr 3
-                add("class-4") // cls nr 3
+                add("2046003820") // cls nr 1
+                add("343331343") // cls nr 2
+                add("4027449371") // cls nr 3
             }
         }
 
@@ -172,7 +170,7 @@ class PredictionModelBuiltIn(context: Context) {
             val result: Double = forest.classifyInstance(newInstance)
             val className = classes[result.toInt()]
             val msg =
-                "Nr: " + "01" + ", predicted: " + className + ", actual: " + "label"
+                "Nr: " + "itemNumber" + ", predicted: " + className + ", actual: " + "2046003820"
             Log.d("WEKA_TEST", msg)
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {

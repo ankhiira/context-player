@@ -14,6 +14,9 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -159,6 +162,10 @@ class SensorProcessService : Service() {
         SensorManager.SENSOR_DELAY_NORMAL)
 
         headphonesPluggedInDetection()
+
+        wifiConnection()
+
+        isOnline(this)
 
         createModel()
 
@@ -404,5 +411,35 @@ class SensorProcessService : Service() {
 
         val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
         registerReceiver(broadcastReceiver, receiverFilter)
+    }
+
+    private fun wifiConnection(): String? {
+        val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
+        val wifiInfo = wifiManager.connectionInfo
+
+        // TODO hash ssid to ensure safety
+        Log.d("ssid", "SSID:${wifiInfo.ssid}")
+
+        return wifiInfo.ssid
+    }
+
+    private fun isOnline(context: Context): String {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                return "TRANSPORT_CELLULAR"
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                return "TRANSPORT_WIFI"
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                return "TRANSPORT_ETHERNET"
+            }
+        }
+        return "NONE"
     }
 }

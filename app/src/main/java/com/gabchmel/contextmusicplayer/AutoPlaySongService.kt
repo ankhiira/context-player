@@ -101,7 +101,6 @@ class AutoPlaySongService : LifecycleService() {
                 }
 
                 service.complete(MediaPlaybackService.getInstance(this@AutoPlaySongService))
-
             }
         }
 

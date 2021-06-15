@@ -39,9 +39,9 @@ class PredictionModelBuiltIn(val context: Context) {
     }
 
     // Function to create and evaluate model
-    fun createModel() {
+    fun createModel(classNames: ArrayList<String>) {
 
-        convertCSVtoarrf(context)
+        convertCSVtoarrf(context, classNames)
 
         lateinit var trainingDataSet: Instances
         if (File(context.filesDir, file).exists()) {
@@ -133,7 +133,7 @@ class PredictionModelBuiltIn(val context: Context) {
         return className
     }
 
-    private fun convertCSVtoarrf(context: Context) {
+    private fun convertCSVtoarrf(context: Context, classNames: ArrayList<String>) {
 
         // load the CSV file
         val load = CSVLoader()
@@ -153,10 +153,15 @@ class PredictionModelBuiltIn(val context: Context) {
             val file = File(context.filesDir, "arffData.arff")
             val fileOut = File(context.filesDir, "arffData_converted.arff")
             var text = file.readText()
-            // TODO get list of nominal classes from input to file
+
+            val classNamesString = classNames.joinToString(separator = ",") { className ->
+                className
+            }
+
+            // Replace attribute description in arff file
             text = text.replace(
                 "@attribute class numeric", "@attribute class {" +
-                        "2046003820,343331343,4027449371" + "}"
+                        classNamesString + "}"
             )
             fileOut.writeText(text)
         }

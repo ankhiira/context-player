@@ -21,6 +21,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.InputProcessHelper.inputProcessHelper
+import com.gabchmel.sensorprocessor.InputProcessHelper.processInputCSV
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -241,11 +242,11 @@ class SensorProcessService : Service() {
 
     fun createModel() {
 
-        // TODO make for other API also - from API 21
+        // TODO make for other API also - I support from API 21
         // Process input CSV file and save class names into ArrayList<String>
-//        classNames = processInputCSV(this)
+        classNames = processInputCSV(this)
 
-        predictionModel.createModel()
+        predictionModel.createModel(classNames)
     }
 
     fun triggerPrediction() {

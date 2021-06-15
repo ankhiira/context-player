@@ -74,24 +74,26 @@ object InputProcessHelper {
         if (inputFile.exists()) {
             csvReader().open(inputFile) {
 
-                // TODO check date formats
-                val formatter = SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.ENGLISH)
-
-                val format=
-                    DateTimeFormatter.ofPattern("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.ENGLISH)
-
                 readAllAsSequence().onEach {
                     println(it) //[a, b, c]
                 }.map { row ->
 
-                    val dateNew = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val dateNew = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        val format =
+                            DateTimeFormatter.ofPattern(
+                                "E MMM dd HH:mm:ss ZZZZ yyyy",
+                                Locale.ENGLISH
+                            )
                         val localDate = LocalDateTime.parse(row[1], format)
                         Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant())
                     } else {
+                        // TODO check date formats
+                        val formatter =
+                            SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.ENGLISH)
                         formatter.parse(row[1])!!
                     }
 
-                    if(!classNames.contains(row[0])) {
+                    if (!classNames.contains(row[0])) {
                         classNames.add(row[0])
                     }
 
@@ -101,9 +103,9 @@ object InputProcessHelper {
                         row[8].toFloat()
                     )
                 }.map {
-                   it.first to inputProcessHelper(it.second)
+                    it.first to inputProcessHelper(it.second)
                 }.forEach {
-                    if(csvFile.exists()) {
+                    if (csvFile.exists()) {
                         try {
                             val data = it.second.joinToString(separator = ",", postfix = "\n")
                             // Write to csv file
@@ -112,8 +114,10 @@ object InputProcessHelper {
                             Log.e("Err", "Couldn't write to file", e)
                         }
                     } else {
-                        csvFile.appendText("class,sinTime,cosTime,dayOfWeekSin,"+
-                                "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n")
+                        csvFile.appendText(
+                            "class,sinTime,cosTime,dayOfWeekSin," +
+                                    "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
+                        )
                     }
                 }
             }

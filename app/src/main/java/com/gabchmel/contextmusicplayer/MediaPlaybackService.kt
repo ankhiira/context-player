@@ -301,9 +301,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                         // Take the service out of foreground, keep the notification
                         stopForeground(false)
-
-                        // unregister BECOME_NOISY BroadcastReceiver
-                        unregisterReceiver(myNoisyAudioStreamReceiver)
                     }
 
                     override fun onSeekTo(pos: Long) {
@@ -444,6 +441,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     }
 
     override fun onDestroy() {
+
+        // unregister BECOME_NOISY BroadcastReceiver
+        unregisterReceiver(myNoisyAudioStreamReceiver)
 
         player.stop()
         player.seekTo(0)

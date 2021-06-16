@@ -17,6 +17,7 @@ import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -46,18 +47,18 @@ class SensorProcessService : Service() {
     private val _time = MutableStateFlow<Date?>(null)
     val time: StateFlow<Date?> = _time
 
-    private lateinit var csvFile : File
+    private lateinit var csvFile: File
 
     private lateinit var pendingIntent: PendingIntent
     private lateinit var broadcastReceiver: BroadcastReceiver
 
     private var currentState = "NONE"
 
-    private var lightSensorValue : Float = 0.0f
+    private var lightSensorValue: Float = 0.0f
 
-    private var orientSensorAzimuthZAxis : Float = 0.0f
-    private var orientSensorPitchXAxis : Float = 0.0f
-    private var orientSensorRollYAxis : Float = 0.0f
+    private var orientSensorAzimuthZAxis: Float = 0.0f
+    private var orientSensorPitchXAxis: Float = 0.0f
+    private var orientSensorRollYAxis: Float = 0.0f
 
     private var deviceLying = 0.0f
 
@@ -78,7 +79,7 @@ class SensorProcessService : Service() {
     }
 
     // Sensor event listener for light sensor
-    private var sensorEventListenerLight = object: SensorEventListener {
+    private var sensorEventListenerLight = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
             if (event != null) {
                 // Get the value in Lux
@@ -98,8 +99,10 @@ class SensorProcessService : Service() {
                 orientSensorPitchXAxis = event.values[1]
                 orientSensorRollYAxis = event.values[2]
 
-                Log.d("Orientation", "orientation:$orientSensorAzimuthZAxis," +
-                        "$orientSensorPitchXAxis, $orientSensorRollYAxis")
+                Log.d(
+                    "Orientation", "orientation:$orientSensorAzimuthZAxis," +
+                            "$orientSensorPitchXAxis, $orientSensorRollYAxis"
+                )
             }
         }
 
@@ -128,7 +131,7 @@ class SensorProcessService : Service() {
                 Manifest.permission.ACTIVITY_RECOGNITION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.e("perm","permission not granted")
+            Log.e("perm", "permission not granted")
         }
 
         locationManager?.requestLocationUpdates(
@@ -150,16 +153,20 @@ class SensorProcessService : Service() {
 
     override fun onBind(intent: Intent): IBinder {
 
-        val sensorManager= this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val sensorLight = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
-        sensorManager.registerListener(sensorEventListenerLight, sensorLight,
-            SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(
+            sensorEventListenerLight, sensorLight,
+            SensorManager.SENSOR_DELAY_NORMAL
+        )
 
         val mySensors: List<Sensor> = sensorManager.getSensorList(Sensor.TYPE_ORIENTATION)
 
-        sensorManager.registerListener(sensorEventListenerOrientation, mySensors[0],
-        SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(
+            sensorEventListenerOrientation, mySensors[0],
+            SensorManager.SENSOR_DELAY_NORMAL
+        )
 
         headphonesPluggedInDetection()
 
@@ -167,8 +174,17 @@ class SensorProcessService : Service() {
 
         isOnline(this)
 
-        createModel()
+        sensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_PRESSURE,
+            "Barometer"
+        )
 
+        sensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_AMBIENT_TEMPERATURE,
+            "Temperature"
+        )
+
+        createModel()
         triggerPrediction()
 
         return binder
@@ -185,7 +201,7 @@ class SensorProcessService : Service() {
         override fun onProviderDisabled(provider: String) {}
     }
 
-    fun writeToFile(ID : String) {
+    fun writeToFile(ID: String) {
 
         // Get current time
         val currentTime = Calendar.getInstance().time
@@ -216,15 +232,15 @@ class SensorProcessService : Service() {
         try {
             // Write to csv file
             csvFile.appendText(
-            ID + ","
-                +date + ","
-                + longitude.toString() + ","
-                + latitude.toString() + ","
-                + currentState + ","
-                + lightSensorValue + ","
-                + deviceLying + ","
-                + BTdeviceConnected + ","
-                + headphonesPluggedIn.toFloat() + "\n"
+                ID + ","
+                        + date + ","
+                        + longitude.toString() + ","
+                        + latitude.toString() + ","
+                        + currentState + ","
+                        + lightSensorValue + ","
+                        + deviceLying + ","
+                        + BTdeviceConnected + ","
+                        + headphonesPluggedIn.toFloat() + "\n"
             )
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
@@ -249,7 +265,6 @@ class SensorProcessService : Service() {
 
     fun createModel() {
 
-        // TODO make for other API also - I support from API 21
         // Process input CSV file and save class names into ArrayList<String>
         classNames = processInputCSV(this)
 
@@ -279,57 +294,13 @@ class SensorProcessService : Service() {
 //            }
 //        }
 
-        val transitions = mutableListOf<ActivityTransition>()
-
-        transitions +=
-            ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.IN_VEHICLE)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-                .build()
-
-        transitions +=
-            ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.IN_VEHICLE)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
-                .build()
-
-        transitions +=
-            ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.ON_BICYCLE)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-                .build()
-
-        transitions +=
-            ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.ON_FOOT)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-                .build()
-
-        transitions +=
-            ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.STILL)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-                .build()
-
-        transitions +=
-            ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.WALKING)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-                .build()
-
-        transitions +=
-            ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.WALKING)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
-                .build()
-
-        val request = ActivityTransitionRequest(transitions)
+        val request = ActivityTransitionRequest(getTransitions())
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
         pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         // myPendingIntent is the instance of PendingIntent where the app receives callbacks.
-        val task= ActivityRecognition.getClient(this)
+        val task = ActivityRecognition.getClient(this)
             .requestActivityTransitionUpdates(request, pendingIntent)
 
         // used: https://heartbeat.fritz.ai/detect-users-activity-in-android-using-activity-transition-api-f718c844efb2
@@ -340,11 +311,14 @@ class SensorProcessService : Service() {
 
         task.addOnFailureListener { e: Exception ->
             // Handle error
-            Log.d("ActivityRecognition", "Transitions Api could NOT be registered ${e.localizedMessage}")
+            Log.d(
+                "ActivityRecognition",
+                "Transitions Api could NOT be registered ${e.localizedMessage}"
+            )
         }
     }
 
-    fun writeActivity(currentActivity : String) {
+    fun writeActivity(currentActivity: String) {
         currentState = currentActivity
     }
 
@@ -365,7 +339,7 @@ class SensorProcessService : Service() {
         val pm: PackageManager = this.packageManager
         val hasBluetooth = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
 
-        if(hasBluetooth) {
+        if (hasBluetooth) {
 
             val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             val pairedDevices = bluetoothAdapter.bondedDevices
@@ -413,33 +387,83 @@ class SensorProcessService : Service() {
         registerReceiver(broadcastReceiver, receiverFilter)
     }
 
-    private fun wifiConnection(): String? {
+    private fun wifiConnection(): String {
         val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.connectionInfo
 
-        // TODO hash ssid to ensure safety
-        Log.d("ssid", "SSID:${wifiInfo.ssid}")
+        Log.d("ssid", "SSID:${wifiInfo.ssid}, hashCode:${wifiInfo.ssid.hashCode()}")
 
-        return wifiInfo.ssid
+        return wifiInfo.ssid.hashCode().toString()
     }
 
     private fun isOnline(context: Context): String {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        val capabilities: NetworkCapabilities?
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        } else {
+            return "NONE"
+        }
         if (capabilities != null) {
-            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                return "TRANSPORT_CELLULAR"
-            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-                return "TRANSPORT_WIFI"
-            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
-                return "TRANSPORT_ETHERNET"
+            when {
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    return "TRANSPORT_CELLULAR"
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return "TRANSPORT_WIFI"
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    return "TRANSPORT_ETHERNET"
+                }
             }
         }
         return "NONE"
+    }
+
+    private fun barometerSensorReader() {
+        // Identify barometer sensor
+        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        val pressureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
+
+        val sensorEventListener: SensorEventListener = object : SensorEventListener {
+            override fun onSensorChanged(sensorEvent: SensorEvent) {
+                val values = sensorEvent.values
+                Log.d("barometer", "Barometer value:${values[0]}")
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor, i: Int) {}
+        }
+
+        sensorManager.registerListener(
+            sensorEventListener,
+            pressureSensor,
+            SensorManager.SENSOR_DELAY_NORMAL
+        )
+    }
+
+    private fun temperatureSensorReader() {
+        // Identify temperature sensor
+        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        val temperatureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
+
+        val sensorEventListener: SensorEventListener = object : SensorEventListener {
+            override fun onSensorChanged(sensorEvent: SensorEvent) {
+                val values = sensorEvent.values
+                Log.d("Temp", "Temp value:${values[0]}")
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor, i: Int) {}
+        }
+
+        sensorManager.registerListener(
+            sensorEventListener,
+            temperatureSensor,
+            SensorManager.SENSOR_DELAY_NORMAL
+        )
     }
 }

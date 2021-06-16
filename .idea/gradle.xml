@@ -14,7 +14,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/jaxb" />
             <option value="$PROJECT_DIR$/predicitonmodule" />
-            <option value="$PROJECT_DIR$/sensorprocessor" />
+            <option value="$PROJECT_DIR$/sensormodule" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

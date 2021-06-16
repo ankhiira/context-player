@@ -4,7 +4,7 @@
     <bytecodeTargetLevel target="1.7">
       <module name="ContextMusicPlayer.app" target="11" />
       <module name="ContextMusicPlayer.predicitonmodule" target="11" />
-      <module name="ContextMusicPlayer.sensorprocessor" target="11" />
+      <module name="ContextMusicPlayer.sensormodule" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

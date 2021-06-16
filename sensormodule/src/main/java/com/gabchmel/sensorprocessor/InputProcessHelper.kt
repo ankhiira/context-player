@@ -3,7 +3,6 @@ package com.gabchmel.sensorprocessor
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import java.io.File
 import java.io.IOException
@@ -63,7 +62,6 @@ object InputProcessHelper {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun processInputCSV(context: Context): ArrayList<String> {
 
         val inputFile = File(context.filesDir, "data.csv")

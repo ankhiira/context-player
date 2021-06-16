@@ -8,8 +8,6 @@ import android.bluetooth.BluetoothProfile
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
@@ -78,38 +76,6 @@ class SensorProcessService : Service() {
         override fun getService() = this@SensorProcessService
     }
 
-    // Sensor event listener for light sensor
-    private var sensorEventListenerLight = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent?) {
-            if (event != null) {
-                // Get the value in Lux
-                lightSensorValue = event.values[0]
-                Log.d("LightVal", "light:$lightSensorValue")
-            }
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        }
-    }
-
-    private var sensorEventListenerOrientation = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent?) {
-            if (event != null) {
-                orientSensorAzimuthZAxis = event.values[0]
-                orientSensorPitchXAxis = event.values[1]
-                orientSensorRollYAxis = event.values[2]
-
-                Log.d(
-                    "Orientation", "orientation:$orientSensorAzimuthZAxis," +
-                            "$orientSensorPitchXAxis, $orientSensorRollYAxis"
-                )
-            }
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        }
-    }
-
     override fun onCreate() {
         super.onCreate()
 
@@ -148,41 +114,37 @@ class SensorProcessService : Service() {
         activityDetection()
 
         // Check if the BT device is connected
-        getBluetoothDevices()
+        bluetoothDevicesConnection()
     }
 
     override fun onBind(intent: Intent): IBinder {
 
         val sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val sensorLight = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
-        sensorManager.registerListener(
-            sensorEventListenerLight, sensorLight,
-            SensorManager.SENSOR_DELAY_NORMAL
+        // Register listeners to sensor value changes
+        SensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_ORIENTATION,
+            "Orientation"
         )
 
-        val mySensors: List<Sensor> = sensorManager.getSensorList(Sensor.TYPE_ORIENTATION)
-
-        sensorManager.registerListener(
-            sensorEventListenerOrientation, mySensors[0],
-            SensorManager.SENSOR_DELAY_NORMAL
+        SensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_LIGHT,
+            "Ambient light"
         )
 
-        headphonesPluggedInDetection()
-
-        wifiConnection()
-
-        isOnline(this)
-
-        sensorManagerUtility.sensorReader(
+        SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_PRESSURE,
             "Barometer"
         )
 
-        sensorManagerUtility.sensorReader(
+        SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_AMBIENT_TEMPERATURE,
             "Temperature"
         )
+
+        headphonesPluggedInDetection()
+        wifiConnection()
+        internetConnectivity(this)
 
         createModel()
         triggerPrediction()
@@ -282,17 +244,6 @@ class SensorProcessService : Service() {
     }
 
     private fun activityDetection() {
-        //        broadcastReceiver = object : BroadcastReceiver() {
-//            override fun onReceive(context: Context, intent: Intent) {
-//                if (ActivityTransitionResult.hasResult(intent)) {
-//                    val result = ActivityTransitionResult.extractResult(intent)!!
-//                    for (event in result.transitionEvents) {
-//                        // chronological sequence of events....
-//                        Log.d("Action", "logging")
-//                    }
-//                }
-//            }
-//        }
 
         val request = ActivityTransitionRequest(getTransitions())
 
@@ -333,7 +284,7 @@ class SensorProcessService : Service() {
         }
     }
 
-    private fun getBluetoothDevices() {
+    private fun bluetoothDevicesConnection() {
 
         // Check if the device supports bluetooth
         val pm: PackageManager = this.packageManager
@@ -396,7 +347,7 @@ class SensorProcessService : Service() {
         return wifiInfo.ssid.hashCode().toString()
     }
 
-    private fun isOnline(context: Context): String {
+    private fun internetConnectivity(context: Context): String {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val capabilities: NetworkCapabilities?
@@ -423,47 +374,5 @@ class SensorProcessService : Service() {
             }
         }
         return "NONE"
-    }
-
-    private fun barometerSensorReader() {
-        // Identify barometer sensor
-        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        val pressureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
-
-        val sensorEventListener: SensorEventListener = object : SensorEventListener {
-            override fun onSensorChanged(sensorEvent: SensorEvent) {
-                val values = sensorEvent.values
-                Log.d("barometer", "Barometer value:${values[0]}")
-            }
-
-            override fun onAccuracyChanged(sensor: Sensor, i: Int) {}
-        }
-
-        sensorManager.registerListener(
-            sensorEventListener,
-            pressureSensor,
-            SensorManager.SENSOR_DELAY_NORMAL
-        )
-    }
-
-    private fun temperatureSensorReader() {
-        // Identify temperature sensor
-        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        val temperatureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
-
-        val sensorEventListener: SensorEventListener = object : SensorEventListener {
-            override fun onSensorChanged(sensorEvent: SensorEvent) {
-                val values = sensorEvent.values
-                Log.d("Temp", "Temp value:${values[0]}")
-            }
-
-            override fun onAccuracyChanged(sensor: Sensor, i: Int) {}
-        }
-
-        sensorManager.registerListener(
-            sensorEventListener,
-            temperatureSensor,
-            SensorManager.SENSOR_DELAY_NORMAL
-        )
     }
 }

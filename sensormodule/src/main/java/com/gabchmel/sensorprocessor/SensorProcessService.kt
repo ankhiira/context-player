@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.InputProcessHelper.inputProcessHelper
 import com.gabchmel.sensorprocessor.InputProcessHelper.processInputCSV
+import com.gabchmel.sensorprocessor.activityDetection.TransitionList
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +58,8 @@ class SensorProcessService : Service() {
     private var orientSensorAzimuthZAxis: Float = 0.0f
     private var orientSensorPitchXAxis: Float = 0.0f
     private var orientSensorRollYAxis: Float = 0.0f
+
+    private var barometerVal: Float = 0.0f
 
     private var deviceLying = 0.0f
 
@@ -115,6 +118,9 @@ class SensorProcessService : Service() {
 
         // Check if the BT device is connected
         bluetoothDevicesConnection()
+
+//        val receiverFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+//        registerReceiver(SensorReceiver(), receiverFilter)
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -122,27 +128,56 @@ class SensorProcessService : Service() {
         val sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         // Register listeners to sensor value changes
-        SensorManagerUtility.sensorReader(
+        val coorList = SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_ORIENTATION,
             "Orientation"
-        )
+        ) as MutableList<*>
 
-        SensorManagerUtility.sensorReader(
+//        orientSensorAzimuthZAxis = coorList[0] as Float
+//        orientSensorPitchXAxis = coorList[1] as Float
+//        orientSensorRollYAxis = coorList[2] as Float
+
+        lightSensorValue = SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_LIGHT,
             "Ambient light"
-        )
+        ) as Float
 
-        SensorManagerUtility.sensorReader(
+        barometerVal = SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_PRESSURE,
             "Barometer"
-        )
+        ) as Float
 
         SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_AMBIENT_TEMPERATURE,
             "Temperature"
         )
 
-        headphonesPluggedInDetection()
+//        SensorManagerUtility.sensorReader(
+//            sensorManager, Sensor.TYPE_PROXIMITY,
+//            "Proximity"
+//        )
+//
+//        SensorManagerUtility.sensorReader(
+//            sensorManager, Sensor.TYPE_RELATIVE_HUMIDITY,
+//            "Humidity"
+//        )
+//
+//        SensorManagerUtility.sensorReader(
+//            sensorManager, Sensor.TYPE_HEART_BEAT,
+//            "Heart beat"
+//        )
+//
+//        SensorManagerUtility.sensorReader(
+//            sensorManager, Sensor.TYPE_HEART_RATE,
+//            "Heart rate"
+//        )
+//
+//        SensorManagerUtility.sensorReader(
+//            sensorManager, Sensor.TYPE_HEART_RATE,
+//            "Heart rate"
+//        )
+
+//        headphonesPluggedInDetection()
         wifiConnection()
         internetConnectivity(this)
 
@@ -209,7 +244,7 @@ class SensorProcessService : Service() {
         }
     }
 
-    private fun getSensorData(): SensorData {
+    fun getSensorData(): SensorData {
 
         val currentTime = Calendar.getInstance().time
 
@@ -245,10 +280,10 @@ class SensorProcessService : Service() {
 
     private fun activityDetection() {
 
-        val request = ActivityTransitionRequest(getTransitions())
+        val request = ActivityTransitionRequest(TransitionList.getTransitions())
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
-        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
         // myPendingIntent is the instance of PendingIntent where the app receives callbacks.
         val task = ActivityRecognition.getClient(this)
@@ -334,8 +369,8 @@ class SensorProcessService : Service() {
             }
         }
 
-        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
-        registerReceiver(broadcastReceiver, receiverFilter)
+//        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
+//        registerReceiver(broadcastReceiver, receiverFilter)
     }
 
     private fun wifiConnection(): String {

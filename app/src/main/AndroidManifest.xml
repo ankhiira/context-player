@@ -9,7 +9,8 @@
     <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 
     <!-- Permission to read local song files -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
@@ -30,9 +31,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"/>
+        <activity android:name=".MainActivity" />
 
-        <activity android:name=".PermissionsActivity"
+        <activity
+            android:name=".PermissionsActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,7 +42,8 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".MediaPlaybackService"
+        <service
+            android:name=".MediaPlaybackService"
             android:exported="false">
             <intent-filter>
                 <!-- IDK if delete -->
@@ -53,8 +56,8 @@
 
         <service
             android:name="com.gabchmel.sensorprocessor.SensorProcessService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -64,20 +67,55 @@
         <service
             android:name="com.gabchmel.contextmusicplayer.AutoPlaySongService"
             android:exported="false"
-            tools:ignore="Instantiatable">
-        </service>
+            tools:ignore="Instantiatable" />
 
-        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+        <service
+            android:name="com.gabchmel.sensorprocessor.SensorIntentService"
+            android:exported="true" />
+
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.gabchmel.sensorprocessor.ActivityTransitionReceiver"
+        <receiver
+            android:name="com.gabchmel.sensorprocessor.ActivityTransitionReceiver"
             android:exported="false"
             android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
             <intent-filter>
+                <action android:name="TRANSITION_UPDATES" />
+            </intent-filter>
+        </receiver>
+
+<!--        <receiver-->
+<!--            android:name="com.gabchmel.sensorprocessor.SensorReceiver"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />-->
+<!--                <action android:name="android.intent.action.ACTION_BATTERY_CHANGED" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
+
+        <receiver
+            android:name="com.gabchmel.sensorprocessor.ActivityTransitionReceiver"
+            android:exported="false"
+            android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
+            <intent-filter>
+                <action android:name="TRANSITION_UPDATES" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.gabchmel.contextmusicplayer.ContextReceiver"
+            android:exported="false"
+            android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.BATTERY_CHANGED" />
+                <action android:name="MyAction" />
+                <action android:name="ACTION_HEADSET_PLUG" />
                 <action android:name="TRANSITION_UPDATES" />
             </intent-filter>
         </receiver>

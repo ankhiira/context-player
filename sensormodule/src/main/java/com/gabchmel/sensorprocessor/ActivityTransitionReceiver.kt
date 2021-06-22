@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
@@ -23,6 +24,10 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 
                 Log.d("DetectedActReceiver", message)
 
+                Toast.makeText(context,message,Toast.LENGTH_LONG).show()
+
+                context.sendBroadcast(Intent("MyAction"))
+
                 sensorProcessService.writeActivity(activity)
             }
         }
@@ -41,6 +46,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
             DetectedActivity.IN_VEHICLE -> "IN_VEHICLE"
             DetectedActivity.STILL -> "STILL"
             DetectedActivity.WALKING -> "WALKING"
+            DetectedActivity.RUNNING -> "RUNNING"
             else -> "UNKNOWN"
         }
     }

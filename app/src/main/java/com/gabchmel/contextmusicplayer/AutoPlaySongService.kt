@@ -21,8 +21,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class AutoPlaySongService : LifecycleService() {
 
+class AutoPlaySongService : LifecycleService() {
 
     private lateinit var mediaBrowser: MediaBrowserCompat
     private var mediaBrowserConnectionCallback = MediaBrowserCompat.ConnectionCallback()
@@ -44,7 +44,7 @@ class AutoPlaySongService : LifecycleService() {
 
     private lateinit var notification: Notification
 
-    val sensorProcessService = lifecycleScope.async {
+    private val sensorProcessService = lifecycleScope.async {
         whenCreated {
             val service = this@AutoPlaySongService.startService(SensorProcessService::class.java)
 
@@ -127,6 +127,7 @@ class AutoPlaySongService : LifecycleService() {
         // Connects to the MediaBrowseService
         mediaBrowser.connect()
 
+        updateNotification(false)
     }
 
     override fun onDestroy() {

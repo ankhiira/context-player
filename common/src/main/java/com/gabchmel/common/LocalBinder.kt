@@ -1,4 +1,4 @@
-package com.gabchmel.sensorprocessor
+package com.gabchmel.common
 
 import android.app.Service
 import android.os.Binder

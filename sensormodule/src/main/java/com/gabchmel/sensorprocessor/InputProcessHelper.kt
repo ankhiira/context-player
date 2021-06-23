@@ -103,20 +103,24 @@ object InputProcessHelper {
                 }.map {
                     it.first to inputProcessHelper(it.second)
                 }.forEach {
-                    if (csvFile.exists()) {
+//                    if (csvFile.exists()) {
                         try {
-                            val data = it.second.joinToString(separator = ",", postfix = "\n")
                             // Write to csv file
+                            csvFile.writeText(
+                                "class,sinTime,cosTime,dayOfWeekSin," +
+                                        "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
+                            )
+                            val data = it.second.joinToString(separator = ",", postfix = "\n")
                             csvFile.appendText(it.first + "," + data)
                         } catch (e: IOException) {
                             Log.e("Err", "Couldn't write to file", e)
                         }
-                    } else {
-                        csvFile.appendText(
-                            "class,sinTime,cosTime,dayOfWeekSin," +
-                                    "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
-                        )
-                    }
+//                    } else {
+//                        csvFile.writeText(
+//                            "class,sinTime,cosTime,dayOfWeekSin," +
+//                                    "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
+//                        )
+//                    }
                 }
             }
         }

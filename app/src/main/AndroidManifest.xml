@@ -24,6 +24,9 @@
     <!-- Permission to detect mobile user activity-->
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
+    <!-- Permission to do not use battery optimization -->
+    <uses-permission  android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -65,13 +68,13 @@
         </service>
 
         <service
-            android:name="com.gabchmel.contextmusicplayer.AutoPlaySongService"
+            android:name=".AutoPlaySongService"
             android:exported="false"
             tools:ignore="Instantiatable" />
 
         <service
             android:name="com.gabchmel.sensorprocessor.SensorIntentService"
-            android:exported="true" />
+            android:exported="false" />
 
         <receiver
             android:name="androidx.media.session.MediaButtonReceiver"
@@ -108,10 +111,11 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.gabchmel.contextmusicplayer.ContextReceiver"
+        <receiver android:name=".ContextReceiver"
             android:exported="false"
             android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
             <intent-filter>
+                <action android:name="android.intent.action.AIRPLANE_MODE"/>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
                 <action android:name="android.intent.action.BATTERY_CHANGED" />
                 <action android:name="MyAction" />

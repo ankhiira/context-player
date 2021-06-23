@@ -5,6 +5,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import com.gabchmel.common.utilities.bindService
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 
 class ContextReceiver : BroadcastReceiver() {
@@ -12,18 +16,31 @@ class ContextReceiver : BroadcastReceiver() {
 
         var isRunning = false
 
+        // Check if the service is running
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (AutoPlaySongService::class.java.name.equals(service.service.className)) {
+        for (serviceInfo in manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (AutoPlaySongService::class.java.name.equals(serviceInfo.service.className)) {
                 isRunning = true
             }
-            isRunning = false
         }
 
         Toast.makeText(context, "ACTION_USER_PRESENT", Toast.LENGTH_SHORT).show()
-        Intent(context, AutoPlaySongService::class.java).also { intent2 ->
-            if(!isRunning)
-                context.startService(intent2)
+        if (!isRunning) {
+
+            Intent(context, AutoPlaySongService::class.java).also { intentService ->
+                context.startService(intentService)
+            }
+            GlobalScope.async {
+                context.bindService(AutoPlaySongService::class.java)
+            }
+        } else {
+
+            val service = CompletableDeferred<AutoPlaySongService>()
+
+            GlobalScope.async {
+                val serviceAuto = service.await()
+                serviceAuto.playSong()
+            }
         }
 
 //        context!!.startService(Intent(context, AutoPlaySongService::class.java))

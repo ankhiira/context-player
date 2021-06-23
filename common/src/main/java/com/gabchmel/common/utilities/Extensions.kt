@@ -1,4 +1,4 @@
-package com.gabchmel.sensorprocessor
+package com.gabchmel.common.utilities
 
 import android.app.Service
 import android.content.ComponentName
@@ -6,10 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import com.gabchmel.common.LocalBinder
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun <T: Service> Context.startService(clazz: Class<T>) =
+suspend fun <T: Service> Context.bindService(clazz: Class<T>) =
     suspendCoroutine<T> { cont ->
         val connection = object : ServiceConnection {
 
@@ -23,8 +24,8 @@ suspend fun <T: Service> Context.startService(clazz: Class<T>) =
             }
         }
 
-        val intent = Intent(this@startService, clazz)
-        this@startService.bindService(
+        val intent = Intent(this@bindService, clazz)
+        this@bindService.bindService(
             intent, connection,
             Service.BIND_AUTO_CREATE
         )

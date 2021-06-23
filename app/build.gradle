@@ -119,6 +119,8 @@ dependencies {
 
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 
+    implementation project(path: ':common')
+
     // Exoplayer
 //    implementation 'com.google.android.exoplayer:exoplayer:2.14.0'
 //    implementation 'com.google.android.exoplayer:extension-mediasession:2.14.0'

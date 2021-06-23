@@ -75,7 +75,7 @@ class SensorProcessService : Service() {
     val prediction: StateFlow<String?> = _prediction
 
     // binder given to clients
-    private val binder = object : LocalBinder<SensorProcessService>() {
+    private val binder = object : com.gabchmel.common.LocalBinder<SensorProcessService>() {
         override fun getService() = this@SensorProcessService
     }
 
@@ -180,9 +180,6 @@ class SensorProcessService : Service() {
 //        headphonesPluggedInDetection()
         wifiConnection()
         internetConnectivity(this)
-
-        createModel()
-        triggerPrediction()
 
         return binder
     }

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.gabchmel.sensorprocessor.SensorProcessService
-import com.gabchmel.sensorprocessor.startService
+import com.gabchmel.common.utilities.bindService
 
 class SensorTriggerWorker(private val appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(
     appContext, workerParams
@@ -15,7 +15,7 @@ class SensorTriggerWorker(private val appContext: Context, workerParams: WorkerP
 //            appContext.startService(intent)
 //        }
 
-        val service = appContext.startService(SensorProcessService::class.java)
+        val service = appContext.bindService(SensorProcessService::class.java)
 
         service.getSensorData()
 

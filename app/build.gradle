@@ -53,20 +53,25 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    android {
+        testOptions {
+            unitTests.includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
-    def work_version = "2.5.0"
-
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     implementation(project(':sensormodule'))
+    implementation project(path: ':common')
+    implementation project(path: ':predicitonmodule')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.5.0'
     implementation 'androidx.appcompat:appcompat:1.3.0-rc01'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation project(path: ':predicitonmodule')
     implementation 'android.arch.navigation:navigation-fragment-ktx:1.0.0'
     implementation 'android.arch.navigation:navigation-ui-ktx:1.0.0'
 
@@ -74,6 +79,12 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test:rules:1.3.0'
+
+    testImplementation 'androidx.test:core-ktx:1.3.0'
+    testImplementation 'androidx.test.ext:junit-ktx:1.1.2'
 
     def nav_version = "2.3.5"
 
@@ -83,25 +94,25 @@ dependencies {
 
 
     // Compose
-    implementation 'androidx.compose.ui:ui:1.0.0-beta08'
+    implementation 'androidx.compose.ui:ui:1.0.0-beta09'
     // Tooling support (Previews, etc.)
-    implementation 'androidx.compose.ui:ui-tooling:1.0.0-beta08'
+    implementation 'androidx.compose.ui:ui-tooling:1.0.0-beta09'
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation 'androidx.compose.foundation:foundation:1.0.0-beta08'
+    implementation 'androidx.compose.foundation:foundation:1.0.0-beta09'
     // Material Design
     implementation 'androidx.compose.material:material:1.0.0-7'
     // Material design icons
-    implementation 'androidx.compose.material:material-icons-core:1.0.0-beta08'
-    implementation 'androidx.compose.material:material-icons-extended:1.0.0-beta08'
+    implementation 'androidx.compose.material:material-icons-core:1.0.0-beta09'
+    implementation 'androidx.compose.material:material-icons-extended:1.0.0-beta09'
     // Integration with activities
-    implementation 'androidx.activity:activity-compose:1.3.0-beta01'
+    implementation 'androidx.activity:activity-compose:1.3.0-beta02'
     // Integration with ViewModels
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha06'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07'
     // Integration with observables
-    implementation 'androidx.compose.runtime:runtime-livedata:1.0.0-beta08'
-    implementation 'androidx.compose.runtime:runtime-rxjava2:1.0.0-beta08'
+    implementation 'androidx.compose.runtime:runtime-livedata:1.0.0-beta09'
+    implementation 'androidx.compose.runtime:runtime-rxjava2:1.0.0-beta09'
     // Navigation
-    implementation "androidx.navigation:navigation-compose:2.4.0-alpha02"
+    implementation "androidx.navigation:navigation-compose:2.4.0-alpha03"
 
     // Pull to refresh Accompanist
     implementation "com.google.accompanist:accompanist-swiperefresh:0.11.1"
@@ -109,7 +120,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.11.1"
 
     // UI Tests
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-beta08'
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-beta09'
 
     // Media notification
     implementation "androidx.media:media:1.3.1"
@@ -117,9 +128,10 @@ dependencies {
     // Kotlin + coroutines
     implementation "androidx.work:work-runtime-ktx:2.6.0-beta01"
 
+    // For occuring error of duplicate library?
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 
-    implementation project(path: ':common')
+    implementation 'androidx.work:work-testing:2.6.0-beta01'
 
     // Exoplayer
 //    implementation 'com.google.android.exoplayer:exoplayer:2.14.0'

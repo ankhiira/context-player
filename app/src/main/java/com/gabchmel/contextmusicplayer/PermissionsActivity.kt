@@ -5,7 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -63,13 +63,14 @@ class PermissionsActivity : AppCompatActivity() {
                 Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // TODO redo to not deprecated version
-                startActivityForResult(
-                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
-                    0
-                )
-            }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                // TODO redo to not deprecated version
+//                startActivityForResult(
+//                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+//                    0
+//                )
+//            }
+            Log.d("Settings", "Settings not registered")
             // TODO else pro mensi API
         }
 

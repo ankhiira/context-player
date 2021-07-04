@@ -2,15 +2,12 @@ package com.gabchmel.contextmusicplayer
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.core.app.ActivityCompat
 
 
 class PermissionsActivity : AppCompatActivity() {
@@ -58,11 +55,11 @@ class PermissionsActivity : AppCompatActivity() {
             array += Manifest.permission.ACTIVITY_RECOGNITION
         }
 
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+//        if (ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
 //            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                // TODO redo to not deprecated version
 //                startActivityForResult(
@@ -70,9 +67,9 @@ class PermissionsActivity : AppCompatActivity() {
 //                    0
 //                )
 //            }
-            Log.d("Settings", "Settings not registered")
+//            Log.d("Settings", "Settings not registered")
             // TODO else pro mensi API
-        }
+//        }
 
         requestMultiplePermissions.launch(
             array

@@ -29,43 +29,58 @@ class MainActivity : AppCompatActivity() {
         volumeControlStream = AudioManager.STREAM_MUSIC
 
         Intent(this, SensorProcessService::class.java).also { intent ->
-                startService(intent)
+            startService(intent)
         }
 
-        val uploadWorkRequest=
-            OneTimeWorkRequestBuilder<PredictionWorker>()
-//                .setInitialDelay(10, TimeUnit.MINUTES)
-//            PeriodicWorkRequestBuilder<PredictionWorker>(
-//                20, TimeUnit.SECONDS, // repeatInterval (the period cycle)
-//                10, TimeUnit.SECONDS // flexInterval
-//            )
-                // Set Work to start on device charging
-                .setConstraints(Constraints.Builder()
+        val request = OneTimeWorkRequestBuilder<PredictionWorker>()
+            // Set Work to start on device charging
+            .setConstraints(
+                Constraints.Builder()
 //                    .setRequiresCharging(true)
 //                    .setMinimumLoggingLevel(android.util.Log.DEBUG)
                     .setRequiredNetworkType(NetworkType.METERED)
-                    .build())
-                .addTag("WIFIJOB2")
-                .build()
+                    .build()
+            )
+            .addTag("WIFIJOB2")
+            .build()
 
-        WorkManager.getInstance().cancelAllWorkByTag("com.gabchmel.contextmusicplayer.PredictionWorker")
+//        WorkManager.getInstance().cancelAllWorkByTag("com.gabchmel.contextmusicplayer.PredictionWorker")
 
         // Create on-demand initialization of WorkManager
-        WorkManager
+        val workManager= WorkManager
             .getInstance(this@MainActivity)
-            .getWorkInfoByIdLiveData(UUID.randomUUID())
-            .observe(this, { workInfo: WorkInfo? ->
-                if (workInfo != null) {
-                    val progress = workInfo.progress
-                    val value = progress.getInt(Progress, 0)
-                    Log.d("WorkManager", "Progress:$value")
-                }
-            })
-//            .enqueue(uploadWorkRequest)
-//            .enqueueUniquePeriodicWork(
-//                "predictSong",
-//                ExistingPeriodicWorkPolicy.REPLACE,
-//                uploadWorkRequest)
+//        workManager.enqueueUniqueWork(
+//            "work",
+//            ExistingWorkPolicy.REPLACE,
+//            request
+//        )
+
+        val status = workManager.getWorkInfoByIdLiveData(request.id)
+        status.observe(this, { workInfo->
+            if (workInfo != null) {
+                val progress = workInfo.progress
+                val state = workInfo.state
+                val value = progress.getInt(Progress, -1)
+                Log.d("Progress", "Progress:$value, state:$state")
+            }
+        })
+        workManager.enqueueUniqueWork(
+            "work",
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
+
+//        WorkManager
+//            .getInstance(this@MainActivity)
+//            .getWorkInfoByIdLiveData(request.id)
+//            .observe(this, { workInfo->
+//                if (workInfo != null) {
+//                    val progress = workInfo.progress
+//                    val state = workInfo.state
+//                    val value = progress.getInt(Progress, 6)
+//                    Log.d("Progress", "Progress:$value, state:$state")
+//                }
+//            })
     }
 }
 

@@ -16,6 +16,7 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -41,13 +42,18 @@ class MainActivity : AppCompatActivity() {
                     .setRequiredNetworkType(NetworkType.METERED)
                     .build()
             )
+            .setInputData(
+                Data.Builder()
+                    .putString("lifecycle", lifecycle.toString())
+                    .build()
+            )
             .addTag("WIFIJOB2")
             .build()
 
 //        WorkManager.getInstance().cancelAllWorkByTag("com.gabchmel.contextmusicplayer.PredictionWorker")
 
         // Create on-demand initialization of WorkManager
-        val workManager= WorkManager
+        val workManager = WorkManager
             .getInstance(this@MainActivity)
 //        workManager.enqueueUniqueWork(
 //            "work",
@@ -56,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 //        )
 
         val status = workManager.getWorkInfoByIdLiveData(request.id)
-        status.observe(this, { workInfo->
+        status.observe(this, { workInfo ->
             if (workInfo != null) {
                 val progress = workInfo.progress
                 val state = workInfo.state
@@ -69,18 +75,6 @@ class MainActivity : AppCompatActivity() {
             ExistingWorkPolicy.REPLACE,
             request
         )
-
-//        WorkManager
-//            .getInstance(this@MainActivity)
-//            .getWorkInfoByIdLiveData(request.id)
-//            .observe(this, { workInfo->
-//                if (workInfo != null) {
-//                    val progress = workInfo.progress
-//                    val state = workInfo.state
-//                    val value = progress.getInt(Progress, 6)
-//                    Log.d("Progress", "Progress:$value, state:$state")
-//                }
-//            })
     }
 }
 

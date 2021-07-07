@@ -7,6 +7,7 @@ import android.media.*
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -24,7 +25,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-
+@Deprecated("SDFSDF")
 class AutoPlaySongService : LifecycleService() {
 
     private lateinit var mediaBrowser: MediaBrowserCompat
@@ -317,6 +318,10 @@ class AutoPlaySongService : LifecycleService() {
         playSong()
     }
 
+    override fun onBind(intent: Intent): IBinder? {
+        return super.onBind(intent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
 
@@ -361,8 +366,6 @@ class AutoPlaySongService : LifecycleService() {
     fun setMusicProgress(progress: Float) {
         mediaController.transportControls.seekTo(progress.toLong())
     }
-
-
 
     // Function to set metadata of the song
     fun updateMetadata() {
@@ -440,7 +443,7 @@ class AutoPlaySongService : LifecycleService() {
                         if ("${song.title},${song.author}".hashCode().toUInt().toString() == prediction) {
                             metadataRetriever.setDataSource(applicationContext, song.URI)
                             updateNotification(false)
-//                                play(song.URI)
+                                play(song.URI)
                             notPlayed = false
                         }
                     }

@@ -2,6 +2,7 @@ package com.gabchmel.contextmusicplayer
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
@@ -9,10 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-class PredictionWorker(appContext: Context, workerParams: WorkerParameters)
-    : CoroutineWorker(
-    appContext, workerParams
-) {
+class PredictionWorker(private val appContext: Context, workerParams: WorkerParameters) :
+    CoroutineWorker(
+        appContext, workerParams
+    ) {
 
     companion object {
         const val Progress = "progress"
@@ -29,6 +30,38 @@ class PredictionWorker(appContext: Context, workerParams: WorkerParameters)
             Log.d("WorkManager", "Working")
             setProgress(lastUpdate)
             delay(delayDuration)
+
+//            var isRunning = false
+//
+//            // Check if the service is running
+//            val manager = appContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+//            for (serviceInfo in manager.getRunningServices(Integer.MAX_VALUE)) {
+//                if (AutoPlaySongService::class.java.name.equals(serviceInfo.service.className)) {
+//                    isRunning = true
+//                }
+//            }
+//
+//            if (!isRunning) {
+//
+////                Intent(appContext, AutoPlaySongService::class.java).also { intentService ->
+////                    appContext.startService(intentService)
+////                }
+////                appContext.bindService(AutoPlaySongService::class.java)
+//
+//                val autoPlaySongService = async {
+//                        val service = appContext.bindService(AutoPlaySongService::class.java)
+//
+//                        service
+//                }
+//            }
+
+//            val service = CompletableDeferred<AutoPlaySongService>()
+//
+//            val serviceAuto = service.await()
+//            serviceAuto.playSong()
+
+            val connector = MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
+//            connector.play()
 
             // Do the work here
 //        val service = appContext.bindService(SensorProcessService::class.java)

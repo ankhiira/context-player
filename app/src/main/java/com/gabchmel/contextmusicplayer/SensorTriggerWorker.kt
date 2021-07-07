@@ -3,8 +3,8 @@ package com.gabchmel.contextmusicplayer
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.gabchmel.sensorprocessor.SensorProcessService
 import com.gabchmel.common.utilities.bindService
+import com.gabchmel.sensorprocessor.SensorProcessService
 
 class SensorTriggerWorker(private val appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(
     appContext, workerParams

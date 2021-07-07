@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
 
+@Deprecated ("neni potreba mit dva notification Managery")
 object PredictedSongNotification {
 
     const val CHANNEL_ID = "predictedSong"

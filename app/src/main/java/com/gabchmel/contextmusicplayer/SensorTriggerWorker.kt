@@ -3,9 +3,8 @@ package com.gabchmel.contextmusicplayer
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.gabchmel.common.utilities.bindService
-import com.gabchmel.sensorprocessor.SensorProcessService
 
+@Deprecated ("Nejspis nebudu potrebovat")
 class SensorTriggerWorker(private val appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(
     appContext, workerParams
 ) {
@@ -15,9 +14,9 @@ class SensorTriggerWorker(private val appContext: Context, workerParams: WorkerP
 //            appContext.startService(intent)
 //        }
 
-        val service = appContext.bindService(SensorProcessService::class.java)
-
-        service.getSensorData()
+//        val service = appContext.bindService(SensorProcessService::class.java)
+//
+//        service.getSensorData()
 
         // Indicate whether the work finished successfully with the Result
         return Result.success()

@@ -69,11 +69,6 @@
         </service>
 
         <service
-            android:name=".AutoPlaySongService"
-            android:exported="false"
-            tools:ignore="Instantiatable" />
-
-        <service
             android:name="com.gabchmel.sensorprocessor.SensorIntentService"
             android:exported="false" />
 

@@ -8,9 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import androidx.work.*
+import com.gabchmel.common.utilities.bindService
 import com.gabchmel.contextmusicplayer.PredictionWorker.Companion.Progress
 import com.gabchmel.sensorprocessor.SensorProcessService
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -33,6 +36,11 @@ class MainActivity : AppCompatActivity() {
             startService(intent)
         }
 
+        lifecycleScope.launch {
+            val service = this@MainActivity.bindService(SensorProcessService::class.java)
+            service.saveSensorData()
+        }
+
         val request = OneTimeWorkRequestBuilder<PredictionWorker>()
             // Set Work to start on device charging
             .setConstraints(
@@ -44,7 +52,7 @@ class MainActivity : AppCompatActivity() {
             )
             .setInputData(
                 Data.Builder()
-                    .putString("lifecycle", lifecycle.toString())
+//                    .putString("lifecycle", lifecycle.toString())
                     .build()
             )
             .addTag("WIFIJOB2")

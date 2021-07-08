@@ -53,20 +53,18 @@ class SensorProcessService : Service() {
 
     private var currentState = "NONE"
 
-    private var lightSensorValue: Float = 0.0f
+    var lightSensorValue: Float = 0.0f
+    var coordList= mutableListOf<Float>()
+    var barometerVal: Float = 0.0f
+    var temperature: Float = 0.0f
 
     private var orientSensorAzimuthZAxis: Float = 0.0f
     private var orientSensorPitchXAxis: Float = 0.0f
     private var orientSensorRollYAxis: Float = 0.0f
 
-    private var barometerVal: Float = 0.0f
-
     private var deviceLying = 0.0f
-
     private var BTdeviceConnected = 0.0f
-
     var headphonesPluggedIn = 0
-
     private val predictionModel = PredictionModelBuiltIn(this)
 
     private var classNames = arrayListOf<String>()
@@ -128,28 +126,28 @@ class SensorProcessService : Service() {
         val sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         // Register listeners to sensor value changes
-        val coorList = SensorManagerUtility.sensorReader(
+        SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_ORIENTATION,
-            "Orientation"
-        ) as MutableList<*>
+            "Orientation",
+            this
+        )
 
-//        orientSensorAzimuthZAxis = coorList[0] as Float
-//        orientSensorPitchXAxis = coorList[1] as Float
-//        orientSensorRollYAxis = coorList[2] as Float
-
-        lightSensorValue = SensorManagerUtility.sensorReader(
+        SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_LIGHT,
-            "Ambient light"
-        ) as Float
+            "Ambient light",
+            this
+        )
 
-        barometerVal = SensorManagerUtility.sensorReader(
+        SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_PRESSURE,
-            "Barometer"
-        ) as Float
+            "Barometer",
+            this
+        )
 
         SensorManagerUtility.sensorReader(
             sensorManager, Sensor.TYPE_AMBIENT_TEMPERATURE,
-            "Temperature"
+            "Temperature",
+            this
         )
 
 //        SensorManagerUtility.sensorReader(
@@ -222,7 +220,7 @@ class SensorProcessService : Service() {
             longitude = location.value?.longitude!!
         }
 
-        // TODO Make check that we have a value - maybe we don't have to have value idk
+        // TODO Make check that we have a value - maybe we don't have to have value idk - mozna def
         try {
             // Write to csv file
             csvFile.appendText(
@@ -241,7 +239,7 @@ class SensorProcessService : Service() {
         }
     }
 
-    fun getSensorData(): SensorData {
+    private fun getSensorData(): SensorData {
 
         val currentTime = Calendar.getInstance().time
 
@@ -263,16 +261,51 @@ class SensorProcessService : Service() {
         classNames = processInputCSV(this)
 
         predictionModel.createModel(classNames)
+
+        Log.d("model", "model created")
     }
 
     fun triggerPrediction() {
 
-        Log.d("prediciton", "trigger prediction")
+        Log.d("prediction", "trigger prediction")
 
         // Get the processed input values
         val input = inputProcessHelper(getSensorData())
 
         _prediction.value = predictionModel.predict(input, classNames)
+    }
+
+    fun detectContextChange(): Boolean {
+        val sensorData = getSensorData()
+
+        val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
+        val name =
+            prefs.getString("time", "No name defined")
+        val idName = prefs.getFloat("headphones", -1.0f)
+        val bluetooth = prefs.getFloat("bluetooth",-1.0f)
+        val light = prefs.getFloat("light",-1.0f)
+        if (sensorData.BTdeviceConnected != bluetooth) {
+            return true
+        }
+        if (sensorData.lightSensorValue != light) {
+            return true
+        }
+        return false
+    }
+
+    fun saveSensorData() {
+        val sensorData = getSensorData()
+
+        val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
+        editor.putString("time", sensorData.currentTime.toString())
+        sensorData.longitude?.let { editor.putFloat("longitude", it.toFloat()) }
+        sensorData.latitude?.let { editor.putFloat("latitude", it.toFloat()) }
+        editor.putString("state", sensorData.currentState)
+        editor.putFloat("light", sensorData.lightSensorValue)
+        editor.putFloat("lying", sensorData.deviceLying)
+        editor.putFloat("bluetooth", sensorData.BTdeviceConnected)
+        editor.putFloat("headphones", sensorData.headphonesPluggedIn)
+        editor.apply()
     }
 
     private fun activityDetection() {
@@ -308,10 +341,10 @@ class SensorProcessService : Service() {
     private fun processOrientation() {
         // Get the range of acceptable values for lying device - -1.58 is exactly lying
         deviceLying = if (abs(orientSensorAzimuthZAxis) in 1.4f..1.7f) {
-            Log.d("Orientation", "Device is lying")
+//            Log.d("Orientation", "Device is lying")
             1.0f
         } else {
-            Log.d("Orientation", "Device is staying")
+//            Log.d("Orientation", "Device is staying")
             0.0f
         }
     }

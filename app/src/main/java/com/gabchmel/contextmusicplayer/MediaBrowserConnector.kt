@@ -2,8 +2,6 @@ package com.gabchmel.contextmusicplayer
 
 import android.content.ComponentName
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -15,8 +13,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
 import com.gabchmel.common.utilities.bindService
-import com.gabchmel.contextmusicplayer.extensions.getAlbumArt
-import com.gabchmel.contextmusicplayer.playlistScreen.Song
 import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -24,17 +20,10 @@ import kotlinx.coroutines.flow.*
 class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Context) :
     LifecycleObserver {
 
-    private val servicePlayback =
-        lifecycleOwner.lifecycleScope.async { MediaPlaybackService.getInstance(context) }
-
     private lateinit var mediaBrowser: MediaBrowserCompat
     val mediaController = CompletableDeferred<MediaControllerCompat>()
 
     val service = CompletableDeferred<MediaPlaybackService>()
-
-//    lateinit var args: NowPlayingFragmentArgs
-
-    var notPlayed = true
 
     private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
         lifecycleOwner.whenCreated {
@@ -57,9 +46,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         emitAll(service.songs)
     }.stateIn(lifecycleOwner.lifecycleScope, SharingStarted.Lazily, null)
 
-    // Update metadata
-    private val metadataRetriever = MediaMetadataRetriever()
-
     private val _musicState = MutableStateFlow<PlaybackStateCompat?>(null)
     val musicState: StateFlow<PlaybackStateCompat?> = _musicState
 
@@ -78,19 +64,12 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
             this@MediaBrowserConnector.mediaController.complete(mediaController)
 
             // Display initial state
-            val metadata = mediaController.metadata
             val pbstate = mediaController.playbackState
 
             _musicState.value = pbstate
 
             // Register a callback to stay in sync
             mediaController.registerCallback(controllerCallback)
-
-//            // Play after fragment is open
-//            if (args.play && notPlayed) {
-//                play(args.uri)
-//                notPlayed = false
-//            }
 
             lifecycleOwner.lifecycleScope.launch {
                 service.complete(MediaPlaybackService.getInstance(context))
@@ -122,17 +101,27 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 //        lifecycleOwner.lifecycle.addObserver(this)
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.whenCreated {
-                // Setting MediaBrowser for connecting to the MediaBrowserService
-                mediaBrowser = MediaBrowserCompat(
-                    context,
-                    ComponentName(context, MediaPlaybackService::class.java),
-                    connectionCallbacks,
-                    null
-                )
 
-                // Connects to the MediaBrowseService
-                mediaBrowser.connect()
-                playSong()
+                // Detect if the context changed so we should predict song
+                val sensorProcessService = sensorProcessService.await()
+                val isContextChanged = sensorProcessService.detectContextChange()
+
+                if(isContextChanged) {
+                    // Setting MediaBrowser for connecting to the MediaBrowserService
+                    mediaBrowser = MediaBrowserCompat(
+                        context,
+                        ComponentName(context, MediaPlaybackService::class.java),
+                        connectionCallbacks,
+                        null
+                    )
+
+                    // Connects to the MediaBrowseService
+                    mediaBrowser.connect()
+                    playSong()
+                }
+
+                // Save current sensor values to later detect if the context changed
+                sensorProcessService.saveSensorData()
             }
         }
     }
@@ -186,10 +175,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                         if ("${song.title},${song.author}".hashCode().toUInt()
                                 .toString() == prediction
                         ) {
-//                            updateNotification(false, song)
                             getMetadata(song.URI)
-//                            play(song.URI)
-                            notPlayed = false
                         }
                     }
                 }
@@ -204,25 +190,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 bundleOf("songUri" to songUri)
             )
         }.join()
-    }
-
-    // Function to update a notification
-    private fun updateNotification(isPlaying: Boolean, song: Song) {
-
-        // Recreate notification
-        val notification = NotificationManager.createNotification(
-            context,
-            mediaBrowser.sessionToken,
-            song.title ?: "unknown",
-            song.author ?: "unknown",
-            _musicMetadata.value?.getAlbumArt() ?: BitmapFactory.decodeResource(
-                context.resources,
-                R.raw.album_cover_clipart
-            ),
-            isPlaying
-        )
-
-        NotificationManager.displayNotification(context, notification)
     }
 
 //    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)

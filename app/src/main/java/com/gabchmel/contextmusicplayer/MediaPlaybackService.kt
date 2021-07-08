@@ -59,9 +59,13 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private lateinit var timer: Timer
     private lateinit var broadcastReceiver: BroadcastReceiver
     private val binder = MediaBinder()
+    private var isRegistered = false
+    private var isPredicted = false
 
     // Update metadata
     private val metadataRetriever = MediaMetadataRetriever()
+
+    private val myNoisyAudioStreamReceiver = BecomingNoisyReceiver()
 
     // Binder to a service
     inner class MediaBinder : Binder() {
@@ -95,8 +99,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             }
         }
     }
-
-    private val myNoisyAudioStreamReceiver = BecomingNoisyReceiver()
 
     var songs = MutableStateFlow(emptyList<Song>())
 
@@ -148,6 +150,24 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         )
 
+        isRegistered = true
+
+        val afChangeListener: AudioManager.OnAudioFocusChangeListener =
+            AudioManager.OnAudioFocusChangeListener { }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest =
+                AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+                    setOnAudioFocusChangeListener(afChangeListener)
+                    // Set audio stream type to music
+                    setAudioAttributes(AudioAttributes.Builder().run {
+                        setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        build()
+                    })
+                    build()
+                }
+        }
+
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
                 val action = intent.action
@@ -197,9 +217,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 val am =
                     applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-                val afChangeListener: AudioManager.OnAudioFocusChangeListener =
-                    AudioManager.OnAudioFocusChangeListener { }
-
                 override fun onPlayFromUri(uri: Uri, extras: Bundle?) {
                     preparePlayer(uri)
                     currentSongUri.value = uri
@@ -209,27 +226,18 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                 override fun onPlay() {
 
-                    val result: Int
+                    if(isPredicted) {
+                        currentSongUri.value?.let { preparePlayer(it) }
+                    }
+
                     isPlaying = true
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-                        audioFocusRequest =
-                            AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
-                                setOnAudioFocusChangeListener(afChangeListener)
-                                // Set audio stream type to music
-                                setAudioAttributes(AudioAttributes.Builder().run {
-                                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                    build()
-                                })
-                                build()
-                            }
-
-                        result = am.requestAudioFocus(audioFocusRequest)
+                    val result= if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        // Request audio focus so only on app is playing audio at a time
+                        am.requestAudioFocus(audioFocusRequest)
                     } else {
-
                         // Request audio focus for playback
-                        result = am.requestAudioFocus(
+                        am.requestAudioFocus(
                             afChangeListener,
                             // Use the music stream.
                             AudioManager.STREAM_MUSIC,
@@ -258,7 +266,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     player.start()
 
                     updateState()
-                    updateNotification(true)
+                    updateNotification(isPlaying)
                     startForeground(NotificationManager.notificationID, notification)
 
                     // register BECOME_NOISY BroadcastReceiver
@@ -266,21 +274,28 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         myNoisyAudioStreamReceiver,
                         IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
                     )
+
+                    isRegistered = true
                 }
 
                 override fun onStop() {
 
                     isPlaying = false
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        am.abandonAudioFocusRequest(audioFocusRequest)
-                    } else {
-                        am.abandonAudioFocus(afChangeListener)
+                    // Check if the audio focus was requested
+                    if(AudioManager.AUDIOFOCUS_REQUEST_GRANTED == 1) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            am.abandonAudioFocusRequest(audioFocusRequest)
+                        } else {
+                            am.abandonAudioFocus(afChangeListener)
+                        }
                     }
+
                     stopForeground(true)
 
                     // unregister BECOME_NOISY BroadcastReceiver if it was registered
-                    unregisterReceiver(myNoisyAudioStreamReceiver)
+                    if (isRegistered)
+                        unregisterReceiver(myNoisyAudioStreamReceiver)
 
                     isActive = false
                 }
@@ -298,7 +313,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                 override fun onSeekTo(pos: Long) {
                     player.seekTo(pos.toInt())
-
                     updateState()
                 }
 
@@ -409,9 +423,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         // Set source to current song to retrieve metadata
         metadataRetriever.setDataSource(applicationContext, songUri)
 
-        preparePlayer(songUri)
         currentSongUri.value = songUri
         updateMetadata()
+
+        isPredicted = true
 
         return metadataRetriever
     }
@@ -444,7 +459,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     override fun onDestroy() {
 
         // unregister BECOME_NOISY BroadcastReceiver
-        unregisterReceiver(myNoisyAudioStreamReceiver)
+        if (isRegistered)
+            unregisterReceiver(myNoisyAudioStreamReceiver)
 
         player.stop()
         player.seekTo(0)

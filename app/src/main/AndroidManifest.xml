@@ -4,7 +4,7 @@
     package="com.gabchmel.contextmusicplayer">
 
     <!-- For streaming internet based media in MediaPlaybackService -->
-    <uses-permission android:name="android.permission.INTERNET" />
+<!--    <uses-permission android:name="android.permission.INTERNET" />-->
 
     <!-- Permission to control media on lock screen -->
     <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />

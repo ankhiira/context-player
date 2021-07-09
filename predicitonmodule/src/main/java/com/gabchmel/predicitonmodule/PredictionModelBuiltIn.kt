@@ -20,7 +20,7 @@ class PredictionModelBuiltIn(val context: Context) {
     lateinit var forest: RandomForest
     // Name of the input arff file
     val file = "arffData_converted.arff"
-    val csvConvertedFile = "convertedData.csv"
+    private val csvConvertedFile = "convertedData.csv"
 
     // Function to read the dataset from arff file
     private fun getDataset(): Instances {

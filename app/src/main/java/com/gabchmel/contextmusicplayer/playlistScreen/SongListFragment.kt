@@ -9,16 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,7 +33,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
-import com.gabchmel.predicitonmodule.PredictionModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,36 +65,6 @@ class SongListFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val songs by viewModel.songs.collectAsState()
-
-                val input = floatArrayOf(
-                    0.781831f,
-                    0.265953f,
-                    0.410050f,
-                    -0.872427f,
-                    -0.522189f,
-                    0.62349f,
-                    0.85283f
-                )
-
-                val predictionModel = PredictionModel(requireContext())
-                val songToPlay = predictionModel.predict(input)
-
-//                // TODO bude vzdy not null?
-//                lateinit var songURI: Uri
-//
-//                for (song in songs!!) {
-//                    if ("$song.title,$song.author".hashCode().toUInt() == songToPlay) {
-//                        songURI = song.URI
-//                    }
-//                }
-//
-//                val play = true
-//                findNavController().navigate(
-//                    SongListFragmentDirections.actionSongListFragmentToHomeFragment(
-//                        songURI,
-//                        play
-//                    )
-//                )
 
                 JetnewsTheme {
 //                    fun ScaffoldDemo() {
@@ -138,14 +105,30 @@ class SongListFragment : Fragment() {
                                     Manifest.permission.READ_EXTERNAL_STORAGE
                                 ) != PackageManager.PERMISSION_GRANTED) && !granted
                             ) {
-                                Column {
-                                    Text("The permission to access external storage needed.")
-                                    Button({
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxSize()
+                                        .padding(vertical = 16.dp)
+                                ) {
+                                    Text(
+                                        text = "The permission to access external storage needed.",
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                    Column(
+                                        horizontalAlignment = CenterHorizontally,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
 
-                                        requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                                    ) {
+                                        Button({
 
-                                    }) {
-                                        Text("Grant permission")
+                                            requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+
+                                        }) {
+                                            Text("Grant permission")
+                                        }
                                     }
                                 }
                             } else if (granted || (ActivityCompat.checkSelfPermission(

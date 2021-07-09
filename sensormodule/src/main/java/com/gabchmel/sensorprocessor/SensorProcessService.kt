@@ -38,6 +38,17 @@ import kotlin.math.abs
 
 class SensorProcessService : Service() {
 
+    companion object {
+//        var sensorData : SensorData(
+//                null,
+//                0.0f,
+//                0.0f,
+//                0.0f,
+//                0.0f,
+//                0.0f,
+//        )
+    }
+
     private var locationManager: LocationManager? = null
 
     private val _location = MutableStateFlow<Location?>(null)
@@ -54,7 +65,7 @@ class SensorProcessService : Service() {
     private var currentState = "NONE"
 
     var lightSensorValue: Float = 0.0f
-    var coordList= mutableListOf<Float>()
+    var coordList = mutableListOf<Float>()
     var barometerVal: Float = 0.0f
     var temperature: Float = 0.0f
 
@@ -279,11 +290,10 @@ class SensorProcessService : Service() {
         val sensorData = getSensorData()
 
         val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
-        val name =
-            prefs.getString("time", "No name defined")
-        val idName = prefs.getFloat("headphones", -1.0f)
-        val bluetooth = prefs.getFloat("bluetooth",-1.0f)
-        val light = prefs.getFloat("light",-1.0f)
+        val time = prefs.getString("time", "No name defined")
+        val headphones = prefs.getFloat("headphones", -1.0f)
+        val bluetooth = prefs.getFloat("bluetooth", -1.0f)
+        val light = prefs.getFloat("light", -1.0f)
         if (sensorData.BTdeviceConnected != bluetooth) {
             return true
         }

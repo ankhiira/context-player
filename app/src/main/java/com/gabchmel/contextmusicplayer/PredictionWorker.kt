@@ -21,8 +21,8 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
     override suspend fun doWork(): Result {
         withContext(Dispatchers.IO) {
 
-            val firstUpdate = workDataOf(Progress to 0)
-            val lastUpdate = workDataOf(Progress to 100)
+//            val firstUpdate = workDataOf(Progress to 0)
+//            val lastUpdate = workDataOf(Progress to 100)
 
 //            setProgress(firstUpdate)
 //            delay(delayDuration)

@@ -46,12 +46,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         emitAll(service.songs)
     }.stateIn(lifecycleOwner.lifecycleScope, SharingStarted.Lazily, null)
 
-    private val _musicState = MutableStateFlow<PlaybackStateCompat?>(null)
-    val musicState: StateFlow<PlaybackStateCompat?> = _musicState
-
-    private val _musicMetadata = MutableStateFlow<MediaMetadataCompat?>(null)
-    val musicMetadata: StateFlow<MediaMetadataCompat?> = _musicMetadata
-
     private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
 
@@ -62,11 +56,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
             )
 
             this@MediaBrowserConnector.mediaController.complete(mediaController)
-
-            // Display initial state
-            val pbstate = mediaController.playbackState
-
-            _musicState.value = pbstate
 
             // Register a callback to stay in sync
             mediaController.registerCallback(controllerCallback)
@@ -88,11 +77,9 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
     private var controllerCallback = object : MediaControllerCompat.Callback() {
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat) {
-            _musicMetadata.value = metadata
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-            _musicState.value = state
         }
     }
 
@@ -106,7 +93,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 val sensorProcessService = sensorProcessService.await()
                 val isContextChanged = sensorProcessService.detectContextChange()
 
-                if(isContextChanged) {
+//                if(isContextChanged) {
                     // Setting MediaBrowser for connecting to the MediaBrowserService
                     mediaBrowser = MediaBrowserCompat(
                         context,
@@ -117,8 +104,8 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
                     // Connects to the MediaBrowseService
                     mediaBrowser.connect()
-                    playSong()
-                }
+                    setNotification()
+//                }
 
                 // Save current sensor values to later detect if the context changed
                 sensorProcessService.saveSensorData()
@@ -141,12 +128,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }.join()
     }
 
-    suspend fun pause() {
-        lifecycleOwner.lifecycleScope.launch {
-            mediaController.await().transportControls.pause()
-        }.join()
-    }
-
     suspend fun next() {
         lifecycleOwner.lifecycleScope.launch {
             mediaController.await().transportControls.skipToNext()
@@ -159,13 +140,8 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }.join()
     }
 
-    suspend fun setMusicProgress(progress: Float) {
-        lifecycleOwner.lifecycleScope.launch {
-            mediaController.await().transportControls.seekTo(progress.toLong())
-        }.join()
-    }
-
-    fun playSong() {
+    // Function identifying predicted song and sending custom action to create notification
+    private fun setNotification() {
         // Check predictions
         lifecycleOwner.lifecycleScope.launch {
 
@@ -183,7 +159,8 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }
     }
 
-    suspend fun getMetadata(songUri: Uri) {
+    // Send action to MediaPlaybackService to set predicted song for play
+    private suspend fun getMetadata(songUri: Uri) {
         lifecycleOwner.lifecycleScope.launch {
             mediaController.await().transportControls.sendCustomAction(
                 "getMetadata",

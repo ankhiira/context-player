@@ -68,19 +68,24 @@ object InputProcessHelper {
         val csvFile = File(context.filesDir, "convertedData.csv")
         val classNames = arrayListOf<String>()
 
+        csvFile.writeText(
+            "class,sinTime,cosTime,dayOfWeekSin," +
+                    "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
+        )
+
         // TODO else
         if (inputFile.exists()) {
             csvReader().open(inputFile) {
 
                 readAllAsSequence().onEach {
-                    println(it) //[a, b, c]
+//                    println(it) //[a, b, c]
                 }.map { row ->
 
                     val dateNew = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         val format =
                             DateTimeFormatter.ofPattern(
                                 "E MMM dd HH:mm:ss ZZZZ yyyy",
-                                Locale.ENGLISH
+                                context.resources.configuration.locales.get(0)
                             )
                         val localDate = LocalDateTime.parse(row[1], format)
                         Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant())
@@ -106,10 +111,6 @@ object InputProcessHelper {
 //                    if (csvFile.exists()) {
                         try {
                             // Write to csv file
-                            csvFile.writeText(
-                                "class,sinTime,cosTime,dayOfWeekSin," +
-                                        "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
-                            )
                             val data = it.second.joinToString(separator = ",", postfix = "\n")
                             csvFile.appendText(it.first + "," + data)
                         } catch (e: IOException) {

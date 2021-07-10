@@ -61,7 +61,7 @@ class SettingsFragment : Fragment() {
                         },
                         content = {
                             Column(
-                                verticalArrangement = Arrangement.spacedBy(24.dp),
+                                verticalArrangement = Arrangement.spacedBy(28.dp),
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(18.dp)

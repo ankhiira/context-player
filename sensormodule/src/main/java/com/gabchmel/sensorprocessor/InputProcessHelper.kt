@@ -23,8 +23,12 @@ object InputProcessHelper {
         val latitude = sensorData.latitude
         val longitude = sensorData.longitude
 
+        var dayOfWeek : Int = 0
+        var timeInSeconds : Int = 0
+
+        currentTime?.let {
         // Convert to similar representation as in other models
-        val dayOfWeek =
+        dayOfWeek =
             if (currentTime.day == 0) {
                 6
             } else {
@@ -32,8 +36,9 @@ object InputProcessHelper {
             }
 
         // Convert current time to seconds
-        val timeInSeconds =
+        timeInSeconds =
             (currentTime.hours * 60 + currentTime.minutes) * 60 + currentTime.seconds
+        }
         // Get number of seconds in a day
         val secondsInDay = 24 * 60 * 60
 

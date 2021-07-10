@@ -21,6 +21,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.gabchmel.common.LocalBinder
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.InputProcessHelper.inputProcessHelper
 import com.gabchmel.sensorprocessor.InputProcessHelper.processInputCSV
@@ -39,15 +40,15 @@ import kotlin.math.abs
 class SensorProcessService : Service() {
 
     companion object {
-//        var sensorData : SensorData(
-//                null,
-//                0.0f,
-//                0.0f,
-//                0.0f,
-//                0.0f,
-//                0.0f,
-//        )
+        private var _sensorData = MutableStateFlow(
+            SensorData(null,null,null,null, null,
+            null,null,null)
+        )
+        val sensorData : StateFlow<SensorData?> = _sensorData
     }
+
+    private lateinit var csvFile: File
+    private lateinit var broadcastReceiver: BroadcastReceiver
 
     private var locationManager: LocationManager? = null
 
@@ -56,11 +57,6 @@ class SensorProcessService : Service() {
 
     private val _time = MutableStateFlow<Date?>(null)
     val time: StateFlow<Date?> = _time
-
-    private lateinit var csvFile: File
-
-    private lateinit var pendingIntent: PendingIntent
-    private lateinit var broadcastReceiver: BroadcastReceiver
 
     private var currentState = "NONE"
 
@@ -84,7 +80,7 @@ class SensorProcessService : Service() {
     val prediction: StateFlow<String?> = _prediction
 
     // binder given to clients
-    private val binder = object : com.gabchmel.common.LocalBinder<SensorProcessService>() {
+    private val binder = object : LocalBinder<SensorProcessService>() {
         override fun getService() = this@SensorProcessService
     }
 
@@ -109,7 +105,7 @@ class SensorProcessService : Service() {
                 Manifest.permission.ACTIVITY_RECOGNITION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.e("perm", "permission not granted")
+            Log.e("permission", "permission not granted")
         }
 
         locationManager?.requestLocationUpdates(
@@ -161,32 +157,37 @@ class SensorProcessService : Service() {
             this
         )
 
-//        SensorManagerUtility.sensorReader(
-//            sensorManager, Sensor.TYPE_PROXIMITY,
-//            "Proximity"
-//        )
-//
-//        SensorManagerUtility.sensorReader(
-//            sensorManager, Sensor.TYPE_RELATIVE_HUMIDITY,
-//            "Humidity"
-//        )
-//
-//        SensorManagerUtility.sensorReader(
-//            sensorManager, Sensor.TYPE_HEART_BEAT,
-//            "Heart beat"
-//        )
-//
-//        SensorManagerUtility.sensorReader(
-//            sensorManager, Sensor.TYPE_HEART_RATE,
-//            "Heart rate"
-//        )
-//
-//        SensorManagerUtility.sensorReader(
-//            sensorManager, Sensor.TYPE_HEART_RATE,
-//            "Heart rate"
-//        )
+        SensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_PROXIMITY,
+            "Proximity",
+            this
+        )
 
-//        headphonesPluggedInDetection()
+        SensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_RELATIVE_HUMIDITY,
+            "Humidity",
+            this
+        )
+
+        SensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_HEART_BEAT,
+            "Heart beat",
+            this
+        )
+
+        SensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_HEART_RATE,
+            "Heart rate",
+            this
+        )
+
+        SensorManagerUtility.sensorReader(
+            sensorManager, Sensor.TYPE_TEMPERATURE,
+            "Heart rate",
+            this
+        )
+
+        headphonesPluggedInDetection()
         wifiConnection()
         internetConnectivity(this)
 
@@ -311,10 +312,10 @@ class SensorProcessService : Service() {
         sensorData.longitude?.let { editor.putFloat("longitude", it.toFloat()) }
         sensorData.latitude?.let { editor.putFloat("latitude", it.toFloat()) }
         editor.putString("state", sensorData.currentState)
-        editor.putFloat("light", sensorData.lightSensorValue)
-        editor.putFloat("lying", sensorData.deviceLying)
-        editor.putFloat("bluetooth", sensorData.BTdeviceConnected)
-        editor.putFloat("headphones", sensorData.headphonesPluggedIn)
+        sensorData.lightSensorValue?.let { editor.putFloat("light", it) }
+        sensorData.deviceLying?.let { editor.putFloat("lying", it) }
+        sensorData.BTdeviceConnected?.let { editor.putFloat("bluetooth", it) }
+        sensorData.headphonesPluggedIn?.let { editor.putFloat("headphones", it) }
         editor.apply()
     }
 
@@ -323,7 +324,7 @@ class SensorProcessService : Service() {
         val request = ActivityTransitionRequest(TransitionList.getTransitions())
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
-        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
         // myPendingIntent is the instance of PendingIntent where the app receives callbacks.
         val task = ActivityRecognition.getClient(this)

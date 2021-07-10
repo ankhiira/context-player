@@ -79,7 +79,8 @@ class PredictionModelSettingsFragment : Fragment() {
                                     Text(
                                         text = "Recreate model",
                                         fontWeight = FontWeight.Bold,
-                                        color = materialYel400
+                                        color = materialYel400,
+                                        fontSize = 18.sp
                                     )
                                     Text(
                                         text = "Clicking on this causes recreation of the model and triggers new song prediction",

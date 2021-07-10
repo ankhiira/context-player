@@ -107,6 +107,8 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".MediaBrowserConnector$ActionReceiver" />
+
 <!--        <receiver-->
 <!--            android:name=".ContextReceiver"-->
 <!--            android:exported="false"-->

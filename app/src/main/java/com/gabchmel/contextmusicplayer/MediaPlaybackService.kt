@@ -333,11 +333,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
 
                 override fun onCustomAction(action: String?, extras: Bundle?) {
-                    if (action.equals("getMetadata")) {
+                    if (action.equals("skip")) {
                         if (extras != null) {
                             setMetadata(extras.get("songUri") as Uri)
                         }
-                        updateNotification(false)
+                        onSkipToNext()
                     }
                 }
             }

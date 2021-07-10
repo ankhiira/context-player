@@ -42,7 +42,6 @@ import kotlinx.coroutines.flow.StateFlow
 class SongListFragment : Fragment() {
 
     private val viewModel: SongListViewModel by viewModels()
-
     private var _isPermGranted = MutableStateFlow(false)
     private var isPermGranted: StateFlow<Boolean> = _isPermGranted
 
@@ -67,7 +66,6 @@ class SongListFragment : Fragment() {
                 val songs by viewModel.songs.collectAsState()
 
                 JetnewsTheme {
-//                    fun ScaffoldDemo() {
                     val onPrimary = MaterialTheme.colors.onPrimary
 
                     Scaffold(
@@ -94,7 +92,6 @@ class SongListFragment : Fragment() {
                                     }
                                 },
                                 elevation = 0.dp,
-//                                backgroundColor = Color.Transparent
                             )
                         },
                         content = {
@@ -137,39 +134,26 @@ class SongListFragment : Fragment() {
                                 ) == PackageManager.PERMISSION_GRANTED)
                             ) {
                                 Column {
-
                                     val isRefreshing by viewModel.isRefreshing.collectAsState()
-
                                     viewModel.loadSongs()
 
                                     SwipeRefresh(
                                         state = rememberSwipeRefreshState(isRefreshing),
                                         onRefresh = { viewModel.refresh() },
                                     ) {
-                                        Column {
-//                                            Text(
-//                                                "Song list name",
-//                                                color = primary,
-//                                                fontWeight = FontWeight.Bold,
-//                                                fontSize = 18.sp,
-//                                                modifier = Modifier
-//                                                    .align(alignment = Alignment.CenterHorizontally)
-//                                                    .padding(vertical = 16.dp)
-//                                            )
-
-                                            if (songs != null)
-                                                LazyColumn {
-                                                    items(songs!!) { song ->
-                                                        SongRow(song)
-                                                    }
+                                        if (songs != null)
+                                            LazyColumn(
+                                                modifier = Modifier.padding(16.dp)
+                                            ) {
+                                                items(songs!!) { song ->
+                                                    SongRow(song)
                                                 }
-                                        }
+                                            }
                                     }
                                 }
                             }
                         }
                     )
-//                    }
                 }
             }
         }
@@ -191,20 +175,18 @@ class SongListFragment : Fragment() {
                         )
                     )
                 })
-//                .padding(horizontal = 8.dp)
-                .padding(8.dp)
+                .padding(vertical = 8.dp)
                 .fillMaxWidth()
         ) {
             Text(
                 text = "${song.title}",
                 fontWeight = FontWeight.W300,
                 color = fontColor
-
             )
             Text(
                 text = "${song.author}",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.W300,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W400,
                 color = fontColor,
                 modifier = Modifier.alpha(0.54f)
             )

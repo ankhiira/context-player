@@ -35,7 +35,7 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
 
             // Enqueue this unique work again so it achieves periodicity
             val tenMinutesRequest = OneTimeWorkRequestBuilder<PredictionWorker>()
-                .setInitialDelay(10, java.util.concurrent.TimeUnit.MINUTES)
+                .setInitialDelay(1, java.util.concurrent.TimeUnit.MINUTES)
                 .addTag("WIFIJOB1")
                 .build()
             WorkManager.getInstance(appContext)

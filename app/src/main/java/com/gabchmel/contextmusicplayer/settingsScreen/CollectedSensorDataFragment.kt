@@ -9,16 +9,16 @@ import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -69,7 +69,7 @@ class CollectedSensorDataFragment : Fragment() {
                             TopAppBar(
                                 title = {
                                     Text(
-                                        "Sensor values",
+                                        "Collected sensor values",
                                         color = materialYel400,
                                         fontSize = 18.sp,
                                     )
@@ -86,30 +86,48 @@ class CollectedSensorDataFragment : Fragment() {
                                 })
                         },
                         content = {
-                            Column {
-
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
                                 sensorProcessService?.let { sensorProcessService ->
-                                    val location by
-                                    sensorProcessService.location.collectAsState(null)
-                                    val time by sensorProcessService.time.collectAsState(null)
+                                    val sensorData by
+                                    sensorProcessService.sensorData.collectAsState(null)
 
-                                    Column {
-                                        // Get the current location
-                                        val text = location?.let { location ->
-                                            "${location.latitude}, ${location.longitude}"
-                                        } ?: "Null"
-                                        Text(text = "Current location: $text")
+                                    sensorData?.currentTime?.let { it1 ->
+                                        SensorRow("time",
+                                            it1
+                                        )
                                     }
-
-                                    Column {
-                                        Text(text = "Current time: ${time?.toString() ?: "Null"}")
-                                    }
+//
+//                                    Column {
+//                                        // Get the current location
+//                                        val text = sensorData?.let { sensorData ->
+//                                            "${sensorData.latitude}, ${sensorData.longitude}"
+//                                        } ?: "Null"
+//                                        Text(
+//                                            text = "Current location: $text",
+//                                            fontSize = 18.sp
+//                                        )
+//                                    }
+//
+//                                    Column {
+//                                        Text(text = "Current time: ${sensorData?.currentTime}")
+//                                    }
                                 }
                             }
                         }
                     )
                 }
             }
+        }
+    }
+
+    @Composable
+    fun SensorRow(sensor: String, value: Any) {
+        Row() {
+            Text(text = "$sensor: ")
+            Text(text = "$value")
         }
     }
 

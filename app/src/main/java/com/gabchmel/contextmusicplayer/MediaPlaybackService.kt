@@ -1,6 +1,7 @@
 package com.gabchmel.contextmusicplayer
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.*
 import android.content.pm.PackageManager
@@ -15,7 +16,9 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.gabchmel.common.LocalBinder
@@ -449,10 +452,18 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         result.sendResult(mediaItems as MutableList<MediaBrowserCompat.MediaItem>?)
     }
 
+    @SuppressLint("ServiceCast")
     override fun onTaskRemoved(rootIntent: Intent?) {
+
+        Toast.makeText(this, "task removed", Toast.LENGTH_SHORT).show()
+
+        val notificationManager =
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManagerCompat
+        notificationManager.cancelAll()
 
         player.stop()
         stopSelf()
+        stopForeground(true)
         super.onTaskRemoved(rootIntent)
     }
 
@@ -464,7 +475,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
         player.stop()
         player.seekTo(0)
-
+        stopForeground(true)
         this.applicationContext.unbindService(connection)
 
         stopSelf()

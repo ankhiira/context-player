@@ -95,8 +95,8 @@ class SongListFragment : Fragment() {
                             )
                         },
                         content = {
+                            // Component to grant the permissions
                             val granted by isPermGranted.collectAsState()
-
                             if ((ActivityCompat.checkSelfPermission(
                                     requireContext(),
                                     Manifest.permission.READ_EXTERNAL_STORAGE

@@ -31,7 +31,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         lateinit var lifecycleOwnerNew: LifecycleOwner
         lateinit var predictedSong: Song
         val mediaControllerNew = CompletableDeferred<MediaControllerCompat>()
-
     }
 
     private lateinit var mediaBrowser: MediaBrowserCompat
@@ -40,8 +39,8 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
     private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
         lifecycleOwner.whenCreated {
             val service = context.bindService(SensorProcessService::class.java)
-            service.createModel()
-            service.triggerPrediction()
+            if (service.createModel())
+                service.triggerPrediction()
             service
         }
     }
@@ -181,75 +180,76 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
             notificationManager.createNotificationChannel(notificationChannel)
+        }
 
-            // Specification of activity that will be executed after click on the notification will be performed
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
+        // Specification of activity that will be executed after click on the notification will be performed
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
 
-            // Definition of the intent execution that execute the according activity
-            val pendingIntent: PendingIntent = PendingIntent.getActivity(
-                context, 0, intent,
+        // Definition of the intent execution that execute the according activity
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+            context, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val intentPlay = Intent(context, ActionReceiver::class.java).apply {
+            this.putExtra("action", "actionPlay")
+        }
+
+        val pendingIntentPlay =
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                intentPlay,
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-            val intentPlay = Intent(context, ActionReceiver::class.java).apply {
-                this.putExtra("action", "actionPlay")
-            }
-
-            val pendingIntentPlay =
-                PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    intentPlay,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-
-            val intentSkip = Intent(context, ActionReceiver::class.java).apply {
-                this.putExtra("action", "actionSkip")
-            }
-
-            val pendingIntentSkip =
-                PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    intentSkip,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-
-            // Definition of notification layout
-            val builder = NotificationCompat.Builder(context, NotificationManager.CHANNEL_ID)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSilent(true)
-                .setSmallIcon(R.drawable.ic_baseline_headset_24)
-                .setContentTitle("Play this song?")
-                .setContentText(song.title + " - " + song.author)
-                .addAction(
-                    R.drawable.ic_play_arrow_black_24dp,
-                    "Play",
-                    pendingIntentPlay
-                )
-                .addAction(
-                    R.drawable.ic_skip_next_black_24dp,
-                    "Skip for now",
-                    pendingIntentSkip
-                )
-                .setContentIntent(pendingIntent)
-                // Stop the service when the notification is swiped away
-                .setDeleteIntent(
-                    MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        context,
-                        PlaybackStateCompat.ACTION_STOP
-                    )
-                )
-                .setAutoCancel(true)
-
-            val notification = builder.build()
-
-            with(NotificationManagerCompat.from(context)) {
-                notify(678, notification)
-            }
+        val intentSkip = Intent(context, ActionReceiver::class.java).apply {
+            this.putExtra("action", "actionSkip")
         }
+
+        val pendingIntentSkip =
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                intentSkip,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+        // Definition of notification layout
+        val builder = NotificationCompat.Builder(context, NotificationManager.CHANNEL_ID)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setSilent(true)
+            .setSmallIcon(R.drawable.ic_baseline_headset_24)
+            .setContentTitle("Play this song?")
+            .setContentText(song.title + " - " + song.author)
+            .addAction(
+                R.drawable.ic_play_arrow_black_24dp,
+                "Play",
+                pendingIntentPlay
+            )
+            .addAction(
+                R.drawable.ic_skip_next_black_24dp,
+                "Skip for now",
+                pendingIntentSkip
+            )
+            .setContentIntent(pendingIntent)
+            // Stop the service when the notification is swiped away
+            .setDeleteIntent(
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    context,
+                    PlaybackStateCompat.ACTION_STOP
+                )
+            )
+            .setAutoCancel(true)
+
+        val notification = builder.build()
+
+        with(NotificationManagerCompat.from(context)) {
+            notify(678, notification)
+        }
+
     }
 }

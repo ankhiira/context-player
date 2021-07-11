@@ -43,16 +43,17 @@ object SensorManagerUtility {
                             add(values[1])
                             add(values[2])
                         }
+                        // TODO call the function for orientation here
                         sensorProcessService.coordList = sensorValueList
                     }
                     sensorType == Sensor.TYPE_LIGHT -> {
-                        sensorProcessService.lightSensorValue = values[0]
+                        sensorProcessService._sensorData.value.lightSensorValue = values[0]
                     }
                     sensorType == Sensor.TYPE_PRESSURE -> {
-                        sensorProcessService.barometerVal = values[0]
+                        sensorProcessService._sensorData.value.pressure = values[0]
                     }
                     sensorType == Sensor.TYPE_AMBIENT_TEMPERATURE -> {
-                        sensorProcessService.temperature = values[0]
+                        sensorProcessService._sensorData.value.temperature = values[0]
                     }
                 }
 

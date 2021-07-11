@@ -14,12 +14,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.fragment.findNavController
+import com.gabchmel.contextmusicplayer.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import java.io.File
 
 class SettingsFragment : Fragment() {
 
@@ -30,7 +34,6 @@ class SettingsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
-
                     val materialYel400 = MaterialTheme.colors.onPrimary
 
                     Scaffold(
@@ -108,27 +111,71 @@ class SettingsFragment : Fragment() {
                                         contentDescription = "Settings",
                                     )
                                 }
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable(onClick = {
-                                            findNavController().navigate(
-                                                SettingsFragmentDirections
-                                                    .actionSettingsFragmentToPredictionModelSettingsFragment()
-                                            )
-                                        }),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "Prediction model",
-                                        color = materialYel400,
-                                        fontSize = 18.sp
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Filled.NavigateNext,
-                                        contentDescription = "Settings",
-                                    )
+                                Row() {
+                                    Column(
+                                        modifier = Modifier
+                                            .clickable(onClick = {
+                                                MediaBrowserConnector(
+                                                    ProcessLifecycleOwner.get(),
+                                                    requireContext()
+                                                )
+                                            })
+                                    ) {
+                                        Text(
+                                            text = "Recreate model",
+                                            fontWeight = FontWeight.Bold,
+                                            color = materialYel400,
+                                            fontSize = 18.sp
+                                        )
+                                        Text(
+                                            text = "Clicking on this causes recreation of the model and triggers new song prediction",
+                                            color = materialYel400
+                                        )
+                                    }
                                 }
+                                Row() {
+                                    Column(
+                                        modifier = Modifier
+                                            .clickable(onClick = {
+                                                val inputFile = File(requireContext().filesDir, "data.csv")
+                                                if (inputFile.exists()) {
+                                                    requireContext().deleteFile("data.csv")
+                                                }
+                                            })
+                                    ) {
+                                        Text(
+                                            text = "Delete saved data",
+                                            fontWeight = FontWeight.Bold,
+                                            color = materialYel400,
+                                            fontSize = 18.sp
+                                        )
+                                        Text(
+                                            text = "Clicking on this deletes all collected sensor data used for song prediction",
+                                            color = materialYel400
+                                        )
+                                    }
+                                }
+//                                Row(
+//                                    modifier = Modifier
+//                                        .fillMaxWidth()
+//                                        .clickable(onClick = {
+//                                            findNavController().navigate(
+//                                                SettingsFragmentDirections
+//                                                    .actionSettingsFragmentToPredictionModelSettingsFragment()
+//                                            )
+//                                        }),
+//                                    horizontalArrangement = Arrangement.SpaceBetween
+//                                ) {
+//                                    Text(
+//                                        text = "Prediction model",
+//                                        color = materialYel400,
+//                                        fontSize = 18.sp
+//                                    )
+//                                    Icon(
+//                                        imageVector = Icons.Filled.NavigateNext,
+//                                        contentDescription = "Settings",
+//                                    )
+//                                }
                             }
                         }
                     )

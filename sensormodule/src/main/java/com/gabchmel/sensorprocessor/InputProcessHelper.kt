@@ -23,21 +23,21 @@ object InputProcessHelper {
         val latitude = sensorData.latitude
         val longitude = sensorData.longitude
 
-        var dayOfWeek : Int = 0
-        var timeInSeconds : Int = 0
+        var dayOfWeek: Int = 0
+        var timeInSeconds: Int = 0
 
         currentTime?.let {
-        // Convert to similar representation as in other models
-        dayOfWeek =
-            if (currentTime.day == 0) {
-                6
-            } else {
-                currentTime.day - 1
-            }
+            // Convert to similar representation as in other models
+            dayOfWeek =
+                if (currentTime.day == 0) {
+                    6
+                } else {
+                    currentTime.day - 1
+                }
 
-        // Convert current time to seconds
-        timeInSeconds =
-            (currentTime.hours * 60 + currentTime.minutes) * 60 + currentTime.seconds
+            // Convert current time to seconds
+            timeInSeconds =
+                (currentTime.hours * 60 + currentTime.minutes) * 60 + currentTime.seconds
         }
         // Get number of seconds in a day
         val secondsInDay = 24 * 60 * 60
@@ -67,53 +67,55 @@ object InputProcessHelper {
         )
     }
 
+    // Give header to the file and process dates
     fun processInputCSV(context: Context): ArrayList<String> {
-
         val inputFile = File(context.filesDir, "data.csv")
         val csvFile = File(context.filesDir, "convertedData.csv")
         val classNames = arrayListOf<String>()
 
+        // Convert the whole file each time
         csvFile.writeText(
             "class,sinTime,cosTime,dayOfWeekSin," +
                     "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
         )
 
-        // TODO else
         if (inputFile.exists()) {
             csvReader().open(inputFile) {
+                readAllAsSequence()
+                    .map { row ->
+                        val dateNew = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            val format =
+                                DateTimeFormatter.ofPattern(
+                                    "E MMM dd HH:mm:ss ZZZZ yyyy",
+                                    context.resources.configuration.locales.get(0)
+                                )
+                            val localDate = LocalDateTime.parse(row[1], format)
+                            Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant())
+                        } else {
+                            // TODO check date formats
+                            val formatter =
+                                SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.ENGLISH)
+                            formatter.parse(row[1])!!
+                        }
 
-                readAllAsSequence().onEach {
-//                    println(it) //[a, b, c]
-                }.map { row ->
+                        if (!classNames.contains(row[0])) {
+                            classNames.add(row[0])
+                        }
 
-                    val dateNew = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        val format =
-                            DateTimeFormatter.ofPattern(
-                                "E MMM dd HH:mm:ss ZZZZ yyyy",
-                                context.resources.configuration.locales.get(0)
-                            )
-                        val localDate = LocalDateTime.parse(row[1], format)
-                        Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant())
-                    } else {
-                        // TODO check date formats
-                        val formatter =
-                            SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.ENGLISH)
-                        formatter.parse(row[1])!!
-                    }
-
-                    if (!classNames.contains(row[0])) {
-                        classNames.add(row[0])
-                    }
-
-                    row[0] to SensorData(
-                        dateNew, row[2].toDouble(), row[3].toDouble(), row[4], row[5].toFloat(),
-                        row[6].toFloat(), row[7].toFloat(),
-                        row[8].toFloat()
-                    )
-                }.map {
-                    it.first to inputProcessHelper(it.second)
-                }.forEach {
-//                    if (csvFile.exists()) {
+                        row[0] to SensorData(
+                            dateNew, row[2].toDouble(), row[3].toDouble(), row[4], row[5].toFloat(),
+                            row[6].toFloat(), row[7].toFloat(),
+                            row[8].toFloat(), row[9].toFloat(), row[10].toFloat()
+                        )
+                    }.map {
+                        it.first to inputProcessHelper(it.second)
+                    }.forEach {
+//                        if (!csvFile.exists()) {
+//                            csvFile.writeText(
+//                                "class,sinTime,cosTime,dayOfWeekSin," +
+//                                        "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
+//                            )
+//                        }
                         try {
                             // Write to csv file
                             val data = it.second.joinToString(separator = ",", postfix = "\n")
@@ -121,14 +123,10 @@ object InputProcessHelper {
                         } catch (e: IOException) {
                             Log.e("Err", "Couldn't write to file", e)
                         }
-//                    } else {
-//                        csvFile.writeText(
-//                            "class,sinTime,cosTime,dayOfWeekSin," +
-//                                    "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
-//                        )
-//                    }
-                }
+                    }
             }
+        } else {
+            Log.e("File", "The input file doesn't exist")
         }
         return classNames
     }

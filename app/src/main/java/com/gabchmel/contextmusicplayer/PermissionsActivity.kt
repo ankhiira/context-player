@@ -34,10 +34,10 @@ class PermissionsActivity : AppCompatActivity() {
             }
             val intent = Intent(this, MainActivity::class.java)
 
-            if (isGranted) {
+//            if (isGranted) {
                 // Start the main activity
                 startActivity(intent)
-            }
+//            }
 
             // TODO if some permission not granted create screen informing about
             // the lack of functionality

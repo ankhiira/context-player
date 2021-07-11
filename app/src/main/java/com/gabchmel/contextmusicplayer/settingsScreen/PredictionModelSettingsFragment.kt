@@ -22,6 +22,7 @@ import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
 import com.gabchmel.sensorprocessor.SensorLister
 
+@Deprecated ("Not used, already in settings screen")
 class PredictionModelSettingsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,7 +31,6 @@ class PredictionModelSettingsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
-
                     val sensorReader = SensorLister(context)
                     val materialYel400 = MaterialTheme.colors.onPrimary
                     val scaffoldState =

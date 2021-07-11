@@ -6,6 +6,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 
 class PredictionWorker(private val appContext: Context, workerParams: WorkerParameters) :
@@ -30,8 +31,12 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
 //            setProgress(lastUpdate)
 //            delay(delayDuration)
 
-            // Connect to the MediaBrowserService, run prediction and create notification
-            MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
+            // Run prediction only if there are input data
+            val inputFile = File(appContext.filesDir, "data.csv")
+            if (inputFile.exists()) {
+                // Connect to the MediaBrowserService, run prediction and create notification
+                MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
+            }
 
             // Enqueue this unique work again so it achieves periodicity
             val tenMinutesRequest = OneTimeWorkRequestBuilder<PredictionWorker>()
@@ -40,7 +45,7 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
                 .build()
             WorkManager.getInstance(appContext)
                 .enqueueUniqueWork("work2",
-                    ExistingWorkPolicy.KEEP,
+                    ExistingWorkPolicy.REPLACE,
                     tenMinutesRequest)
 
             Log.d("Work", "Done Work")

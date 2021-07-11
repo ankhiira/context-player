@@ -39,9 +39,13 @@ class PredictionModelBuiltIn(val context: Context) {
     }
 
     // Function to create and evaluate model
-    fun createModel(classNames: ArrayList<String>) {
+    fun createModel(classNames: ArrayList<String>): Boolean {
 
         convertCSVtoarrf(context, classNames)
+
+        if (classNames.size == 1) {
+            return false
+        }
 
         lateinit var trainingDataSet: Instances
         if (File(context.filesDir, file).exists()) {
@@ -64,6 +68,7 @@ class PredictionModelBuiltIn(val context: Context) {
             println(eval.toClassDetailsString())
             eval.predictions()
         }
+        return true
     }
 
     // Function to make prediction on input data

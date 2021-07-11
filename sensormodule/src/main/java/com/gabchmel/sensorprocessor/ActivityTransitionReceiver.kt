@@ -28,7 +28,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 
                 context.sendBroadcast(Intent("MyAction"))
 
-                sensorProcessService.writeActivity(activity)
+                sensorProcessService.sensorData.value.currentState = activity
             }
         }
     }

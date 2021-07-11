@@ -9,14 +9,12 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
-import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
@@ -31,7 +29,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
@@ -39,43 +36,28 @@ import kotlin.math.abs
 
 class SensorProcessService : Service() {
 
-    companion object {
-        private var _sensorData = MutableStateFlow(
-            SensorData(null,null,null,null, null,
-            null,null,null)
+    // Structure to store sensor values
+    var _sensorData = MutableStateFlow(
+        SensorData(
+            null, 0.0, 0.0, "NONE", 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f
         )
-        val sensorData : StateFlow<SensorData?> = _sensorData
-    }
+    )
+    val sensorData: StateFlow<SensorData> = _sensorData
 
-    private lateinit var csvFile: File
-    private lateinit var broadcastReceiver: BroadcastReceiver
-
-    private var locationManager: LocationManager? = null
-
-    private val _location = MutableStateFlow<Location?>(null)
-    val location: StateFlow<Location?> = _location
-
-    private val _time = MutableStateFlow<Date?>(null)
-    val time: StateFlow<Date?> = _time
-
-    private var currentState = "NONE"
-
-    var lightSensorValue: Float = 0.0f
+    // List of orientation coordinates
     var coordList = mutableListOf<Float>()
-    var barometerVal: Float = 0.0f
-    var temperature: Float = 0.0f
 
-    private var orientSensorAzimuthZAxis: Float = 0.0f
-    private var orientSensorPitchXAxis: Float = 0.0f
-    private var orientSensorRollYAxis: Float = 0.0f
+    // Input CSV file to save sensor values
+    private lateinit var csvFile: File
 
-    private var deviceLying = 0.0f
-    private var BTdeviceConnected = 0.0f
-    var headphonesPluggedIn = 0
+    // Random Forest model
     private val predictionModel = PredictionModelBuiltIn(this)
 
+    // Song IDs
     private var classNames = arrayListOf<String>()
 
+    // Saved prediction result as StateFlow to show notification
     private val _prediction = MutableStateFlow<String?>(null)
     val prediction: StateFlow<String?> = _prediction
 
@@ -90,33 +72,7 @@ class SensorProcessService : Service() {
         // CSV file with sensor measurements and context data
         csvFile = File(this.filesDir, "data.csv")
 
-        // Persistent LocationManager reference
-        locationManager = this.getSystemService(LOCATION_SERVICE) as LocationManager?
-
-        // TODO if not granted
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACTIVITY_RECOGNITION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.e("permission", "permission not granted")
-        }
-
-        locationManager?.requestLocationUpdates(
-            LocationManager.NETWORK_PROVIDER,
-            0L,
-            0f,
-            locationListener
-        )
-
-        // Get current time
-        _time.value = Calendar.getInstance().time
+        registerLocationListener()
 
         // Set ut callbacks for activity detection
         activityDetection()
@@ -194,133 +150,86 @@ class SensorProcessService : Service() {
         return binder
     }
 
-    // Location change listener
-    private val locationListener: LocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            _location.value = location
-        }
+    fun writeToFile(songID: String) {
+        // Read current time
+        _sensorData.value.currentTime = Calendar.getInstance().time
 
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
-    }
-
-    fun writeToFile(ID: String) {
-
-        // Get current time
-        val currentTime = Calendar.getInstance().time
-        val dateFormatter = SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.getDefault())
-        val date = dateFormatter.format(currentTime)
-
-        Log.d("Sensor", "write")
+//        Log.d("Sensor", "write")
 
         processOrientation()
 
-        val latitude: Double
-        val longitude: Double
-
-//        if (location.value == null) {
-//            locationManager.requestLocationUpdates(getProviderName(), 0, 0, this)
-//        }
-
-        // If the location is null, set the value to 0.0
-        if (location.value == null) {
-            latitude = 0.0
-            longitude = 0.0
-        } else {
-            latitude = location.value?.latitude!!
-            longitude = location.value?.longitude!!
-        }
-
-        // TODO Make check that we have a value - maybe we don't have to have value idk - mozna def
+        // TODO Make check that we have a value - maybe we don't have to have value idk - let
         try {
+            // TODO redo do for each to optimize
             // Write to csv file
             csvFile.appendText(
-                ID + ","
-                        + date + ","
-                        + longitude.toString() + ","
-                        + latitude.toString() + ","
-                        + currentState + ","
-                        + lightSensorValue + ","
-                        + deviceLying + ","
-                        + BTdeviceConnected + ","
-                        + headphonesPluggedIn.toFloat() + "\n"
+                songID + ","
+                    + sensorData.value.currentTime + ","
+                    + sensorData.value.longitude + ","
+                    + sensorData.value.latitude + ","
+                    + sensorData.value.currentState + ","
+                    + sensorData.value.lightSensorValue + ","
+                    + sensorData.value.deviceLying + ","
+                    + sensorData.value.BTdeviceConnected + ","
+                    + sensorData.value.headphonesPluggedIn + ","
+                    + sensorData.value.pressure + ","
+                    + sensorData.value.temperature + "\n"
             )
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
         }
     }
 
-    private fun getSensorData(): SensorData {
-
-        val currentTime = Calendar.getInstance().time
-
-        return SensorData(
-            currentTime,
-            location.value?.longitude,
-            location.value?.latitude,
-            currentState,
-            lightSensorValue,
-            deviceLying,
-            BTdeviceConnected,
-            headphonesPluggedIn.toFloat()
-        )
-    }
-
-    fun createModel() {
-
+    fun createModel(): Boolean {
         // Process input CSV file and save class names into ArrayList<String>
         classNames = processInputCSV(this)
 
-        predictionModel.createModel(classNames)
+        if(!predictionModel.createModel(classNames)) {
+            return false
+        }
 
         Log.d("model", "model created")
+        return true
     }
 
     fun triggerPrediction() {
-
         Log.d("prediction", "trigger prediction")
 
         // Get the processed input values
-        val input = inputProcessHelper(getSensorData())
+        val input = inputProcessHelper(sensorData.value)
 
         _prediction.value = predictionModel.predict(input, classNames)
     }
 
     fun detectContextChange(): Boolean {
-        val sensorData = getSensorData()
-
         val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
         val time = prefs.getString("time", "No name defined")
         val headphones = prefs.getFloat("headphones", -1.0f)
         val bluetooth = prefs.getFloat("bluetooth", -1.0f)
         val light = prefs.getFloat("light", -1.0f)
-        if (sensorData.BTdeviceConnected != bluetooth) {
+        if (sensorData.value.BTdeviceConnected != bluetooth) {
             return true
         }
-        if (sensorData.lightSensorValue != light) {
+        if (sensorData.value.lightSensorValue != light) {
             return true
         }
         return false
     }
 
     fun saveSensorData() {
-        val sensorData = getSensorData()
-
         val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
-        editor.putString("time", sensorData.currentTime.toString())
-        sensorData.longitude?.let { editor.putFloat("longitude", it.toFloat()) }
-        sensorData.latitude?.let { editor.putFloat("latitude", it.toFloat()) }
-        editor.putString("state", sensorData.currentState)
-        sensorData.lightSensorValue?.let { editor.putFloat("light", it) }
-        sensorData.deviceLying?.let { editor.putFloat("lying", it) }
-        sensorData.BTdeviceConnected?.let { editor.putFloat("bluetooth", it) }
-        sensorData.headphonesPluggedIn?.let { editor.putFloat("headphones", it) }
+        editor.putString("time", sensorData.value.currentTime.toString())
+        sensorData.value.longitude?.let { editor.putFloat("longitude", it.toFloat()) }
+        sensorData.value.latitude?.let { editor.putFloat("latitude", it.toFloat()) }
+        editor.putString("state", sensorData.value.currentState)
+        sensorData.value.lightSensorValue?.let { editor.putFloat("light", it) }
+        sensorData.value.deviceLying?.let { editor.putFloat("lying", it) }
+        sensorData.value.BTdeviceConnected?.let { editor.putFloat("bluetooth", it) }
+        sensorData.value.headphonesPluggedIn?.let { editor.putFloat("headphones", it) }
         editor.apply()
     }
 
     private fun activityDetection() {
-
         val request = ActivityTransitionRequest(TransitionList.getTransitions())
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
@@ -345,14 +254,15 @@ class SensorProcessService : Service() {
         }
     }
 
-    fun writeActivity(currentActivity: String) {
-        currentState = currentActivity
-    }
-
     private fun processOrientation() {
+
+//    private var orientSensorAzimuthZAxis: Float = 0.0f
+//    private var orientSensorPitchXAxis: Float = 0.0f
+//    private var orientSensorRollYAxis: Float = 0.0f
+
         // Get the range of acceptable values for lying device - -1.58 is exactly lying
-        deviceLying = if (abs(orientSensorAzimuthZAxis) in 1.4f..1.7f) {
-//            Log.d("Orientation", "Device is lying")
+        _sensorData.value.deviceLying = if (abs(coordList[0]) in 1.4f..1.7f) {
+            Log.d("Orientation", "Device is lying")
             1.0f
         } else {
 //            Log.d("Orientation", "Device is staying")
@@ -361,7 +271,6 @@ class SensorProcessService : Service() {
     }
 
     private fun bluetoothDevicesConnection() {
-
         // Check if the device supports bluetooth
         val pm: PackageManager = this.packageManager
         val hasBluetooth = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
@@ -374,7 +283,7 @@ class SensorProcessService : Service() {
             val s: MutableList<String> = ArrayList()
             for (bt in pairedDevices) s.add(bt.name)
 
-            BTdeviceConnected =
+            _sensorData.value.BTdeviceConnected =
                 if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED == bluetoothAdapter.getProfileConnectionState(
                         BluetoothProfile.HEADSET
                     )
@@ -388,18 +297,19 @@ class SensorProcessService : Service() {
     }
 
     private fun headphonesPluggedInDetection() {
-        broadcastReceiver = object : BroadcastReceiver() {
+        val broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
                 val action = intent.action
                 if (Intent.ACTION_HEADSET_PLUG == action) {
-                    headphonesPluggedIn = intent.getIntExtra("state", -1)
-                    if (headphonesPluggedIn == 0) {
+                    _sensorData.value.headphonesPluggedIn =
+                        intent.getIntExtra("state", -1).toFloat()
+                    if (_sensorData.value.headphonesPluggedIn == 0.0f) {
                         Toast.makeText(
                             applicationContext,
                             "Headphones not plugged in",
                             Toast.LENGTH_LONG
                         ).show()
-                    } else if (headphonesPluggedIn == 1) {
+                    } else if (_sensorData.value.headphonesPluggedIn == 1.0f) {
                         Toast.makeText(
                             applicationContext,
                             "Headphones plugged in",
@@ -410,8 +320,8 @@ class SensorProcessService : Service() {
             }
         }
 
-//        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
-//        registerReceiver(broadcastReceiver, receiverFilter)
+        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
+        registerReceiver(broadcastReceiver, receiverFilter)
     }
 
     private fun wifiConnection(): String {
@@ -450,5 +360,45 @@ class SensorProcessService : Service() {
             }
         }
         return "NONE"
+    }
+
+    private fun registerLocationListener() {
+
+        // Location change listener
+        val locationListener = LocationListener { location ->
+            _sensorData.value.longitude = location.longitude
+            _sensorData.value.latitude = location.latitude
+        }
+
+        // Persistent LocationManager reference
+        val locationManager = this.getSystemService(LOCATION_SERVICE) as LocationManager?
+
+        // TODO if not granted
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.e("permission", "permission not granted")
+            return
+        }
+
+        locationManager?.requestLocationUpdates(
+            LocationManager.NETWORK_PROVIDER,
+            0L,
+            0f,
+            locationListener
+        )
+
+        //        if (location.value == null) {
+//            locationManager.requestLocationUpdates(getProviderName(), 0, 0, this)
+//        }
+
     }
 }

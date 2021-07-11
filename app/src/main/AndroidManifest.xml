@@ -48,7 +48,8 @@
 
         <service
             android:name=".MediaPlaybackService"
-            android:exported="false">
+            android:exported="false"
+            android:stopWithTask="true">
             <intent-filter>
                 <!-- IDK if delete -->
                 <action android:name="android.intent.action.MEDIA_BUTTON" />

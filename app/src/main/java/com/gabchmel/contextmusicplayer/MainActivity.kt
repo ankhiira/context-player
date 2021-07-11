@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                 Constraints.Builder()
 //                    .setRequiresCharging(true)
 //                    .setMinimumLoggingLevel(android.util.Log.DEBUG)
-                    .setRequiredNetworkType(NetworkType.METERED)
+//                    .setRequiredNetworkType(NetworkType.METERED)
                     .build()
             )
             .setInputData(

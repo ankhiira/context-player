@@ -13,7 +13,6 @@ object SensorManagerUtility {
         sensorManager: SensorManager, sensorType: Int, sensorName: String,
         sensorProcessService: SensorProcessService
     ) {
-
         var isOrientSensor = false
         var sensorList: List<Sensor> = emptyList()
 
@@ -26,7 +25,6 @@ object SensorManagerUtility {
         if (isOrientSensor) {
             sensorList = sensorManager.getSensorList(sensorType)
         }
-
 
         // Identify the sensor
         val sensor = sensorManager.getDefaultSensor(sensorType)

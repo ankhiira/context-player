@@ -65,6 +65,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
+    // Dependency on the other local modules
     implementation(project(':sensormodule'))
     implementation project(path: ':common')
     implementation project(path: ':predicitonmodule')

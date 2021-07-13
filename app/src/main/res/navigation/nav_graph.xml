@@ -40,9 +40,6 @@
         <action
             android:id="@+id/action_settingsFragment_to_sensorValuesFragment"
             app:destination="@id/sensorValuesFragment" />
-        <action
-            android:id="@+id/action_settingsFragment_to_predictionModelSettingsFragment"
-            app:destination="@id/predictionModelSettingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/sensorScreen"
@@ -52,8 +49,4 @@
         android:id="@+id/sensorValuesFragment"
         android:name="com.gabchmel.contextmusicplayer.settingsScreen.CollectedSensorDataFragment"
         android:label="SensorValuesFragment" />
-    <fragment
-        android:id="@+id/predictionModelSettingsFragment"
-        android:name="com.gabchmel.contextmusicplayer.settingsScreen.PredictionModelSettingsFragment"
-        android:label="PredictionModelSettingsFragment" />
 </navigation>

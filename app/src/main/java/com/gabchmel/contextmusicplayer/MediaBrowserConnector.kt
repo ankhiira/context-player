@@ -131,6 +131,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }
     }
 
+    // Broadcast Receiver listening to action performed by click on prediction notification buttons
     class ActionReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.getStringExtra("action")

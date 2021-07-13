@@ -17,13 +17,13 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
-import com.gabchmel.sensorprocessor.InputProcessHelper.inputProcessHelper
-import com.gabchmel.sensorprocessor.InputProcessHelper.processInputCSV
+import com.gabchmel.sensorprocessor.utility.InputProcessHelper.inputProcessHelper
+import com.gabchmel.sensorprocessor.utility.InputProcessHelper.processInputCSV
 import com.gabchmel.sensorprocessor.activityDetection.TransitionList
+import com.gabchmel.sensorprocessor.utility.SensorManagerUtility
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +40,8 @@ class SensorProcessService : Service() {
     var _sensorData = MutableStateFlow(
         SensorData(
             null, 0.0, 0.0, "NONE", 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0, 0.0f
         )
     )
     val sensorData: StateFlow<SensorData> = _sensorData
@@ -304,17 +305,17 @@ class SensorProcessService : Service() {
                     _sensorData.value.headphonesPluggedIn =
                         intent.getIntExtra("state", -1).toFloat()
                     if (_sensorData.value.headphonesPluggedIn == 0.0f) {
-                        Toast.makeText(
-                            applicationContext,
-                            "Headphones not plugged in",
-                            Toast.LENGTH_LONG
-                        ).show()
+//                        Toast.makeText(
+//                            applicationContext,
+//                            "Headphones not plugged in",
+//                            Toast.LENGTH_LONG
+//                        ).show()
                     } else if (_sensorData.value.headphonesPluggedIn == 1.0f) {
-                        Toast.makeText(
-                            applicationContext,
-                            "Headphones plugged in",
-                            Toast.LENGTH_LONG
-                        ).show()
+//                        Toast.makeText(
+//                            applicationContext,
+//                            "Headphones plugged in",
+//                            Toast.LENGTH_LONG
+//                        ).show()
                     }
                 }
             }
@@ -324,13 +325,15 @@ class SensorProcessService : Service() {
         registerReceiver(broadcastReceiver, receiverFilter)
     }
 
-    private fun wifiConnection(): String {
+    private fun wifiConnection() {
         val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.connectionInfo
 
         Log.d("ssid", "SSID:${wifiInfo.ssid}, hashCode:${wifiInfo.ssid.hashCode()}")
 
-        return wifiInfo.ssid.hashCode().toString()
+        _sensorData.value.wifi = wifiInfo.ssid.hashCode()
+
+//        return wifiInfo.ssid.hashCode().toString()
     }
 
     private fun internetConnectivity(context: Context): String {
@@ -353,10 +356,10 @@ class SensorProcessService : Service() {
                     Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
                     return "TRANSPORT_WIFI"
                 }
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
-                    return "TRANSPORT_ETHERNET"
-                }
+//                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+//                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+//                    return "TRANSPORT_ETHERNET"
+//                }
             }
         }
         return "NONE"

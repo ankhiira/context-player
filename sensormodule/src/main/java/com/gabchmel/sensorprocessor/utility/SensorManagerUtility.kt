@@ -1,9 +1,10 @@
-package com.gabchmel.sensorprocessor
+package com.gabchmel.sensorprocessor.utility
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import com.gabchmel.sensorprocessor.SensorProcessService
 
 object SensorManagerUtility {
 

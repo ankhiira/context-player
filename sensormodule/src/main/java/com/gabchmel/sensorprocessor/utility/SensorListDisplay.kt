@@ -1,10 +1,10 @@
-package com.gabchmel.sensorprocessor;
+package com.gabchmel.sensorprocessor.utility;
 
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorManager;
 
-class SensorLister(context: Context) {
+class SensorListDisplay(context: Context) {
 
     var sensorManager= context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 

@@ -1,8 +1,9 @@
-package com.gabchmel.sensorprocessor
+package com.gabchmel.sensorprocessor.utility
 
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import com.gabchmel.sensorprocessor.SensorData
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import java.io.File
 import java.io.IOException
@@ -105,7 +106,8 @@ object InputProcessHelper {
                         row[0] to SensorData(
                             dateNew, row[2].toDouble(), row[3].toDouble(), row[4], row[5].toFloat(),
                             row[6].toFloat(), row[7].toFloat(),
-                            row[8].toFloat(), row[9].toFloat(), row[10].toFloat()
+                            row[8].toFloat(), row[9].toFloat(), row[10].toFloat(), row[11].toInt(),
+                            row[12].toFloat()
                         )
                     }.map {
                         it.first to inputProcessHelper(it.second)

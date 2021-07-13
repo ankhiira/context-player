@@ -94,26 +94,20 @@ class CollectedSensorDataFragment : Fragment() {
                                     val sensorData by
                                     sensorProcessService.sensorData.collectAsState(null)
 
-                                    sensorData?.currentTime?.let { it1 ->
-                                        SensorRow("time",
-                                            it1
+                                    Column {
+                                        // Get the current location
+                                        val text = sensorData?.let { sensorData ->
+                                            "${sensorData.latitude}, ${sensorData.longitude}"
+                                        } ?: "Null"
+                                        Text(
+                                            text = "Location: $text",
+                                            fontSize = 18.sp
                                         )
                                     }
-//
-//                                    Column {
-//                                        // Get the current location
-//                                        val text = sensorData?.let { sensorData ->
-//                                            "${sensorData.latitude}, ${sensorData.longitude}"
-//                                        } ?: "Null"
-//                                        Text(
-//                                            text = "Current location: $text",
-//                                            fontSize = 18.sp
-//                                        )
-//                                    }
-//
-//                                    Column {
-//                                        Text(text = "Current time: ${sensorData?.currentTime}")
-//                                    }
+
+                                    sensorData?.currentTime?.let { value ->
+                                        SensorRow("Time",value)
+                                    }
                                 }
                             }
                         }
@@ -125,8 +119,10 @@ class CollectedSensorDataFragment : Fragment() {
 
     @Composable
     fun SensorRow(sensor: String, value: Any) {
+        val materialYel400 = MaterialTheme.colors.onPrimary
         Row() {
-            Text(text = "$sensor: ")
+            Text(text = "$sensor: ",
+                color = materialYel400)
             Text(text = "$value")
         }
     }

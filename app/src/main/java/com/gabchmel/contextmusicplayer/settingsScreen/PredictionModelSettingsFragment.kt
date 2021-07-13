@@ -20,7 +20,7 @@ import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
-import com.gabchmel.sensorprocessor.SensorLister
+import com.gabchmel.sensorprocessor.utility.SensorListDisplay
 
 @Deprecated ("Not used, already in settings screen")
 class PredictionModelSettingsFragment : Fragment() {
@@ -31,7 +31,7 @@ class PredictionModelSettingsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
-                    val sensorReader = SensorLister(context)
+                    val sensorReader = SensorListDisplay(context)
                     val materialYel400 = MaterialTheme.colors.onPrimary
                     val scaffoldState =
                         rememberScaffoldState(rememberDrawerState(DrawerValue.Open))

@@ -12,5 +12,12 @@ data class SensorData(
     var BTdeviceConnected: Float?,
     var headphonesPluggedIn: Float?,
     var pressure: Float?,
-    var temperature: Float?
-)
+    var temperature: Float?,
+    var wifi: Int?,
+    var connection: Float?
+) {
+    fun getData() = listOf(
+        currentTime, longitude, latitude, currentState, lightSensorValue,
+        deviceLying, BTdeviceConnected, headphonesPluggedIn, pressure, temperature, wifi, connection
+    )
+}

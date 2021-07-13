@@ -134,25 +134,28 @@ class SettingsFragment : Fragment() {
                                     }
                                 }
                                 Row() {
-                                    Column(
-                                        modifier = Modifier
-                                            .clickable(onClick = {
-                                                val inputFile = File(requireContext().filesDir, "data.csv")
-                                                if (inputFile.exists()) {
-                                                    requireContext().deleteFile("data.csv")
-                                                }
-                                            })
-                                    ) {
-                                        Text(
-                                            text = "Delete saved data",
-                                            fontWeight = FontWeight.Bold,
-                                            color = materialYel400,
-                                            fontSize = 18.sp
-                                        )
-                                        Text(
-                                            text = "Clicking on this deletes all collected sensor data used for song prediction",
-                                            color = materialYel400
-                                        )
+                                    Card {
+                                        Column(
+                                            modifier = Modifier
+                                                .clickable(onClick = {
+                                                    val inputFile =
+                                                        File(requireContext().filesDir, "data.csv")
+                                                    if (inputFile.exists()) {
+                                                        requireContext().deleteFile("data.csv")
+                                                    }
+                                                })
+                                        ) {
+                                            Text(
+                                                text = "Delete saved data",
+                                                fontWeight = FontWeight.Bold,
+                                                color = materialYel400,
+                                                fontSize = 18.sp
+                                            )
+                                            Text(
+                                                text = "Clicking on this deletes all collected sensor data used for song prediction",
+                                                color = materialYel400
+                                            )
+                                        }
                                     }
                                 }
 //                                Row(

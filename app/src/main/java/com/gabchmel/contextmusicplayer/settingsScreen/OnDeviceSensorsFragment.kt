@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
-import com.gabchmel.sensorprocessor.SensorLister
+import com.gabchmel.sensorprocessor.utility.SensorListDisplay
 
 class OnDeviceSensorsFragment : Fragment() {
 
@@ -29,7 +29,7 @@ class OnDeviceSensorsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
-                    val sensorReader = SensorLister(context)
+                    val sensorReader = SensorListDisplay(context)
                     val materialYel400 = MaterialTheme.colors.onPrimary
                     val scaffoldState =
                         rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
@@ -59,11 +59,11 @@ class OnDeviceSensorsFragment : Fragment() {
                                 })
                         },
                         content = {
-                            LazyColumn (
+                            LazyColumn(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 contentPadding = PaddingValues(horizontal = 16.dp),
                                 modifier = Modifier.padding(vertical = 8.dp)
-                                    ) {
+                            ) {
                                 items(sensorReader.deviceSensors) { sensor ->
                                     Text(
                                         text = sensor.name,

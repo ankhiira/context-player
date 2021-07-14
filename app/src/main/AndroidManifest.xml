@@ -83,39 +83,8 @@
             </intent-filter>
         </receiver>
 
-        <!--        <receiver-->
-        <!--            android:name="com.gabchmel.sensorprocessor.SensorReceiver"-->
-        <!--            android:exported="true">-->
-        <!--            <intent-filter>-->
-        <!--                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />-->
-        <!--                <action android:name="android.intent.action.ACTION_BATTERY_CHANGED" />-->
-        <!--            </intent-filter>-->
-        <!--        </receiver>-->
-
-        <receiver
-            android:name="com.gabchmel.sensorprocessor.activityDetection.ActivityTransitionReceiver"
-            android:exported="false"
-            android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
-            <intent-filter>
-                <action android:name="TRANSITION_UPDATES" />
-            </intent-filter>
-        </receiver>
-
         <receiver android:name=".MediaBrowserConnector$ActionReceiver" />
 
-<!--        <receiver-->
-<!--            android:name=".ContextReceiver"-->
-<!--            android:exported="false"-->
-<!--            android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.AIRPLANE_MODE" />-->
-<!--                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />-->
-<!--                <action android:name="android.intent.action.BATTERY_CHANGED" />-->
-<!--                <action android:name="MyAction" />-->
-<!--                <action android:name="ACTION_HEADSET_PLUG" />-->
-<!--                <action android:name="TRANSITION_UPDATES" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
     </application>
 
 </manifest>

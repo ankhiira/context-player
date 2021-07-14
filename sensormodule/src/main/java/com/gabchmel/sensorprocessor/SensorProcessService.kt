@@ -39,13 +39,7 @@ import kotlin.math.abs
 class SensorProcessService : Service() {
 
     // Structure to store sensor values
-    var _sensorData = MutableStateFlow(
-        SensorData(
-            null, 0.0, 0.0, "NONE", 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-            0, "NONE"
-        )
-    )
+    var _sensorData = MutableStateFlow(SensorData())
     val sensorData: StateFlow<SensorData> = _sensorData
 
     // List of orientation coordinates
@@ -82,9 +76,6 @@ class SensorProcessService : Service() {
 
         // Check if the BT device is connected
         bluetoothDevicesConnection()
-
-
-//        registerReceiver(SensorReceiver(), receiverFilter)
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -162,24 +153,26 @@ class SensorProcessService : Service() {
         processOrientation()
         batteryStatusDetection()
 
-        // TODO Make check that we have a value - maybe we don't have to have value idk - let
+        sensorData.value.getData()
+
         try {
             // TODO redo do for each to optimize
             // Write to csv file
             csvFile.appendText(
-                songID + ","
-                    + sensorData.value.currentTime + ","
-                    + sensorData.value.longitude + ","
-                    + sensorData.value.latitude + ","
-                    + sensorData.value.currentState + ","
-                    + sensorData.value.lightSensorValue + ","
-                    + sensorData.value.deviceLying + ","
-                    + sensorData.value.BTdeviceConnected + ","
-                    + sensorData.value.headphonesPluggedIn + ","
-                    + sensorData.value.pressure + ","
-                    + sensorData.value.temperature + ","
-                    + sensorData.value.wifi + ","
-                    + sensorData.value.connection + "\n"
+            songID + ","
+//                    + sensorData.value.getData()
+                + sensorData.value.currentTime + ","
+                + sensorData.value.longitude + ","
+                + sensorData.value.latitude + ","
+                + sensorData.value.currentState + ","
+                + sensorData.value.lightSensorValue + ","
+                + sensorData.value.deviceLying + ","
+                + sensorData.value.BTdeviceConnected + ","
+                + sensorData.value.headphonesPluggedIn + ","
+                + sensorData.value.pressure + ","
+                + sensorData.value.temperature + ","
+                + sensorData.value.wifi + ","
+                + sensorData.value.connection + "\n"
             )
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
@@ -190,6 +183,7 @@ class SensorProcessService : Service() {
         // Process input CSV file and save class names into ArrayList<String>
         classNames = processInputCSV(this)
 
+        // If we don't have enough input data, don't create a model
         if(!predictionModel.createModel(classNames)) {
             return false
         }
@@ -291,8 +285,7 @@ class SensorProcessService : Service() {
 
             _sensorData.value.BTdeviceConnected =
                 if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED == bluetoothAdapter.getProfileConnectionState(
-                        BluetoothProfile.HEADSET
-                    )
+                        BluetoothProfile.HEADSET)
                 ) {
                     Log.d("BT", "mame headset")
                     1.0f
@@ -323,7 +316,7 @@ class SensorProcessService : Service() {
 
         Log.d("ssid", "SSID:${wifiInfo.ssid}, hashCode:${wifiInfo.ssid.hashCode()}")
 
-        _sensorData.value.wifi = wifiInfo.ssid.hashCode()
+        _sensorData.value.wifi = wifiInfo.ssid.hashCode().toUInt()
     }
 
     // Function to retrieve current internet connection state
@@ -401,13 +394,24 @@ class SensorProcessService : Service() {
             this.registerReceiver(null, iFilter)
         }
 
-        val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
-        val isCharging: Boolean = status == BatteryManager.BATTERY_STATUS_CHARGING
-                || status == BatteryManager.BATTERY_STATUS_FULL
+        // Detect if the device is charged
+        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1) {
+            BatteryManager.BATTERY_STATUS_CHARGING ->
+                _sensorData.value.batteryStatus = "CHARGING"
+            BatteryManager.BATTERY_STATUS_FULL ->
+                _sensorData.value.batteryStatus = "CHARGING"
+            BatteryManager.BATTERY_STATUS_NOT_CHARGING ->
+                _sensorData.value.batteryStatus = "NOT_CHARGING"
+        }
 
-        // How are we charging?
-        val chargePlug: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: -1
-        val usbCharge: Boolean = chargePlug == BatteryManager.BATTERY_PLUGGED_USB
-        val acCharge: Boolean = chargePlug == BatteryManager.BATTERY_PLUGGED_AC
+        // Detect how the device is charged
+        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: -1) {
+            BatteryManager.BATTERY_PLUGGED_USB ->
+                _sensorData.value.chargingType = "USB"
+            BatteryManager.BATTERY_PLUGGED_AC ->
+                _sensorData.value.chargingType = "AC"
+            BatteryManager.BATTERY_PLUGGED_WIRELESS ->
+                _sensorData.value.chargingType = "WIRELESS"
+        }
     }
 }

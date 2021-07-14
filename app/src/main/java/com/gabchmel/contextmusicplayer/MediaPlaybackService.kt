@@ -299,6 +299,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     // unregister BECOME_NOISY BroadcastReceiver if it was registered
                     if (isRegistered)
                         unregisterReceiver(myNoisyAudioStreamReceiver)
+                    isRegistered = false
 
                     isActive = false
                 }
@@ -472,6 +473,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         // unregister BECOME_NOISY BroadcastReceiver
         if (isRegistered)
             unregisterReceiver(myNoisyAudioStreamReceiver)
+        isRegistered = false
 
         player.stop()
         player.seekTo(0)

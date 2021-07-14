@@ -66,10 +66,6 @@
 
         </service>
 
-        <service
-            android:name="com.gabchmel.sensorprocessor.SensorIntentService"
-            android:exported="false" />
-
         <receiver
             android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="true">

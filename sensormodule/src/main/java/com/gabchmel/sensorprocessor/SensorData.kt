@@ -14,7 +14,7 @@ data class SensorData(
     var pressure: Float?,
     var temperature: Float?,
     var wifi: Int?,
-    var connection: Float?
+    var connection: String?
 ) {
     fun getData() = listOf(
         currentTime, longitude, latitude, currentState, lightSensorValue,

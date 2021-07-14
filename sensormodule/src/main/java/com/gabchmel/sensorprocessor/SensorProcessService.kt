@@ -14,6 +14,7 @@ import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
+import android.os.BatteryManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -42,7 +43,7 @@ class SensorProcessService : Service() {
         SensorData(
             null, 0.0, 0.0, "NONE", 0.0f,
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-            0, 0.0f
+            0, "NONE"
         )
     )
     val sensorData: StateFlow<SensorData> = _sensorData
@@ -82,8 +83,8 @@ class SensorProcessService : Service() {
         // Check if the BT device is connected
         bluetoothDevicesConnection()
 
-        val receiverFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        registerReceiver(SensorReceiver(), receiverFilter)
+
+//        registerReceiver(SensorReceiver(), receiverFilter)
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -159,6 +160,7 @@ class SensorProcessService : Service() {
         wifiConnection()
         internetConnectivity(this)
         processOrientation()
+        batteryStatusDetection()
 
         // TODO Make check that we have a value - maybe we don't have to have value idk - let
         try {
@@ -307,19 +309,6 @@ class SensorProcessService : Service() {
                 if (Intent.ACTION_HEADSET_PLUG == action) {
                     _sensorData.value.headphonesPluggedIn =
                         intent.getIntExtra("state", -1).toFloat()
-                    if (_sensorData.value.headphonesPluggedIn == 0.0f) {
-//                        Toast.makeText(
-//                            applicationContext,
-//                            "Headphones not plugged in",
-//                            Toast.LENGTH_LONG
-//                        ).show()
-                    } else if (_sensorData.value.headphonesPluggedIn == 1.0f) {
-//                        Toast.makeText(
-//                            applicationContext,
-//                            "Headphones plugged in",
-//                            Toast.LENGTH_LONG
-//                        ).show()
-                    }
                 }
             }
         }
@@ -335,41 +324,41 @@ class SensorProcessService : Service() {
         Log.d("ssid", "SSID:${wifiInfo.ssid}, hashCode:${wifiInfo.ssid.hashCode()}")
 
         _sensorData.value.wifi = wifiInfo.ssid.hashCode()
-
-//        return wifiInfo.ssid.hashCode().toString()
     }
 
-    private fun internetConnectivity(context: Context): String {
+    // Function to retrieve current internet connection state
+    private fun internetConnectivity(context: Context) {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val capabilities: NetworkCapabilities?
+        var capabilities: NetworkCapabilities? = null
+        // Function activeNetwork requires minimal level 23
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             capabilities =
                 connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         } else {
-            return "NONE"
+            _sensorData.value.connection = "NONE"
         }
         if (capabilities != null) {
             when {
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
                     Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                    return "TRANSPORT_CELLULAR"
+                    _sensorData.value.connection = "TRANSPORT_CELLULAR"
                 }
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
                     Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-                    return "TRANSPORT_WIFI"
+                    _sensorData.value.connection = "TRANSPORT_WIFI"
                 }
-//                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-//                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
-//                    return "TRANSPORT_ETHERNET"
-//                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    _sensorData.value.connection = "TRANSPORT_ETHERNET"
+                }
             }
+        } else {
+            _sensorData.value.connection = "NONE"
         }
-        return "NONE"
     }
 
     private fun registerLocationListener() {
-
         // Location change listener
         val locationListener = LocationListener { location ->
             _sensorData.value.longitude = location.longitude
@@ -405,6 +394,20 @@ class SensorProcessService : Service() {
         //        if (location.value == null) {
 //            locationManager.requestLocationUpdates(getProviderName(), 0, 0, this)
 //        }
+    }
 
+    private fun batteryStatusDetection() {
+        val batteryStatus = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { iFilter ->
+            this.registerReceiver(null, iFilter)
+        }
+
+        val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+        val isCharging: Boolean = status == BatteryManager.BATTERY_STATUS_CHARGING
+                || status == BatteryManager.BATTERY_STATUS_FULL
+
+        // How are we charging?
+        val chargePlug: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: -1
+        val usbCharge: Boolean = chargePlug == BatteryManager.BATTERY_PLUGGED_USB
+        val acCharge: Boolean = chargePlug == BatteryManager.BATTERY_PLUGGED_AC
     }
 }

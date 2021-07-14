@@ -93,12 +93,12 @@ object InputProcessHelper {
                             val localDate = LocalDateTime.parse(row[1], format)
                             Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant())
                         } else {
-                            // TODO check date formats
                             val formatter =
                                 SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.ENGLISH)
                             formatter.parse(row[1])!!
                         }
 
+                        // Check if the target class is int he list of classes, if not add it
                         if (!classNames.contains(row[0])) {
                             classNames.add(row[0])
                         }
@@ -107,7 +107,7 @@ object InputProcessHelper {
                             dateNew, row[2].toDouble(), row[3].toDouble(), row[4], row[5].toFloat(),
                             row[6].toFloat(), row[7].toFloat(),
                             row[8].toFloat(), row[9].toFloat(), row[10].toFloat(), row[11].toInt(),
-                            row[12].toFloat()
+                            row[12]
                         )
                     }.map {
                         it.first to inputProcessHelper(it.second)

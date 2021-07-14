@@ -129,15 +129,14 @@ class PredictionModelBuiltIn(val context: Context) {
         try {
             val result= forest.classifyInstance(newInstance)
             className = classNames[result.toInt()]
-            val msg =
-                "Nr: itemNumber, predicted: $className, actual: 2046003820"
-            Log.d("WekaTest", msg)
+            Log.d("WekaTest", "Nr: itemNumber, predicted: $className, actual: 2046003820")
         } catch (e: Exception) {
             e.printStackTrace()
         }
         return className
     }
 
+    // Function to convert CSV file to arff file representation
     private fun convertCSVtoarrf(context: Context, classNames: ArrayList<String>) {
 
         // load the CSV file

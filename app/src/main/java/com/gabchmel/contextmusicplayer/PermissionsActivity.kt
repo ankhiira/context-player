@@ -55,22 +55,6 @@ class PermissionsActivity : AppCompatActivity() {
             array += Manifest.permission.ACTIVITY_RECOGNITION
         }
 
-//        if (ActivityCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                // TODO redo to not deprecated version
-//                startActivityForResult(
-//                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
-//                    0
-//                )
-//            }
-//            Log.d("Settings", "Settings not registered")
-            // TODO else pro mensi API
-//        }
-
         requestMultiplePermissions.launch(
             array
         )

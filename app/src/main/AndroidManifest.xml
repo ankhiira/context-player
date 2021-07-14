@@ -25,9 +25,6 @@
     <!-- Permission to detect mobile user activity-->
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
-    <!-- Permission to do not use battery optimization -->
-    <!--    <uses-permission  android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>-->
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -82,7 +79,7 @@
         </receiver>
 
         <receiver
-            android:name="com.gabchmel.sensorprocessor.ActivityTransitionReceiver"
+            android:name="com.gabchmel.sensorprocessor.activityDetection.ActivityTransitionReceiver"
             android:exported="false"
             android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
             <intent-filter>
@@ -100,7 +97,7 @@
         <!--        </receiver>-->
 
         <receiver
-            android:name="com.gabchmel.sensorprocessor.ActivityTransitionReceiver"
+            android:name="com.gabchmel.sensorprocessor.activityDetection.ActivityTransitionReceiver"
             android:exported="false"
             android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
             <intent-filter>

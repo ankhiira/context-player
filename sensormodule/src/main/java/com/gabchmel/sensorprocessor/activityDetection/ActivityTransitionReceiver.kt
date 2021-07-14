@@ -1,10 +1,11 @@
-package com.gabchmel.sensorprocessor
+package com.gabchmel.sensorprocessor.activityDetection
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import com.gabchmel.sensorprocessor.SensorProcessService
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity

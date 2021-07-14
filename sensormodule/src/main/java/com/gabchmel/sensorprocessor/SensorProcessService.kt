@@ -20,9 +20,10 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
+import com.gabchmel.sensorprocessor.activityDetection.ActivityTransitionReceiver
+import com.gabchmel.sensorprocessor.activityDetection.TransitionList
 import com.gabchmel.sensorprocessor.utility.InputProcessHelper.inputProcessHelper
 import com.gabchmel.sensorprocessor.utility.InputProcessHelper.processInputCSV
-import com.gabchmel.sensorprocessor.activityDetection.TransitionList
 import com.gabchmel.sensorprocessor.utility.SensorManagerUtility
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,8 +82,8 @@ class SensorProcessService : Service() {
         // Check if the BT device is connected
         bluetoothDevicesConnection()
 
-//        val receiverFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-//        registerReceiver(SensorReceiver(), receiverFilter)
+        val receiverFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        registerReceiver(SensorReceiver(), receiverFilter)
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -145,8 +146,6 @@ class SensorProcessService : Service() {
         )
 
         headphonesPluggedInDetection()
-        wifiConnection()
-        internetConnectivity(this)
 
         return binder
     }
@@ -157,6 +156,8 @@ class SensorProcessService : Service() {
 
 //        Log.d("Sensor", "write")
 
+        wifiConnection()
+        internetConnectivity(this)
         processOrientation()
 
         // TODO Make check that we have a value - maybe we don't have to have value idk - let
@@ -174,7 +175,9 @@ class SensorProcessService : Service() {
                     + sensorData.value.BTdeviceConnected + ","
                     + sensorData.value.headphonesPluggedIn + ","
                     + sensorData.value.pressure + ","
-                    + sensorData.value.temperature + "\n"
+                    + sensorData.value.temperature + ","
+                    + sensorData.value.wifi + ","
+                    + sensorData.value.connection + "\n"
             )
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)

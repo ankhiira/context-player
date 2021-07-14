@@ -106,7 +106,7 @@ object InputProcessHelper {
                         row[0] to SensorData(
                             dateNew, row[2].toDouble(), row[3].toDouble(), row[4], row[5].toFloat(),
                             row[6].toFloat(), row[7].toFloat(),
-                            row[8].toFloat(), row[9].toFloat(), row[10].toFloat(), row[11].toInt(),
+                            row[8].toFloat(), row[9].toFloat(), row[10].toFloat(), row[11].toUInt(),
                             row[12], row[13], row[14]
                         )
                     }.map {

@@ -72,7 +72,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     // Binder to a service
     inner class MediaBinder : Binder() {
-        fun getService(): MediaPlaybackService = this@MediaPlaybackService
+        fun getService() = this@MediaPlaybackService
     }
 
     private var sensorProcessService = MutableStateFlow<SensorProcessService?>(null)

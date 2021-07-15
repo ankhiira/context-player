@@ -3,9 +3,12 @@ package com.gabchmel.sensorprocessor.utility
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import com.gabchmel.common.ConvertedData
 import com.gabchmel.sensorprocessor.SensorData
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import java.io.BufferedReader
 import java.io.File
+import java.io.FileReader
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -15,10 +18,11 @@ import java.util.*
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.reflect.full.memberProperties
 
 
 object InputProcessHelper {
-    fun inputProcessHelper(sensorData: SensorData): DoubleArray {
+    fun inputProcessHelper(sensorData: SensorData): ConvertedData {
 
         val currentTime = sensorData.currentTime
         val latitude = sensorData.latitude
@@ -51,7 +55,7 @@ object InputProcessHelper {
         val dayOfWeekSin = sin(dayOfWeek * (2 * PI / 7))
         val dayOfWeekCos = cos(dayOfWeek * (2 * PI / 7))
 
-        // Convert longitude and latitude to x,y,z coordinates
+        // Convert longitude and latitude to x,y,z coordinates - haversine distance
         val xCoord = latitude?.let { lat ->
             longitude?.let { long -> cos(lat) * cos(long) }
         }
@@ -62,10 +66,12 @@ object InputProcessHelper {
             sin(lat)
         }
 
-        return doubleArrayOf(
+        val doubleArr = doubleArrayOf(
             sinTime, cosTime, dayOfWeekSin,
             dayOfWeekCos, (xCoord ?: 0.0), (yCoord ?: 0.0), (zCoord ?: 0.0)
         )
+
+        return ConvertedData(sinTime, sensorData.currentState)
     }
 
     // Give header to the file and process dates
@@ -76,8 +82,9 @@ object InputProcessHelper {
 
         // Convert the whole file each time
         csvFile.writeText(
-            "class,sinTime,cosTime,dayOfWeekSin," +
-                    "dayOfWeekCos,xCoord,yCoord,zCoord" + "\n"
+//            "class,sinTime,cosTime,dayOfWeekSin," +
+//                    "dayOfWeekCos,xCoord,yCoord,zCoord,state" + "\n"
+            "class,state,sinTime" + "\n"
         )
 
         if (inputFile.exists()) {
@@ -103,6 +110,22 @@ object InputProcessHelper {
                             classNames.add(row[0])
                         }
 
+//                        var service : SensorProcessService
+//                        var num : Int = 0
+//
+//                        GlobalScope.launch {
+//                            service = context.bindService(SensorProcessService::class.java)
+//                            num = service.data.toUserViewReflection()
+//                        }
+//
+//                        if (num != row.size) {
+//                            val inputFile =
+//                                File(context.filesDir, "data.csv")
+//                            if (inputFile.exists()) {
+//                                context.deleteFile("data.csv")
+//                            }
+//                        }
+
                         row[0] to SensorData(
                             dateNew, row[2].toDouble(), row[3].toDouble(), row[4], row[5].toFloat(),
                             row[6].toFloat(), row[7].toFloat(),
@@ -120,8 +143,15 @@ object InputProcessHelper {
 //                        }
                         try {
                             // Write to csv file
-                            val data = it.second.joinToString(separator = ",", postfix = "\n")
-                            csvFile.appendText(it.first + "," + data)
+//                            val data = it.second.joinToString(separator = ",", postfix = "\n")
+                            val data : ConvertedData = it.second
+                            var csvString : String = ""
+                            for (property in ConvertedData::class.memberProperties) {
+                                csvString += "${property.get(data)},"
+                            }
+                            csvString = csvString.dropLast(1)
+                            csvString += "\n"
+                            csvFile.appendText(it.first + "," + csvString)
                         } catch (e: IOException) {
                             Log.e("Err", "Couldn't write to file", e)
                         }

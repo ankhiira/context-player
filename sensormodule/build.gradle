@@ -53,6 +53,8 @@ dependencies {
     implementation 'com.github.doyaaaaaken:kotlin-csv-jvm:0.15.2'
     implementation 'com.opencsv:opencsv:4.4'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
 }
 repositories {
     mavenCentral()

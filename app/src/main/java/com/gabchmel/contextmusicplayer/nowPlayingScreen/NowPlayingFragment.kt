@@ -196,7 +196,9 @@ class NowPlayingFragment : Fragment() {
                                     sliderPosition = it
                                     viewModel.setMusicProgress(it)
                                 },
-                                valueRange = 0f..songLength
+                                valueRange = 0f..songLength,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
                             )
 
                             Row(

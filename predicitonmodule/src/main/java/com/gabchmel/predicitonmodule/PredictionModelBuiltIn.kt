@@ -4,26 +4,30 @@ package com.gabchmel.predicitonmodule
 
 import android.content.Context
 import android.util.Log
+import com.gabchmel.common.ConvertedData
 import weka.classifiers.Evaluation
 import weka.classifiers.trees.RandomForest
 import weka.core.Attribute
 import weka.core.DenseInstance
+import weka.core.FastVector
 import weka.core.Instances
 import weka.core.converters.ArffLoader
 import weka.core.converters.ArffSaver
 import weka.core.converters.CSVLoader
 import java.io.File
+import java.util.*
+import kotlin.math.roundToInt
 
 
 class PredictionModelBuiltIn(val context: Context) {
 
-    lateinit var forest: RandomForest
+    private lateinit var forest: RandomForest
     // Name of the input arff file
     val file = "arffData_converted.arff"
     private val csvConvertedFile = "convertedData.csv"
 
     // Function to read the dataset from arff file
-    private fun getDataset(): Instances {
+    private fun getDataset(): Pair<Instances, Instances> {
 
         val initialFile = File(context.filesDir, file)
         val classIdx = 0
@@ -35,7 +39,17 @@ class PredictionModelBuiltIn(val context: Context) {
 
         // Set index of the class attribute
         dataSet.setClassIndex(classIdx)
-        return dataSet
+
+        // Randomize dataset values
+        dataSet.randomize(Random(0))
+
+        // Split train and test data in 80 percent to train data
+        val trainSize = (dataSet.numInstances() * 0.8).roundToInt()
+        val testSize = dataSet.numInstances() - trainSize
+        val train = Instances(dataSet, 0, trainSize)
+        val test = Instances(dataSet, trainSize, testSize)
+
+        return Pair(train, test)
     }
 
     // Function to create and evaluate model
@@ -47,17 +61,16 @@ class PredictionModelBuiltIn(val context: Context) {
             return false
         }
 
-        lateinit var trainingDataSet: Instances
         if (File(context.filesDir, file).exists()) {
-            // TODO split train test data na zacatku pred vytvorenim souboru
-            trainingDataSet = getDataset()
+
+            val (trainingDataSet, testDataSet) = getDataset()
 
             forest = RandomForest()
             // Train the model
             forest.buildClassifier(trainingDataSet)
             // Test the dataset
             val eval = Evaluation(trainingDataSet)
-            eval.evaluateModel(forest, trainingDataSet)
+            eval.evaluateModel(forest, testDataSet)
 
             // Print the evaluation summary
             println("Decision Tress Evaluation")
@@ -72,16 +85,21 @@ class PredictionModelBuiltIn(val context: Context) {
     }
 
     // Function to make prediction on input data
-    fun predict(input: DoubleArray, classNames: ArrayList<String>): String {
+    fun predict(input: ConvertedData, classNames: ArrayList<String>): String {
+
+        val fastVector = FastVector<String>(2)
+        fastVector.addElement("NONE")
+        fastVector.addElement("STILL")
 
         // Names of the attributes used in input
         val sinTime = Attribute("sinTime")
-        val cosTime = Attribute("cosTime")
-        val dayOfWeekSin = Attribute("dayOfWeekSin")
-        val dayOfWeekCos = Attribute("dayOfWeekCos")
-        val xCoord = Attribute("xCoord")
-        val yCoord = Attribute("yCoord")
-        val zCoord = Attribute("zCoord")
+//        val cosTime = Attribute("cosTime")
+//        val dayOfWeekSin = Attribute("dayOfWeekSin")
+//        val dayOfWeekCos = Attribute("dayOfWeekCos")
+//        val xCoord = Attribute("xCoord")
+//        val yCoord = Attribute("yCoord")
+//        val zCoord = Attribute("zCoord")
+        val state = Attribute("state", fastVector)
 
         // Create a list of input attributes
         val attributeList = object : ArrayList<Attribute?>(2) {
@@ -89,12 +107,13 @@ class PredictionModelBuiltIn(val context: Context) {
                 val attributeClass = Attribute("@@class@@", classNames)
                 add(attributeClass)
                 add(sinTime)
-                add(cosTime)
-                add(dayOfWeekSin)
-                add(dayOfWeekCos)
-                add(xCoord)
-                add(yCoord)
-                add(zCoord)
+//                add(cosTime)
+//                add(dayOfWeekSin)
+//                add(dayOfWeekCos)
+//                add(xCoord)
+//                add(yCoord)
+//                add(zCoord)
+                add(state)
             }
         }
 
@@ -110,13 +129,15 @@ class PredictionModelBuiltIn(val context: Context) {
         // Create new instance and assign the attributes their values
         val newInstance = object : DenseInstance(dataUnpredicted.numAttributes()) {
             init {
-                setValue(sinTime, input[0])
-                setValue(cosTime, input[1])
-                setValue(dayOfWeekSin, input[2])
-                setValue(dayOfWeekCos, input[3])
-                setValue(xCoord, input[4])
-                setValue(yCoord, input[5])
-                setValue(zCoord, input[6])
+                setValue(sinTime, input.prvni)
+//                setValue(cosTime, input[1])
+//                setValue(dayOfWeekSin, input[2])
+//                setValue(dayOfWeekCos, input[3])
+//                setValue(xCoord, input[4])
+//                setValue(yCoord, input[5])
+//                setValue(zCoord, input[6])
+                setValue(state, input.druha)
+
             }
         }
 

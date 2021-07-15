@@ -18,10 +18,10 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
-import com.gabchmel.sensorprocessor.activityDetection.ActivityTransitionReceiver
 import com.gabchmel.sensorprocessor.activityDetection.TransitionList
 import com.gabchmel.sensorprocessor.utility.InputProcessHelper.inputProcessHelper
 import com.gabchmel.sensorprocessor.utility.InputProcessHelper.processInputCSV
@@ -41,6 +41,8 @@ class SensorProcessService : Service() {
     // Structure to store sensor values
     var _sensorData = MutableStateFlow(SensorData())
     val sensorData: StateFlow<SensorData> = _sensorData
+
+    val data = sensorData.value
 
     // List of orientation coordinates
     var coordList = mutableListOf<Float>()
@@ -73,9 +75,6 @@ class SensorProcessService : Service() {
 
         // Set ut callbacks for activity detection
         activityDetection()
-
-        // Check if the BT device is connected
-        bluetoothDevicesConnection()
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -131,12 +130,6 @@ class SensorProcessService : Service() {
             this
         )
 
-        SensorManagerUtility.sensorReader(
-            sensorManager, Sensor.TYPE_TEMPERATURE,
-            "Heart rate",
-            this
-        )
-
         headphonesPluggedInDetection()
 
         return binder
@@ -148,19 +141,22 @@ class SensorProcessService : Service() {
 
 //        Log.d("Sensor", "write")
 
+        // Check to which Wi-Fi is the device connected
         wifiConnection()
+        // Check the internet connection type
         internetConnectivity(this)
+        // Get the orientation of the device
         processOrientation()
+        // Detect if the device is charging
         batteryStatusDetection()
-
-        sensorData.value.getData()
+        // Check if the BT device is connected
+        bluetoothDevicesConnection()
 
         try {
             // TODO redo do for each to optimize
             // Write to csv file
             csvFile.appendText(
             songID + ","
-//                    + sensorData.value.getData()
                 + sensorData.value.currentTime + ","
                 + sensorData.value.longitude + ","
                 + sensorData.value.latitude + ","
@@ -172,7 +168,9 @@ class SensorProcessService : Service() {
                 + sensorData.value.pressure + ","
                 + sensorData.value.temperature + ","
                 + sensorData.value.wifi + ","
-                + sensorData.value.connection + "\n"
+                + sensorData.value.connection + ","
+                + sensorData.value.batteryStatus + ","
+                + sensorData.value.chargingType + "\n"
             )
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
@@ -235,7 +233,7 @@ class SensorProcessService : Service() {
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
-        // myPendingIntent is the instance of PendingIntent where the app receives callbacks.
+        // pendingIntent is the instance of PendingIntent where the app receives callbacks.
         val task = ActivityRecognition.getClient(this)
             .requestActivityTransitionUpdates(request, pendingIntent)
 
@@ -272,19 +270,19 @@ class SensorProcessService : Service() {
 
     private fun bluetoothDevicesConnection() {
         // Check if the device supports bluetooth
-        val pm: PackageManager = this.packageManager
-        val hasBluetooth = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
+        val hasBluetooth = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
 
         if (hasBluetooth) {
-
             val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             val pairedDevices = bluetoothAdapter.bondedDevices
 
             val s: MutableList<String> = ArrayList()
             for (bt in pairedDevices) s.add(bt.name)
 
+            // Check if the bluetooth headphones are connected
             _sensorData.value.BTdeviceConnected =
-                if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED == bluetoothAdapter.getProfileConnectionState(
+                if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED
+                    == bluetoothAdapter.getProfileConnectionState(
                         BluetoothProfile.HEADSET)
                 ) {
                     Log.d("BT", "mame headset")
@@ -314,7 +312,7 @@ class SensorProcessService : Service() {
         val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.connectionInfo
 
-        Log.d("ssid", "SSID:${wifiInfo.ssid}, hashCode:${wifiInfo.ssid.hashCode()}")
+//        Log.d("ssid", "SSID:${wifiInfo.ssid}, hashCode:${wifiInfo.ssid.hashCode()}")
 
         _sensorData.value.wifi = wifiInfo.ssid.hashCode().toUInt()
     }
@@ -334,15 +332,15 @@ class SensorProcessService : Service() {
         if (capabilities != null) {
             when {
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+//                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
                     _sensorData.value.connection = "TRANSPORT_CELLULAR"
                 }
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+//                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
                     _sensorData.value.connection = "TRANSPORT_WIFI"
                 }
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+//                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
                     _sensorData.value.connection = "TRANSPORT_ETHERNET"
                 }
             }
@@ -395,23 +393,68 @@ class SensorProcessService : Service() {
         }
 
         // Detect if the device is charged
-        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1) {
+        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: "NONE") {
             BatteryManager.BATTERY_STATUS_CHARGING ->
                 _sensorData.value.batteryStatus = "CHARGING"
             BatteryManager.BATTERY_STATUS_FULL ->
                 _sensorData.value.batteryStatus = "CHARGING"
             BatteryManager.BATTERY_STATUS_NOT_CHARGING ->
                 _sensorData.value.batteryStatus = "NOT_CHARGING"
+            "NONE" ->
+                _sensorData.value.chargingType = "NONE"
         }
 
         // Detect how the device is charged
-        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: -1) {
+        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: "NONE") {
             BatteryManager.BATTERY_PLUGGED_USB ->
                 _sensorData.value.chargingType = "USB"
             BatteryManager.BATTERY_PLUGGED_AC ->
                 _sensorData.value.chargingType = "AC"
             BatteryManager.BATTERY_PLUGGED_WIRELESS ->
                 _sensorData.value.chargingType = "WIRELESS"
+            "NONE" ->
+                _sensorData.value.chargingType = "NONE"
+        }
+    }
+
+    inner class ActivityTransitionReceiver : BroadcastReceiver() {
+
+        override fun onReceive(context: Context, intent: Intent) {
+            if (ActivityTransitionResult.hasResult(intent)) {
+
+                val result = ActivityTransitionResult.extractResult(intent)
+                for (event in result!!.transitionEvents) {
+                    val activity = activityType(event.activityType)
+                    val transition = transitionType(event.transitionType)
+                    val message = "Transition: $activity ($transition)"
+
+                    Log.d("DetectedActReceiver", message)
+
+                    Toast.makeText(context,message, Toast.LENGTH_LONG).show()
+
+                    context.sendBroadcast(Intent("MyAction"))
+
+                    _sensorData.value.currentState = activity
+                }
+            }
+        }
+
+        private fun transitionType(transitionType: Int): String {
+            return when (transitionType) {
+                ActivityTransition.ACTIVITY_TRANSITION_ENTER -> "ENTER"
+                ActivityTransition.ACTIVITY_TRANSITION_EXIT -> "EXIT"
+                else -> "UNKNOWN"
+            }
+        }
+
+        private fun activityType(activity: Int): String {
+            return when (activity) {
+                DetectedActivity.IN_VEHICLE -> "IN_VEHICLE"
+                DetectedActivity.STILL -> "STILL"
+                DetectedActivity.WALKING -> "WALKING"
+                DetectedActivity.RUNNING -> "RUNNING"
+                else -> "UNKNOWN"
+            }
         }
     }
 }

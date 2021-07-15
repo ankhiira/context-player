@@ -93,9 +93,9 @@ class PredictionModelBuiltIn(val context: Context) {
 
         // Names of the attributes used in input
         val sinTime = Attribute("sinTime")
-//        val cosTime = Attribute("cosTime")
-//        val dayOfWeekSin = Attribute("dayOfWeekSin")
-//        val dayOfWeekCos = Attribute("dayOfWeekCos")
+        val cosTime = Attribute("cosTime")
+        val dayOfWeekSin = Attribute("dayOfWeekSin")
+        val dayOfWeekCos = Attribute("dayOfWeekCos")
 //        val xCoord = Attribute("xCoord")
 //        val yCoord = Attribute("yCoord")
 //        val zCoord = Attribute("zCoord")
@@ -107,9 +107,9 @@ class PredictionModelBuiltIn(val context: Context) {
                 val attributeClass = Attribute("@@class@@", classNames)
                 add(attributeClass)
                 add(sinTime)
-//                add(cosTime)
-//                add(dayOfWeekSin)
-//                add(dayOfWeekCos)
+                add(cosTime)
+                add(dayOfWeekSin)
+                add(dayOfWeekCos)
 //                add(xCoord)
 //                add(yCoord)
 //                add(zCoord)
@@ -129,14 +129,14 @@ class PredictionModelBuiltIn(val context: Context) {
         // Create new instance and assign the attributes their values
         val newInstance = object : DenseInstance(dataUnpredicted.numAttributes()) {
             init {
-                setValue(sinTime, input.prvni)
-//                setValue(cosTime, input[1])
-//                setValue(dayOfWeekSin, input[2])
-//                setValue(dayOfWeekCos, input[3])
+                setValue(sinTime, input.sinTime)
+                setValue(cosTime, input.cosTime)
+                setValue(dayOfWeekSin, input.dayOfWeekSin)
+                setValue(dayOfWeekCos, input.dayOfWeekCos)
 //                setValue(xCoord, input[4])
 //                setValue(yCoord, input[5])
 //                setValue(zCoord, input[6])
-                setValue(state, input.druha)
+                setValue(state, input.state)
 
             }
         }
@@ -145,12 +145,18 @@ class PredictionModelBuiltIn(val context: Context) {
         newInstance.setDataset(dataUnpredicted)
 
         var className = ""
+        val resultArray = Array<String?>(4) {null}
 
         // predict new sample
         try {
-            val result= forest.classifyInstance(newInstance)
-            className = classNames[result.toInt()]
-            Log.d("WekaTest", "Nr: itemNumber, predicted: $className, actual: 2046003820")
+            // Classify instance multiple times to get more results
+            for (i in 0..3) {
+                val result = forest.classifyInstance(newInstance)
+                resultArray[i] = classNames[result.toInt()]
+                Log.d("WekaTest", "Nr: itemNumber, predicted: $className")
+            }
+            className = resultArray.random().toString()
+            Log.d("random", className)
         } catch (e: Exception) {
             e.printStackTrace()
         }

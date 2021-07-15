@@ -6,6 +6,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.gabchmel.sensorprocessor.SensorProcessService
 
+
 object SensorManagerUtility {
 
     // Utility function to get onSensorChanged listener for requested sensor
@@ -15,14 +16,10 @@ object SensorManagerUtility {
     ) {
         var isOrientSensor = false
         var sensorList: List<Sensor> = emptyList()
-
         val sensorValueList = mutableListOf<Float>()
 
         if (sensorType == Sensor.TYPE_ORIENTATION) {
             isOrientSensor = true
-        }
-
-        if (isOrientSensor) {
             sensorList = sensorManager.getSensorList(sensorType)
         }
 
@@ -53,6 +50,18 @@ object SensorManagerUtility {
                     }
                     sensorType == Sensor.TYPE_AMBIENT_TEMPERATURE -> {
                         sensorProcessService._sensorData.value.temperature = values[0]
+                    }
+                    sensorType == Sensor.TYPE_PROXIMITY -> {
+                        sensorProcessService._sensorData.value.proximity = values[0]
+                    }
+                    sensorType == Sensor.TYPE_RELATIVE_HUMIDITY -> {
+                        sensorProcessService._sensorData.value.humidity = values[0]
+                    }
+                    sensorType == Sensor.TYPE_HEART_BEAT -> {
+                        sensorProcessService._sensorData.value.heartBeat = values[0]
+                    }
+                    sensorType == Sensor.TYPE_HEART_RATE -> {
+                        sensorProcessService._sensorData.value.heartRate = values[0]
                     }
                 }
 

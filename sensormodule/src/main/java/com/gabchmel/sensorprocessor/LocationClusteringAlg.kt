@@ -14,9 +14,9 @@ class LocationClusteringAlg {
 
 
     // It is possible to define different distance functions for different data classes
-// It is also possible to define different distance functions for the same data class
-// For example, we could define full blown 'geodesic' distance for locations
-// I tried to reproduce something like 'Typeclass' pattern which I would use in Scala/Haskell
+    // It is also possible to define different distance functions for the same data class
+    // For example, we could define full blown 'geodesic' distance for locations
+    // I tried to reproduce something like 'Typeclass' pattern which I would use in Scala/Haskell
     val euclideanDistance = object : Distance<Point> {
         override fun Point.distance(to: Point): Double {
             return sqrt((x - to.x).pow(2) + (y - to.y).pow(2))
@@ -43,25 +43,25 @@ class LocationClusteringAlg {
 
 
     // We will only require a 'cluster' to have an id for now
-// And let's say we use integers as identifiers
-//data class Cluster(val id: Int)
+    // And let's say we use integers as identifiers
+    //data class Cluster(val id: Int)
     sealed class Cluster
     object Unknown : Cluster()
     object Outsider : Cluster()
     data class Identified(val id: Int) : Cluster()
 
     // Now we can try to define what types can be 'clustered'
-// 'We know how to compute a distance between 2 objects of a type' => 'We can cluster a list of such objects'
+    // 'We know how to compute a distance between 2 objects of a type' => 'We can cluster a list of such objects'
     interface ClusteringAlgorithm<T, D> {
         fun <D : Distance<T>> fit_transform(xs: List<T>, dist: D): List<Cluster>
     }
 
 
     // I first implemented a minimalistic version of a Matrix to hold pairwise distances,
-// but I didn't really use everything from here after all.
-// On a bright side, it's easy to add a method to ClusteringAlgorithm that would get
-// an arbitrary pairwise distance matrix and skip its own distance calculations
-// as it's done in sklearn
+    // but I didn't really use everything from here after all.
+    // On a bright side, it's easy to add a method to ClusteringAlgorithm that would get
+    // an arbitrary pairwise distance matrix and skip its own distance calculations
+    // as it's done in sklearn
     interface DummyMatrix<T> {
         fun get(i: Int, j: Int): T
         fun bitMask(f: (item: T) -> Boolean): DummyMatrix<Boolean>
@@ -97,7 +97,7 @@ class LocationClusteringAlg {
     }
 
     // Simplified implementation of DBSCAN
-// It doesn't take into account edge points
+    // It doesn't take into account edge points
     class DBSCAN(val eps: Double, val minPts: Int) :
         ClusteringAlgorithm<Location, Distance<Location>> {
         override fun <D : Distance<Location>> fit_transform(
@@ -155,7 +155,7 @@ class LocationClusteringAlg {
         println(d4) // -> 0.0
         // Thus, d(a, b) = d(b, a) and d(a, a) = 0. At least that seems correct.
 
-        val dataset = listOf<Location>(
+        val dataset = listOf(
             // Groenplaats
             Location(51.219227, 4.401766),
             Location(51.218729, 4.401970),

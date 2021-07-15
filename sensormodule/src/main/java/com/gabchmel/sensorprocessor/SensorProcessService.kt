@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 
@@ -170,7 +169,11 @@ class SensorProcessService : Service() {
                 + sensorData.value.wifi + ","
                 + sensorData.value.connection + ","
                 + sensorData.value.batteryStatus + ","
-                + sensorData.value.chargingType + "\n"
+                + sensorData.value.chargingType + ","
+                + sensorData.value.proximity + ","
+                + sensorData.value.humidity + ","
+                + sensorData.value.heartBeat + ","
+                + sensorData.value.heartRate + "\n"
             )
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
@@ -214,6 +217,7 @@ class SensorProcessService : Service() {
         return false
     }
 
+    // Function to save current context values to shared preferences for later comparison
     fun saveSensorData() {
         val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
         editor.putString("time", sensorData.value.currentTime.toString())
@@ -269,15 +273,14 @@ class SensorProcessService : Service() {
     }
 
     private fun bluetoothDevicesConnection() {
+
         // Check if the device supports bluetooth
-        val hasBluetooth = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
-
-        if (hasBluetooth) {
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
             val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-            val pairedDevices = bluetoothAdapter.bondedDevices
+//            val pairedDevices = bluetoothAdapter.bondedDevices
 
-            val s: MutableList<String> = ArrayList()
-            for (bt in pairedDevices) s.add(bt.name)
+//            val s: MutableList<String> = ArrayList()
+//            for (bt in pairedDevices) s.add(bt.name)
 
             // Check if the bluetooth headphones are connected
             _sensorData.value.BTdeviceConnected =
@@ -285,7 +288,7 @@ class SensorProcessService : Service() {
                     == bluetoothAdapter.getProfileConnectionState(
                         BluetoothProfile.HEADSET)
                 ) {
-                    Log.d("BT", "mame headset")
+//                    Log.d("BT", "mame headset")
                     1.0f
                 } else {
                     0.0f
@@ -354,6 +357,8 @@ class SensorProcessService : Service() {
         val locationListener = LocationListener { location ->
             _sensorData.value.longitude = location.longitude
             _sensorData.value.latitude = location.latitude
+
+            Log.d("location", "${location.latitude}, ${location.longitude}")
         }
 
         // Persistent LocationManager reference

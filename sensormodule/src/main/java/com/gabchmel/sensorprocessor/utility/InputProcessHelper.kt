@@ -77,7 +77,7 @@ object InputProcessHelper {
     }
 
     // Give header to the file and process dates
-    fun processInputCSV(context: Context): ArrayList<String> {
+    fun processInputCSV(context: Context): Pair<ArrayList<String>, ArrayList<UInt>> {
         val inputFile = File(context.filesDir, "data.csv")
         val csvFile = File(context.filesDir, "convertedData.csv")
         val classNames = arrayListOf<String>()
@@ -91,6 +91,8 @@ object InputProcessHelper {
         )
 
         val dataset = mutableListOf<LocationClusteringAlg.Location>()
+
+        var wifiList = arrayListOf<UInt>()
 
         if (inputFile.exists()) {
             csvReader().open(inputFile) {
@@ -168,6 +170,10 @@ object InputProcessHelper {
                                 // Check for wifi property because with UInt it is not working well
                                 if (property.name == "wifi") {
                                     csvString += "${data.wifi},"
+                                    // Save every individual wifi into the list
+                                    if(!wifiList.contains(data.wifi)) {
+                                        data.wifi?.let { it1 -> wifiList.add(it1) }
+                                    }
                                 } else {
                                     csvString += "${propertyNew.get(data)},"
                                 }
@@ -236,6 +242,6 @@ object InputProcessHelper {
             }
         }
 
-        return classNames
+        return Pair(classNames, wifiList)
     }
 }

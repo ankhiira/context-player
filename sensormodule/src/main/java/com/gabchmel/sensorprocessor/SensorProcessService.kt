@@ -155,25 +155,25 @@ class SensorProcessService : Service() {
             // TODO redo do for each to optimize
             // Write to csv file
             csvFile.appendText(
-            songID + ","
-                + sensorData.value.currentTime + ","
-                + sensorData.value.longitude + ","
-                + sensorData.value.latitude + ","
-                + sensorData.value.currentState + ","
-                + sensorData.value.lightSensorValue + ","
-                + sensorData.value.deviceLying + ","
-                + sensorData.value.BTdeviceConnected + ","
-                + sensorData.value.headphonesPluggedIn + ","
-                + sensorData.value.pressure + ","
-                + sensorData.value.temperature + ","
-                + sensorData.value.wifi + ","
-                + sensorData.value.connection + ","
-                + sensorData.value.batteryStatus + ","
-                + sensorData.value.chargingType + ","
-                + sensorData.value.proximity + ","
-                + sensorData.value.humidity + ","
-                + sensorData.value.heartBeat + ","
-                + sensorData.value.heartRate + "\n"
+                songID + ","
+                        + sensorData.value.currentTime + ","
+                        + sensorData.value.longitude + ","
+                        + sensorData.value.latitude + ","
+                        + sensorData.value.currentState + ","
+                        + sensorData.value.lightSensorValue + ","
+                        + sensorData.value.deviceLying + ","
+                        + sensorData.value.BTdeviceConnected + ","
+                        + sensorData.value.headphonesPluggedIn + ","
+                        + sensorData.value.pressure + ","
+                        + sensorData.value.temperature + ","
+                        + sensorData.value.wifi + ","
+                        + sensorData.value.connection + ","
+                        + sensorData.value.batteryStatus + ","
+                        + sensorData.value.chargingType + ","
+                        + sensorData.value.proximity + ","
+                        + sensorData.value.humidity + ","
+                        + sensorData.value.heartBeat + ","
+                        + sensorData.value.heartRate + "\n"
             )
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
@@ -181,11 +181,13 @@ class SensorProcessService : Service() {
     }
 
     fun createModel(): Boolean {
-        // Process input CSV file and save class names into ArrayList<String>
-        classNames = processInputCSV(this)
+        // Process input CSV file and save class names and wifi list into ArrayList<String>
+        val (classNamesNew, wifiList) = processInputCSV(this)
+
+        classNames = classNamesNew
 
         // If we don't have enough input data, don't create a model
-        if(!predictionModel.createModel(classNames)) {
+        if (!predictionModel.createModel(classNames, wifiList)) {
             return false
         }
 
@@ -286,7 +288,8 @@ class SensorProcessService : Service() {
             _sensorData.value.BTdeviceConnected =
                 if (bluetoothAdapter != null && BluetoothProfile.STATE_CONNECTED
                     == bluetoothAdapter.getProfileConnectionState(
-                        BluetoothProfile.HEADSET)
+                        BluetoothProfile.HEADSET
+                    )
                 ) {
 //                    Log.d("BT", "mame headset")
                     1.0f
@@ -435,7 +438,7 @@ class SensorProcessService : Service() {
 
                     Log.d("DetectedActReceiver", message)
 
-                    Toast.makeText(context,message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
 
                     context.sendBroadcast(Intent("MyAction"))
 

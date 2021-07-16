@@ -53,9 +53,9 @@ class PredictionModelBuiltIn(val context: Context) {
     }
 
     // Function to create and evaluate model
-    fun createModel(classNames: ArrayList<String>): Boolean {
+    fun createModel(classNames: ArrayList<String>, wifiList: ArrayList<UInt>): Boolean {
 
-        convertCSVtoarrf(context, classNames)
+        convertCSVtoarrf(context, classNames, wifiList)
 
         if (classNames.size == 1) {
             return false
@@ -64,6 +64,8 @@ class PredictionModelBuiltIn(val context: Context) {
         if (File(context.filesDir, file).exists()) {
 
             val (trainingDataSet, testDataSet) = getDataset()
+
+            val test = trainingDataSet.equalHeaders(testDataSet)
 
             forest = RandomForest()
             // Train the model
@@ -87,9 +89,23 @@ class PredictionModelBuiltIn(val context: Context) {
     // Function to make prediction on input data
     fun predict(input: ConvertedData, classNames: ArrayList<String>): String {
 
-        val fastVector = FastVector<String>(2)
-        fastVector.addElement("NONE")
-        fastVector.addElement("STILL")
+        // To create attributes with all possible values
+        val stateList = listOf("IN_VEHICLE","STILL","WALKING","RUNNING","UNKNOWN")
+        val connectionList = listOf("NONE","TRANSPORT_CELLULAR","TRANSPORT_WIFI","TRANSPORT_ETHERNET")
+        val batteryStatusList = listOf("NONE","CHARGING","NOT_CHARGING")
+        val chargingTypeList = listOf("NONE","USB","AC","WIRELESS")
+
+        val stateVector = FastVector<String>(5)
+        stateVector.addAll(stateList)
+
+        val connectionVector = FastVector<String>(4)
+        connectionVector.addAll(connectionList)
+
+        val batteryStatVector = FastVector<String>(3)
+        batteryStatVector.addAll(batteryStatusList)
+
+        val chargingTypeVector = FastVector<String>(4)
+        chargingTypeVector.addAll(chargingTypeList)
 
         // Names of the attributes used in input
         val sinTime = Attribute("sinTime")
@@ -99,7 +115,21 @@ class PredictionModelBuiltIn(val context: Context) {
 //        val xCoord = Attribute("xCoord")
 //        val yCoord = Attribute("yCoord")
 //        val zCoord = Attribute("zCoord")
-        val state = Attribute("state", fastVector)
+        val state = Attribute("state", stateVector)
+        val light = Attribute("light")
+        val orientation = Attribute("orientation")
+        val BTconnected = Attribute("BTconnected")
+        val headphonesPlugged = Attribute("headphonesPlugged")
+        val pressure = Attribute("pressure")
+        val temperature = Attribute("temperature")
+        val wifi = Attribute("wifi")
+        val connection = Attribute("connection", connectionVector)
+        val batteryStatus = Attribute("batteryStatus", batteryStatVector)
+        val chargingType = Attribute("chargingType", chargingTypeVector)
+        val proximity = Attribute("proximity")
+        val humidity = Attribute("humidity")
+        val heartRate = Attribute("heartRate")
+        val heartBeat = Attribute("heartBeat")
 
         // Create a list of input attributes
         val attributeList = object : ArrayList<Attribute?>(2) {
@@ -114,6 +144,20 @@ class PredictionModelBuiltIn(val context: Context) {
 //                add(yCoord)
 //                add(zCoord)
                 add(state)
+                add(light)
+                add(orientation)
+                add(BTconnected)
+                add(headphonesPlugged)
+                add(pressure)
+                add(temperature)
+                add(wifi)
+                add(connection)
+                add(batteryStatus)
+                add(chargingType)
+                add(proximity)
+                add(humidity)
+                add(heartRate)
+                add(heartBeat)
             }
         }
 
@@ -137,7 +181,19 @@ class PredictionModelBuiltIn(val context: Context) {
 //                setValue(yCoord, input[5])
 //                setValue(zCoord, input[6])
                 setValue(state, input.state)
-
+                setValue(light, input.lightSensorValue!!.toDouble())
+                setValue(orientation, input.deviceLying!!.toDouble())
+                setValue(BTconnected, input.BTdeviceConnected!!.toDouble())
+                setValue(pressure, input.pressure!!.toDouble())
+                setValue(temperature, input.temperature!!.toDouble())
+                setValue(wifi, input.wifi!!.toDouble())
+                setValue(connection, input.connection)
+                setValue(batteryStatus, input.batteryStatus)
+                setValue(chargingType, input.chargingType)
+                setValue(proximity, input.proximity!!.toDouble())
+                setValue(humidity, input.humidity!!.toDouble())
+                setValue(heartRate, input.heartRate!!.toDouble())
+                setValue(heartBeat, input.heartBeat!!.toDouble())
             }
         }
 
@@ -164,7 +220,8 @@ class PredictionModelBuiltIn(val context: Context) {
     }
 
     // Function to convert CSV file to arff file representation
-    private fun convertCSVtoarrf(context: Context, classNames: ArrayList<String>) {
+    private fun convertCSVtoarrf(context: Context, classNames: ArrayList<String>,
+                                 wifiList: ArrayList<UInt>) {
 
         // load the CSV file
         val load = CSVLoader()
@@ -189,11 +246,25 @@ class PredictionModelBuiltIn(val context: Context) {
                 className
             }
 
+            val wifiListString = wifiList.joinToString(separator = ",") { wifiName ->
+                wifiName.toString()
+            }
+
+
+
             // Replace attribute description in arff file
             text = text.replace(
                 "@attribute class numeric", "@attribute class {" +
                         classNamesString + "}"
             )
+
+            if(wifiList.isNotEmpty()) {
+                // Replace attribute description in arff file
+                text = text.replace(
+                    "@attribute wifi numeric", "@attribute wifi {" +
+                            wifiListString + "}"
+                )
+            }
             fileOut.writeText(text)
         }
     }

@@ -32,7 +32,9 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 
 class SensorProcessService : Service() {
@@ -82,7 +84,7 @@ class SensorProcessService : Service() {
 
         // Register listeners to sensor value changes
         SensorManagerUtility.sensorReader(
-            sensorManager, Sensor.TYPE_ORIENTATION,
+            sensorManager, Sensor.TYPE_ACCELEROMETER,
             "Orientation",
             this
         )
@@ -260,16 +262,29 @@ class SensorProcessService : Service() {
 
     private fun processOrientation() {
 
-//    private var orientSensorAzimuthZAxis: Float = 0.0f
-//    private var orientSensorPitchXAxis: Float = 0.0f
-//    private var orientSensorRollYAxis: Float = 0.0f
+        val normOfg = sqrt(
+            (coordList[0] * coordList[0]
+                    + coordList[1] * coordList[1] + coordList[2] * coordList[2]).toDouble()
+        )
 
-        // Get the range of acceptable values for lying device - -1.58 is exactly lying
-        _sensorData.value.deviceLying = if (abs(coordList[0]) in 1.4f..1.7f) {
+        // Normalize the accelerometer vector
+        coordList[0] = (coordList[0] / normOfg).toFloat()
+        coordList[1] = (coordList[1] / normOfg).toFloat()
+        coordList[2] = (coordList[2] / normOfg).toFloat()
+
+        val inclination = Math.toDegrees(acos(coordList[2]).toDouble()).roundToInt()
+
+        // Device detected as lying is with inclination in range < 25 or > 155 degrees
+        _sensorData.value.deviceLying = if (inclination < 25 || inclination > 155)
+        {
+            // device is flat
             Log.d("Orientation", "Device is lying")
             1.0f
-        } else {
-//            Log.d("Orientation", "Device is staying")
+        }
+        else
+        {
+            // device is not flat
+            Log.d("Orientation", "Device is staying")
             0.0f
         }
     }

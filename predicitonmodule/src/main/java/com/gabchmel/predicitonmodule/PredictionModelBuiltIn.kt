@@ -209,7 +209,7 @@ class PredictionModelBuiltIn(val context: Context) {
             for (i in 0..3) {
                 val result = forest.classifyInstance(newInstance)
                 resultArray[i] = classNames[result.toInt()]
-                Log.d("WekaTest", "Nr: itemNumber, predicted: $className")
+                Log.d("WekaTest", "Nr: itemNumber, predicted: ${resultArray[i]}")
             }
             className = resultArray.random().toString()
             Log.d("random", className)

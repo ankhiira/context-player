@@ -91,8 +91,7 @@ object InputProcessHelper {
         )
 
         val dataset = mutableListOf<LocationClusteringAlg.Location>()
-
-        var wifiList = arrayListOf<UInt>()
+        val wifiList = arrayListOf<UInt>()
 
         if (inputFile.exists()) {
             csvReader().open(inputFile) {
@@ -117,16 +116,11 @@ object InputProcessHelper {
                             classNames.add(row[0])
                         }
 
-                        // TODO if the structure changes, delete csv
+                        // TODO if the structure changes, delete csv - mozna shared pref
 //                        var service : SensorProcessService
 //                        var num : Int = 0
 //
-//                        GlobalScope.launch {
-//                            service = context.bindService(SensorProcessService::class.java)
-//                            num = service.data.toUserViewReflection()
-//                        }
-//
-//                        if (num != row.size) {
+//                        if (headers.size != row.size) {
 //                            val inputFile =
 //                                File(context.filesDir, "data.csv")
 //                            if (inputFile.exists()) {
@@ -230,8 +224,13 @@ object InputProcessHelper {
                         val connected : String
                         // Detecting the first row, which has header information
                         if (!first) {
+
                             // Add location cluster value to others
-                            connected = "$rowNew, ${(dbscanClusters[index] as LocationClusteringAlg.Identified).id}\n"
+                            connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
+                                "$rowNew, ${0}\n"
+                            } else {
+                                "$rowNew, ${(dbscanClusters[index] as LocationClusteringAlg.Identified).id}\n"
+                            }
                             index++
                         } else {
                             first = false

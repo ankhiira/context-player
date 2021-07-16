@@ -4,6 +4,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import com.gabchmel.sensorprocessor.SensorProcessService
 
 
@@ -18,7 +19,7 @@ object SensorManagerUtility {
         var sensorList: List<Sensor> = emptyList()
         val sensorValueList = mutableListOf<Float>()
 
-        if (sensorType == Sensor.TYPE_ORIENTATION) {
+        if (sensorType == Sensor.TYPE_ACCELEROMETER) {
             isOrientSensor = true
             sensorList = sensorManager.getSensorList(sensorType)
         }
@@ -66,11 +67,11 @@ object SensorManagerUtility {
                 }
 
                 // Log the values of sensors
-//                if (isOrientSensor) {
-//                    Log.d("SensorValues", "$sensorName: ${values[0]}, ${values[1]}, ${values[2]}")
-//                } else {
-//                    Log.d("SensorValues", "$sensorName: ${values[0]}")
-//                }
+                if (isOrientSensor) {
+                    Log.d("SensorValues", "$sensorName: ${values[0]}, ${values[1]}, ${values[2]}")
+                } else {
+                    Log.d("SensorValues", "$sensorName: ${values[0]}")
+                }
             }
 
             override fun onAccuracyChanged(sensor: Sensor, i: Int) {}

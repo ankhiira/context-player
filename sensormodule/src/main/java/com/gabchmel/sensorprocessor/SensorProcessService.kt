@@ -278,13 +278,13 @@ class SensorProcessService : Service() {
         _sensorData.value.deviceLying = if (inclination < 25 || inclination > 155)
         {
             // device is flat
-            Log.d("Orientation", "Device is lying")
+//            Log.d("Orientation", "Device is lying")
             1.0f
         }
         else
         {
             // device is not flat
-            Log.d("Orientation", "Device is staying")
+//            Log.d("Orientation", "Device is staying")
             0.0f
         }
     }

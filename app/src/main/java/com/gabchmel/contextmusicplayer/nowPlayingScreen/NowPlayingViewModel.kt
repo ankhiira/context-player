@@ -11,7 +11,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabchmel.contextmusicplayer.MediaPlaybackService
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 
@@ -34,12 +35,12 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
     val service = CompletableDeferred<MediaPlaybackService>()
 
-    private var songs = flow {
-        // Service awaits for complete call
-        val service = service.await()
-        // Collects values from songs from services
-        emitAll(service.songs)
-    }.stateIn(viewModelScope, SharingStarted.Lazily,null)
+//    private var songs = flow {
+//        // Service awaits for complete call
+//        val service = service.await()
+//        // Collects values from songs from services
+//        emitAll(service.songs)
+//    }.stateIn(viewModelScope, SharingStarted.Lazily,null)
 
     private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
@@ -69,7 +70,11 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
             }
 
             viewModelScope.launch {
-                service.complete(MediaPlaybackService.getInstance(app))
+//                service.complete(MediaPlaybackService.getInstance(app))
+//                val intent = Intent(app, MediaPlaybackService::class.java)
+//                intent.putExtra("is_binding", true)
+//                bs = bindServiceAndWait(app,
+//                    intent, Context.BIND_AUTO_CREATE)
             }
         }
 
@@ -96,7 +101,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     override fun onCleared() {
-        super.onCleared()
+//        super.onCleared()
 
         mediaController.unregisterCallback(controllerCallback)
         mediaBrowserConnectionCallback.onConnectionSuspended()

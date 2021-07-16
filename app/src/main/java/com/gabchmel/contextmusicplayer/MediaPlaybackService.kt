@@ -44,12 +44,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
             context.bindService(intent, object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder) {
-                    cont.resumeWith(kotlin.Result.success((service as MediaBinder).getService()))
+                    cont.resumeWith(kotlin.Result.success((service as LocalBinder<MediaPlaybackService>).getService()))
                 }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
                 }
             }, Context.BIND_AUTO_CREATE)
+        }
+
+        fun disconnect(context: Context) {
+
         }
     }
 
@@ -61,7 +65,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private lateinit var notification: Notification
     private lateinit var timer: Timer
     private lateinit var broadcastReceiver: BroadcastReceiver
-    private val binder = MediaBinder()
+//    private val binder = MediaBinder()
+    private val binder = object : LocalBinder<MediaPlaybackService>() {
+        override fun getService() = this@MediaPlaybackService
+    }
     private var isRegistered = false
     private var isPredicted = false
 
@@ -463,8 +470,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         notificationManager.cancelAll()
 
         player.stop()
-        stopSelf()
         stopForeground(true)
+        stopSelf()
         super.onTaskRemoved(rootIntent)
     }
 

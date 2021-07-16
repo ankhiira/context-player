@@ -3,7 +3,6 @@ package com.gabchmel.contextmusicplayer
 import android.content.Intent
 import android.media.AudioManager
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -11,7 +10,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
 import com.gabchmel.common.utilities.bindService
-import com.gabchmel.contextmusicplayer.PredictionWorker.Companion.Progress
 import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.launch
 import java.util.*
@@ -69,20 +67,20 @@ class MainActivity : AppCompatActivity() {
 //            request
 //        )
 
-        val status = workManager.getWorkInfoByIdLiveData(request.id)
-        status.observe(this, { workInfo ->
-            if (workInfo != null) {
-                val progress = workInfo.progress
-                val state = workInfo.state
-                val value = progress.getInt(Progress, -1)
-                Log.d("Progress", "Progress:$value, state:$state")
-            }
-        })
-        workManager.enqueueUniqueWork(
-            "work",
-            ExistingWorkPolicy.REPLACE,
-            request
-        )
+//        val status = workManager.getWorkInfoByIdLiveData(request.id)
+//        status.observe(this, { workInfo ->
+//            if (workInfo != null) {
+//                val progress = workInfo.progress
+//                val state = workInfo.state
+//                val value = progress.getInt(Progress, -1)
+//                Log.d("Progress", "Progress:$value, state:$state")
+//            }
+//        })
+//        workManager.enqueueUniqueWork(
+//            "work",
+//            ExistingWorkPolicy.REPLACE,
+//            request
+//        )
     }
 }
 

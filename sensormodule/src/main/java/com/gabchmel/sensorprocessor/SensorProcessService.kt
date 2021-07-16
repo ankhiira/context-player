@@ -251,6 +251,7 @@ class SensorProcessService : Service() {
             Log.d("ActivityRecognition", "Transitions Api registered with success")
         }
 
+
         task.addOnFailureListener { e: Exception ->
             // Handle error
             Log.d(

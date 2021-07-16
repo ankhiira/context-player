@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
@@ -15,7 +14,6 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
-import androidx.media.session.MediaButtonReceiver
 import com.gabchmel.common.utilities.bindService
 import com.gabchmel.contextmusicplayer.playlistScreen.Song
 import com.gabchmel.sensorprocessor.SensorProcessService
@@ -238,12 +236,12 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
             )
             .setContentIntent(pendingIntent)
             // Stop the service when the notification is swiped away
-            .setDeleteIntent(
-                MediaButtonReceiver.buildMediaButtonPendingIntent(
-                    context,
-                    PlaybackStateCompat.ACTION_STOP
-                )
-            )
+//            .setDeleteIntent(
+//                MediaButtonReceiver.buildMediaButtonPendingIntent(
+//                    context,
+//                    PlaybackStateCompat.ACTION_STOP
+//                )
+//            )
             .setAutoCancel(true)
 
         val notification = builder.build()

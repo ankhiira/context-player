@@ -19,5 +19,6 @@ data class ConvertedData (
     var proximity: Float? = 0.0f,
     var humidity: Float? = 0.0f,
     var heartBeat: Float? = 0.0f,
-    var heartRate: Float? = 0.0f
+    var heartRate: Float? = 0.0f,
+    var locationCluster: Int = -1
         )

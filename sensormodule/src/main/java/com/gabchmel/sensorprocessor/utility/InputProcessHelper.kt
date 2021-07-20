@@ -20,6 +20,29 @@ import kotlin.reflect.full.primaryConstructor
 
 
 object InputProcessHelper {
+
+    private val dataset = mutableListOf<LocationClusteringAlg.Location>()
+
+    // Calculation of harvesine distance, serves for location clustering
+    private val haversineDistance = object :
+        LocationClusteringAlg.Distance<LocationClusteringAlg.Location> {
+        override fun LocationClusteringAlg.Location.distance(to: LocationClusteringAlg.Location): Double {
+            val R = 6371000.0
+            val lat1 = Math.toRadians(lat)
+            val lat2 = Math.toRadians(to.lat)
+            val lon1 = Math.toRadians(lon)
+            val lon2 = Math.toRadians(to.lon)
+
+            return 2 * R * asin(
+                sqrt(
+                    ((lat1 - lat2) / 2).pow(2) + cos(lat1) * cos(lat2) * sin((lon1 - lon2) / 2).pow(
+                        2
+                    )
+                )
+            )
+        }
+    }
+
     fun inputProcessHelper(sensorData: SensorData): ConvertedData {
 
         val currentTime = sensorData.currentTime
@@ -64,6 +87,23 @@ object InputProcessHelper {
             sin(lat)
         }
 
+        val location = LocationClusteringAlg.Location(
+            longitude!!, latitude!!
+        )
+        dataset.add(location)
+
+        val locationCluster = 0
+
+//        // Clustering the location values
+//        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 4)
+//        val dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
+//
+//        val locationCluster = if (dbscanClusters.last() == LocationClusteringAlg.Outsider) {
+//            0
+//        } else {
+//            (dbscanClusters.last() as LocationClusteringAlg.Identified).id
+//        }
+
 //        val doubleArr = doubleArrayOf(
 //            sinTime, cosTime, dayOfWeekSin,
 //            dayOfWeekCos, (xCoord ?: 0.0), (yCoord ?: 0.0), (zCoord ?: 0.0)
@@ -73,7 +113,8 @@ object InputProcessHelper {
             sensorData.lightSensorValue, sensorData.deviceLying, sensorData.BTdeviceConnected,
             sensorData.headphonesPluggedIn, sensorData.pressure,sensorData.temperature,
             sensorData.wifi,sensorData.connection,sensorData.batteryStatus,sensorData.chargingType,
-            sensorData.proximity,sensorData.humidity,sensorData.heartBeat,sensorData.heartRate)
+            sensorData.proximity,sensorData.humidity,sensorData.heartBeat,sensorData.heartRate,
+            locationCluster)
     }
 
     // Give header to the file and process dates
@@ -87,10 +128,9 @@ object InputProcessHelper {
             "class,sinTime,cosTime,dayOfWeekSin," +
                 "dayOfWeekCos,state,light,orientation,BTconnected,headphonesPlugged," +
                 "pressure,temperature,wifi,connection,batteryStatus,chargingType," +
-                "proximity,humidity,heartRate,heartBeat" + "\n"
+                "proximity,humidity,heartRate,heartBeat,location" + "\n"
         )
 
-        val dataset = mutableListOf<LocationClusteringAlg.Location>()
         val wifiList = arrayListOf<UInt>()
 
         if (inputFile.exists()) {
@@ -185,29 +225,14 @@ object InputProcessHelper {
             Log.e("File", "The input file doesn't exist")
         }
 
-        // Calculation of harvesine distance, serves for location clustering
-        val haversineDistance = object :
-            LocationClusteringAlg.Distance<LocationClusteringAlg.Location> {
-            override fun LocationClusteringAlg.Location.distance(to: LocationClusteringAlg.Location): Double {
-                val R = 6371000.0
-                val lat1 = Math.toRadians(lat)
-                val lat2 = Math.toRadians(to.lat)
-                val lon1 = Math.toRadians(lon)
-                val lon2 = Math.toRadians(to.lon)
+//        var dbscanClusters = emptyList<LocationClusteringAlg.Cluster>()
+//
+//        GlobalScope.launch(Dispatchers.Default) {
+//        // Clustering the location values
+//        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 2)
+//        dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
+//        }
 
-                return 2 * R * asin(
-                    sqrt(
-                        ((lat1 - lat2) / 2).pow(2) + cos(lat1) * cos(lat2) * sin((lon1 - lon2) / 2).pow(
-                            2
-                        )
-                    )
-                )
-            }
-        }
-
-        // Clustering the location values
-        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 2)
-        val dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
         var index = 0
         var first = true
 
@@ -219,22 +244,23 @@ object InputProcessHelper {
             csvReader().open(csvFile) {
                 readAllAsSequence()
                     .forEach { row ->
-                        var rowNew = row.toString()
+                        // Convert row to String without spaces
+                        var rowNew = row.toString().replace("\\s".toRegex(), "")
                         rowNew = rowNew.substring(1, rowNew.length-1)
-                        val connected : String
+                        var connected : String = ""
                         // Detecting the first row, which has header information
-                        if (!first) {
-                            // Add location cluster value to others
-                            connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
-                                "$rowNew, ${0}\n"
-                            } else {
-                                "$rowNew, ${(dbscanClusters[index] as LocationClusteringAlg.Identified).id}\n"
-                            }
-                            index++
-                        } else {
-                            first = false
-                            connected = "$rowNew,location\n"
-                        }
+//                        if (!first) {
+//                            // Add location cluster value to others
+////                            connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
+////                                "$rowNew, ${0}\n"
+////                            } else {
+////                                "$rowNew, ${(dbscanClusters[index] as LocationClusteringAlg.Identified).id}\n"
+////                            }
+////                            index++
+//                        } else {
+//                            first = false
+                            connected = "$rowNew\n"
+//                        }
                         locationNewFile.appendText(connected)
                     }
             }

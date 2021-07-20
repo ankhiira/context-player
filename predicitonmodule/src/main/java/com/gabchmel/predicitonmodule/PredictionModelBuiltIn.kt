@@ -159,7 +159,7 @@ class PredictionModelBuiltIn(val context: Context) {
                 add(humidity)
                 add(heartRate)
                 add(heartBeat)
-//                add(location)
+                add(location)
             }
         }
 
@@ -196,7 +196,7 @@ class PredictionModelBuiltIn(val context: Context) {
                 setValue(humidity, input.humidity!!.toDouble())
                 setValue(heartRate, input.heartRate!!.toDouble())
                 setValue(heartBeat, input.heartBeat!!.toDouble())
-//                setValue(location, input.heartBeat!!.toDouble())
+                setValue(location, input.locationCluster.toDouble())
             }
         }
 

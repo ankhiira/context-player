@@ -152,7 +152,14 @@ class SongListFragment : Fragment() {
                                     }
                                 }
                             }
-                        }
+                        },
+//                        bottomBar = {
+//                            BottomAppBar() {
+//                                Text(
+//                                    text = "Bla bla"
+//                                )
+//                            }
+//                        }
                     )
                 }
             }

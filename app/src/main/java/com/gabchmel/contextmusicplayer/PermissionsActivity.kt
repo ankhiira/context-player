@@ -51,21 +51,6 @@ class PermissionsActivity : AppCompatActivity() {
     @Composable
     fun PermissionsScreen() {
 
-//        if (ActivityCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACCESS_COARSE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACTIVITY_RECOGNITION
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            Log.e("permission", "permission not granted")
-//            return
-//        }
-
         var array = arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,

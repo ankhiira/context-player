@@ -2,6 +2,8 @@ package com.gabchmel.sensorprocessor
 
 import kotlin.math.*
 
+// Taken from: https://gist.github.com/mgadzhi/b2e8626556ae3b91f9bca1e37268e0ee
+
 class LocationClusteringAlg {
     // First, we need to define, what a 'distance' is
     interface Distance<T> {
@@ -11,7 +13,6 @@ class LocationClusteringAlg {
     // Now let's define few concrete data classes that will be used to store the data
     data class Location(val lat: Double, val lon: Double)
     data class Point(val x: Double, val y: Double)
-
 
     // It is possible to define different distance functions for different data classes
     // It is also possible to define different distance functions for the same data class
@@ -41,7 +42,6 @@ class LocationClusteringAlg {
         }
     }
 
-
     // We will only require a 'cluster' to have an id for now
     // And let's say we use integers as identifiers
     //data class Cluster(val id: Int)
@@ -55,7 +55,6 @@ class LocationClusteringAlg {
     interface ClusteringAlgorithm<T, D> {
         fun <D : Distance<T>> fit_transform(xs: List<T>, dist: D): List<Cluster>
     }
-
 
     // I first implemented a minimalistic version of a Matrix to hold pairwise distances,
     // but I didn't really use everything from here after all.
@@ -135,55 +134,5 @@ class LocationClusteringAlg {
             }
             return result
         }
-    }
-
-
-    fun main() {
-        val a = Point(1.0, 1.0)
-        val b = Point(0.0, 0.0)
-        val d = euclideanDistance.run { a.distance(b) }
-        println(d) // -> 1.4142135623730951
-
-        val loc1 = Location(-34.83333, -58.5166646)
-        val loc2 = Location(49.0083899664, 2.53844117956)
-
-        val d2 = haversineDistance.run { loc1.distance(loc2) } / 1000
-        val d3 = haversineDistance.run { loc2.distance(loc1) } / 1000
-        val d4 = haversineDistance.run { loc1.distance(loc1) } / 1000
-        println(d2) // -> 12275.31211886113
-        println(d3) // -> 12275.31211886113
-        println(d4) // -> 0.0
-        // Thus, d(a, b) = d(b, a) and d(a, a) = 0. At least that seems correct.
-
-        val dataset = listOf(
-            // Groenplaats
-            Location(51.219227, 4.401766),
-            Location(51.218729, 4.401970),
-            Location(51.219162, 4.401155),
-
-            // Sentiance
-            Location(51.196732, 4.407988),
-            Location(51.196743, 4.408003),
-            Location(51.196677, 4.408226),
-
-            // Stadspark
-            Location(51.211933, 4.413849),
-            Location(51.212721, 4.414198),
-            Location(51.212113, 4.414257),
-
-            // Noise
-            Location(0.0, 0.0)
-        )
-
-        val dbscan = DBSCAN(150.0, 2)
-        val dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
-        println(dbscanClusters)
-        /* -> [Identified(id=1), Identified(id=1), Identified(id=1),
-               Identified(id=2), Identified(id=2), Identified(id=2),
-               Identified(id=3), Identified(id=3), Identified(id=3),
-               Outsider@15975490]
-
-               Three toy clusters are identified and the noisy outsider is also detected.
-        */
     }
 }

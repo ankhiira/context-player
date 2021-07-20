@@ -1,7 +1,6 @@
 package com.gabchmel.contextmusicplayer
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.*
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +34,7 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
             val inputFile = File(appContext.filesDir, "data.csv")
             if (inputFile.exists()) {
                 // Connect to the MediaBrowserService, run prediction and create notification
-                MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
+                val connector = MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
             }
 
             // Enqueue this unique work again so it achieves periodicity
@@ -48,7 +47,7 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
                     ExistingWorkPolicy.REPLACE,
                     tenMinutesRequest)
 
-            Log.d("Work", "Done Work")
+//            Log.d("Work", "Done Work")
         }
         // Indicate whether the work finished successfully with the Result
         return Result.success()

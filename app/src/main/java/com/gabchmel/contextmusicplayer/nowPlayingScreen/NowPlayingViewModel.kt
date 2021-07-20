@@ -8,12 +8,10 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import com.gabchmel.contextmusicplayer.MediaPlaybackService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 
 class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
@@ -21,6 +19,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     private lateinit var mediaBrowser: MediaBrowserCompat
     private var mediaBrowserConnectionCallback = MediaBrowserCompat.ConnectionCallback()
 
+    val service = CompletableDeferred<MediaPlaybackService>()
     lateinit var mediaController: MediaControllerCompat
 
     private val _musicState = MutableStateFlow<PlaybackStateCompat?>(null)
@@ -33,20 +32,10 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
     var notPlayed = true
 
-    val service = CompletableDeferred<MediaPlaybackService>()
-
-//    private var songs = flow {
-//        // Service awaits for complete call
-//        val service = service.await()
-//        // Collects values from songs from services
-//        emitAll(service.songs)
-//    }.stateIn(viewModelScope, SharingStarted.Lazily,null)
-
     private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
 
             mediaBrowser.sessionToken.also { token ->
-
                 // Create MediaControllerCompat
                 mediaController = MediaControllerCompat(
                     app,
@@ -67,14 +56,6 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
             if (args.play && notPlayed) {
                 play(args.uri)
                 notPlayed = false
-            }
-
-            viewModelScope.launch {
-//                service.complete(MediaPlaybackService.getInstance(app))
-//                val intent = Intent(app, MediaPlaybackService::class.java)
-//                intent.putExtra("is_binding", true)
-//                bs = bindServiceAndWait(app,
-//                    intent, Context.BIND_AUTO_CREATE)
             }
         }
 
@@ -101,11 +82,9 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     override fun onCleared() {
-//        super.onCleared()
-
         mediaController.unregisterCallback(controllerCallback)
-        mediaBrowserConnectionCallback.onConnectionSuspended()
         mediaBrowser.disconnect()
+        super.onCleared()
     }
 
     private var controllerCallback = object : MediaControllerCompat.Callback() {

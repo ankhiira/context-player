@@ -24,7 +24,7 @@ class PredictionModelBuiltIn(val context: Context) {
     private lateinit var forest: RandomForest
     // Name of the input arff file
     val file = "arffData_converted.arff"
-    private val csvConvertedFile = "convertedData.csv"
+    private val csvConvertedFile = "convertedLocData.csv"
 
     // Function to read the dataset from arff file
     private fun getDataset(): Pair<Instances, Instances> {
@@ -130,6 +130,7 @@ class PredictionModelBuiltIn(val context: Context) {
         val humidity = Attribute("humidity")
         val heartRate = Attribute("heartRate")
         val heartBeat = Attribute("heartBeat")
+        val location = Attribute("location")
 
         // Create a list of input attributes
         val attributeList = object : ArrayList<Attribute?>(2) {
@@ -158,6 +159,7 @@ class PredictionModelBuiltIn(val context: Context) {
                 add(humidity)
                 add(heartRate)
                 add(heartBeat)
+//                add(location)
             }
         }
 
@@ -194,6 +196,7 @@ class PredictionModelBuiltIn(val context: Context) {
                 setValue(humidity, input.humidity!!.toDouble())
                 setValue(heartRate, input.heartRate!!.toDouble())
                 setValue(heartBeat, input.heartBeat!!.toDouble())
+//                setValue(location, input.heartBeat!!.toDouble())
             }
         }
 
@@ -209,7 +212,7 @@ class PredictionModelBuiltIn(val context: Context) {
             for (i in 0..3) {
                 val result = forest.classifyInstance(newInstance)
                 resultArray[i] = classNames[result.toInt()]
-                Log.d("WekaTest", "Nr: itemNumber, predicted: ${resultArray[i]}")
+//                Log.d("WekaTest", "Nr: itemNumber, predicted: ${resultArray[i]}")
             }
             className = resultArray.random().toString()
             Log.d("random", className)
@@ -249,8 +252,6 @@ class PredictionModelBuiltIn(val context: Context) {
             val wifiListString = wifiList.joinToString(separator = ",") { wifiName ->
                 wifiName.toString()
             }
-
-
 
             // Replace attribute description in arff file
             text = text.replace(

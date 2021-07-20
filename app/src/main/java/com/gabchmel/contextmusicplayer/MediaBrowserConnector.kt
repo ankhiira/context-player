@@ -5,8 +5,10 @@ import android.app.PendingIntent
 import android.content.*
 import android.net.Uri
 import android.os.Build
+import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
@@ -14,6 +16,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
+import com.gabchmel.common.LocalBinder
 import com.gabchmel.common.utilities.bindService
 import com.gabchmel.contextmusicplayer.playlistScreen.Song
 import com.gabchmel.sensorprocessor.SensorProcessService
@@ -21,6 +24,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Context) :
     LifecycleObserver {
@@ -31,8 +36,49 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         val mediaControllerNew = CompletableDeferred<MediaControllerCompat>()
     }
 
+    inner class BoundService(
+        private val context: Context,
+        val name: ComponentName?,
+        val service: MediaPlaybackService,
+        val conn: ServiceConnection,
+        var isBinded : Boolean
+    ) {
+        fun unbind() {
+            if (isBinded) {
+                try {
+                    context.unbindService(conn)
+                    isBinded = false
+                } catch (e: Exception) {
+                    Log.e("Exception", e.toString())
+                }
+            }
+        }
+    }
+
+    // call within a coroutine to bind service, waiting for onServiceConnected
+    // before the coroutine resumes
+    suspend fun bindServiceAndWait(context: Context, intent: Intent, flags: Int) =
+        suspendCoroutine<BoundService> { continuation ->
+
+            val conn = object: ServiceConnection {
+                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                    val binder = service as LocalBinder<MediaPlaybackService>
+                    val serviceVal = binder.getService()
+                    continuation.resume(BoundService(context, name,
+                        serviceVal
+                        , this, true))
+
+                }
+                override fun onServiceDisconnected(name: ComponentName?) {
+                    // ignore, not much we can do
+                }
+
+            }
+            context.bindService(intent, conn, flags)
+        }
+
     private lateinit var mediaBrowser: MediaBrowserCompat
-    val service = CompletableDeferred<MediaPlaybackService>()
+    val bs = CompletableDeferred<MediaBrowserConnector.BoundService>()
 
     private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
         lifecycleOwner.whenCreated {
@@ -50,7 +96,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
     private var songs = flow {
         // Service awaits for complete call
-        val service = service.await()
+        val service = bs.await().service
         // Collects values from songs from services
         emitAll(service.songs)
     }.stateIn(lifecycleOwner.lifecycleScope, SharingStarted.Lazily, null)
@@ -70,7 +116,11 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
             mediaController.registerCallback(controllerCallback)
 
             lifecycleOwner.lifecycleScope.launch {
-                service.complete(MediaPlaybackService.getInstance(context))
+                val intent = Intent(context, MediaPlaybackService::class.java)
+                intent.putExtra("is_binding", true)
+                bs.complete(
+                bindServiceAndWait(context,
+                    intent, Context.BIND_AUTO_CREATE))
             }
         }
     }
@@ -122,6 +172,9 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                         ) {
                             predictedSong = song
                             createNotification(song)
+
+//                            mediaBrowser.disconnect()
+//                            bs.await().unbind()
                         }
                     }
                 }
@@ -235,13 +288,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 pendingIntentSkip
             )
             .setContentIntent(pendingIntent)
-            // Stop the service when the notification is swiped away
-//            .setDeleteIntent(
-//                MediaButtonReceiver.buildMediaButtonPendingIntent(
-//                    context,
-//                    PlaybackStateCompat.ACTION_STOP
-//                )
-//            )
             .setAutoCancel(true)
 
         val notification = builder.build()

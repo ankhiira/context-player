@@ -3,29 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/song_list_Fragment">
+    app:startDestination="@id/songListFragment">
 
     <fragment
-        android:id="@+id/homeFragment"
+        android:id="@+id/nowPlayingFragment"
         android:name="com.gabchmel.contextmusicplayer.nowPlayingScreen.NowPlayingFragment"
         android:label="fragment_blank">
-        <argument android:name="uri"
+
+        <argument
+            android:name="uri"
             app:argType="android.net.Uri" />
         <argument
             android:name="play"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
-        android:id="@+id/song_list_Fragment"
+        android:id="@+id/songListFragment"
         android:name="com.gabchmel.contextmusicplayer.playlistScreen.SongListFragment"
         android:label="fragment_blank2">
         <action
             android:id="@+id/action_song_list_Fragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
+            app:destination="@id/nowPlayingFragment" />
         <action
             android:id="@+id/action_song_list_Fragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />

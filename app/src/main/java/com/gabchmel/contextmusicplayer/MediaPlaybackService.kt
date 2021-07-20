@@ -16,6 +16,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
@@ -51,10 +52,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
             }, Context.BIND_AUTO_CREATE)
         }
-
-        fun disconnect(context: Context) {
-
-        }
     }
 
     private lateinit var mediaSession: MediaSessionCompat
@@ -64,7 +61,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private var player = MediaPlayer()
     private lateinit var notification: Notification
     private lateinit var timer: Timer
-    private lateinit var broadcastReceiver: BroadcastReceiver
+    private lateinit var headsetPlugReceiver: BroadcastReceiver
 //    private val binder = MediaBinder()
     private val binder = object : LocalBinder<MediaPlaybackService>() {
         override fun getService() = this@MediaPlaybackService
@@ -76,6 +73,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private val metadataRetriever = MediaMetadataRetriever()
 
     private val myNoisyAudioStreamReceiver = BecomingNoisyReceiver()
+
+    var isBinded = false
 
     // Binder to a service
     inner class MediaBinder : Binder() {
@@ -91,9 +90,19 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
             val binder = service as LocalBinder<SensorProcessService>
             sensorProcessService.value = binder.getService()
+            isBinded = true
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
+            isBinded = false
+        }
+
+        override fun onBindingDied(name: ComponentName?) {
+            isBinded = false
+        }
+
+        override fun onNullBinding(name: ComponentName?) {
+            isBinded = false
         }
     }
 
@@ -178,7 +187,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
         }
 
-        broadcastReceiver = object : BroadcastReceiver() {
+        headsetPlugReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
                 val action = intent.action
                 if (Intent.ACTION_HEADSET_PLUG == action) {
@@ -202,7 +211,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         }
 
         val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
-        registerReceiver(broadcastReceiver, receiverFilter)
+        registerReceiver(headsetPlugReceiver, receiverFilter)
 
         // Create and initialize MediaSessionCompat
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
@@ -465,6 +474,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
         Toast.makeText(this, "task removed", Toast.LENGTH_SHORT).show()
 
+        if (isRegistered)
+            unregisterReceiver(headsetPlugReceiver)
+        isRegistered = false
+
         val notificationManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManagerCompat
         notificationManager.cancelAll()
@@ -480,19 +493,27 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         // unregister BECOME_NOISY BroadcastReceiver
         if (isRegistered)
             unregisterReceiver(myNoisyAudioStreamReceiver)
+            unregisterReceiver(headsetPlugReceiver)
         isRegistered = false
 
-        player.stop()
         player.seekTo(0)
-        stopForeground(true)
-        this.applicationContext.unbindService(connection)
+        player.stop()
 
-        stopSelf()
+        if (isBinded) {
+            try {
+                this.applicationContext.unbindService(connection)
+            } catch (e: Exception) {
+                Log.e("Exception", e.toString())
+            }
+        }
 
         mediaSession.run {
             isActive = false
             release()
         }
+
+        stopForeground(true)
+        stopSelf()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

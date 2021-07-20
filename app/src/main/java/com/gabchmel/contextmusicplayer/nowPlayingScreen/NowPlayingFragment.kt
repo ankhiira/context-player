@@ -39,7 +39,6 @@ import com.google.accompanist.glide.rememberGlidePainter
 class NowPlayingFragment : Fragment() {
 
     private val viewModel: NowPlayingViewModel by viewModels()
-
     private val args: NowPlayingFragmentArgs by navArgs()
 
     @SuppressLint("RestrictedApi")
@@ -85,7 +84,6 @@ class NowPlayingFragment : Fragment() {
         JetnewsTheme {
             val materialGrey400 = MaterialTheme.colors.secondary
             val materialYel400 = MaterialTheme.colors.onPrimary
-
             val scaffoldState =
                 rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
 
@@ -103,7 +101,7 @@ class NowPlayingFragment : Fragment() {
                             )
                         },
                         navigationIcon = {
-                            IconButton(onClick = { findNavController().navigate(R.id.song_list_Fragment) }) {
+                            IconButton(onClick = { findNavController().navigate(R.id.songListFragment) }) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_back),
                                     contentDescription = "Back",
@@ -175,9 +173,8 @@ class NowPlayingFragment : Fragment() {
                                     .absolutePadding(bottom = 16.dp)
                             )
 
-                            // TODO val check
+                            // Slider
                             var sliderPosition by remember { mutableStateOf(0f) }
-
                             val songLength = musicMetadata?.getDuration()?.toFloat() ?: 0.0f
                             val songPosition =
                                 musicState?.getCurrentPosition(null)?.toFloat() ?: 0.0f

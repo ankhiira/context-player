@@ -136,11 +136,12 @@ class SensorProcessService : Service() {
         return binder
     }
 
+    // Function to write sensor values to file
     fun writeToFile(songID: String) {
         // Read current time
         _sensorData.value.currentTime = Calendar.getInstance().time
 
-//        Log.d("Sensor", "write")
+        Log.d("Sensor", "write")
 
         // Check to which Wi-Fi is the device connected
         wifiConnection()
@@ -154,7 +155,6 @@ class SensorProcessService : Service() {
         bluetoothDevicesConnection()
 
         try {
-            // TODO redo do for each to optimize
             // Write to csv file
             csvFile.appendText(
                 songID + ","
@@ -193,19 +193,17 @@ class SensorProcessService : Service() {
             return false
         }
 
-        Log.d("model", "model created")
         return true
     }
 
     fun triggerPrediction() {
-        Log.d("prediction", "trigger prediction")
-
         // Get the processed input values
         val input = inputProcessHelper(sensorData.value)
 
         _prediction.value = predictionModel.predict(input, classNames)
     }
 
+    // Function to compare measured values with saved to determine change in context
     fun detectContextChange(): Boolean {
         val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
         val time = prefs.getString("time", "No name defined")
@@ -235,6 +233,7 @@ class SensorProcessService : Service() {
         editor.apply()
     }
 
+    // Function to detect current activity
     private fun activityDetection() {
         val request = ActivityTransitionRequest(TransitionList.getTransitions())
 
@@ -247,20 +246,18 @@ class SensorProcessService : Service() {
 
         // used: https://heartbeat.fritz.ai/detect-users-activity-in-android-using-activity-transition-api-f718c844efb2
         task.addOnSuccessListener {
-            // Handle success
-            Log.d("ActivityRecognition", "Transitions Api registered with success")
         }
-
 
         task.addOnFailureListener { e: Exception ->
             // Handle error
-            Log.d(
+            Log.e(
                 "ActivityRecognition",
                 "Transitions Api could NOT be registered ${e.localizedMessage}"
             )
         }
     }
 
+    // Function for detection if the device is lying
     private fun processOrientation() {
 
         val normOfg = sqrt(
@@ -276,22 +273,15 @@ class SensorProcessService : Service() {
         val inclination = Math.toDegrees(acos(coordList[2]).toDouble()).roundToInt()
 
         // Device detected as lying is with inclination in range < 25 or > 155 degrees
-        _sensorData.value.deviceLying = if (inclination < 25 || inclination > 155)
-        {
-            // device is flat
-//            Log.d("Orientation", "Device is lying")
+        _sensorData.value.deviceLying = if (inclination < 25 || inclination > 155) {
             1.0f
-        }
-        else
-        {
-            // device is not flat
-//            Log.d("Orientation", "Device is staying")
+        } else {
             0.0f
         }
     }
 
+    // Function to detect connection of the bluetooth headset
     private fun bluetoothDevicesConnection() {
-
         // Check if the device supports bluetooth
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
             val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -307,7 +297,6 @@ class SensorProcessService : Service() {
                         BluetoothProfile.HEADSET
                     )
                 ) {
-//                    Log.d("BT", "mame headset")
                     1.0f
                 } else {
                     0.0f
@@ -315,6 +304,7 @@ class SensorProcessService : Service() {
         }
     }
 
+    // Function to detect if the headphones are plugged in
     private fun headphonesPluggedInDetection() {
         val broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
@@ -330,16 +320,15 @@ class SensorProcessService : Service() {
         registerReceiver(broadcastReceiver, receiverFilter)
     }
 
+    // Function for connected wifi name detection
     private fun wifiConnection() {
         val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.connectionInfo
 
-//        Log.d("ssid", "SSID:${wifiInfo.ssid}, hashCode:${wifiInfo.ssid.hashCode()}")
-
         _sensorData.value.wifi = wifiInfo.ssid.hashCode().toUInt()
     }
 
-    // Function to retrieve current internet connection state
+    // Function to retrieve current internet connection type
     private fun internetConnectivity(context: Context) {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -354,15 +343,12 @@ class SensorProcessService : Service() {
         if (capabilities != null) {
             when {
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-//                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
                     _sensorData.value.connection = "TRANSPORT_CELLULAR"
                 }
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-//                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
                     _sensorData.value.connection = "TRANSPORT_WIFI"
                 }
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-//                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
                     _sensorData.value.connection = "TRANSPORT_ETHERNET"
                 }
             }
@@ -371,26 +357,24 @@ class SensorProcessService : Service() {
         }
     }
 
-    private fun registerLocationListener() {
+    // Function for current location detection
+    fun registerLocationListener() {
         // Location change listener
         val locationListener = LocationListener { location ->
             _sensorData.value.longitude = location.longitude
             _sensorData.value.latitude = location.latitude
-
-            Log.d("location", "${location.latitude}, ${location.longitude}")
         }
 
         // Persistent LocationManager reference
         val locationManager = this.getSystemService(LOCATION_SERVICE) as LocationManager?
 
-        // TODO if not granted
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACTIVITY_RECOGNITION
             ) != PackageManager.PERMISSION_GRANTED
@@ -405,10 +389,6 @@ class SensorProcessService : Service() {
             0f,
             locationListener
         )
-
-        //        if (location.value == null) {
-//            locationManager.requestLocationUpdates(getProviderName(), 0, 0, this)
-//        }
     }
 
     private fun batteryStatusDetection() {
@@ -441,6 +421,7 @@ class SensorProcessService : Service() {
         }
     }
 
+    // For detection of the current activity
     inner class ActivityTransitionReceiver : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {

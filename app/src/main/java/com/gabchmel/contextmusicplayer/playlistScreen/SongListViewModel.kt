@@ -10,6 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.contextmusicplayer.MediaPlaybackService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -23,7 +24,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         private val context: Context,
         val name: ComponentName?,
         val service: MediaPlaybackService,
-        val conn: ServiceConnection
+        private val conn: ServiceConnection
     ) {
         fun unbind() {
             context.unbindService(conn)
@@ -32,9 +33,10 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
     // call within a coroutine to bind service, waiting for onServiceConnected
     // before the coroutine resumes
-    suspend fun bindServiceAndWait(context: Context, intent: Intent, flags: Int) =
+    private suspend fun bindService(context: Context, intent: Intent, flags: Int) =
         suspendCoroutine<BoundService> { continuation ->
 
+            // Create a connection object
             val conn = object: ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     val binder = service as LocalBinder<MediaPlaybackService>
@@ -44,25 +46,23 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
                         , this))
 
                 }
-                override fun onServiceDisconnected(name: ComponentName?) {
-                    // ignore, not much we can do
-                }
 
+                override fun onServiceDisconnected(name: ComponentName?) {
+                }
             }
+
+            // Bind to a service using connection
             context.bindService(intent, conn, flags)
         }
 
-    private val bs = viewModelScope.async {
-//        MediaPlaybackService.getInstance(app)
+    private val boundService = viewModelScope.async {
         val intent = Intent(app, MediaPlaybackService::class.java)
         intent.putExtra("is_binding", true)
-        bindServiceAndWait(app,
-            intent, Context.BIND_AUTO_CREATE)
+        bindService(app, intent, Context.BIND_AUTO_CREATE)
     }
 
     var songs = flow {
-        val bs = bs.await()
-        val service = bs.service
+        val service = boundService.await().service
         emitAll(service.songs)
     }.stateIn(viewModelScope, SharingStarted.Lazily,null)
 
@@ -71,23 +71,25 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     val isRefreshing: StateFlow<Boolean>
         get() = _isRefreshing.asStateFlow()
 
+    // Function to refresh list of song on pull down
     fun refresh() {
         // This doesn't handle multiple 'refreshing' tasks, don't use this
         viewModelScope.launch {
-
             _isRefreshing.value = true
-            bs.await().service.loadSongs()
+            boundService.await().service.loadSongs()
             delay(1000)
             _isRefreshing.value = false
         }
     }
 
+    @ExperimentalCoroutinesApi
     fun loadSongs() {
-        try {bs.getCompleted().service.loadSongs()} catch (e:Exception){}
+        try {boundService.getCompleted().service.loadSongs()} catch (e:Exception){}
     }
 
+    @ExperimentalCoroutinesApi
     override fun onCleared() {
-//        super.onCleared()
-        bs.getCompleted().unbind()
+        boundService.getCompleted().unbind()
+        super.onCleared()
     }
 }

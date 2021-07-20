@@ -209,11 +209,11 @@ object InputProcessHelper {
         val dbscan = LocationClusteringAlg.DBSCAN(150.0, 2)
         val dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
         var index = 0
+        var first = true
 
+        // File to save data with clustered location
         val locationNewFile = File(context.filesDir, "convertedLocData.csv")
         locationNewFile.writeText("")
-
-        var first = true
 
         if (csvFile.exists()) {
             csvReader().open(csvFile) {
@@ -224,7 +224,6 @@ object InputProcessHelper {
                         val connected : String
                         // Detecting the first row, which has header information
                         if (!first) {
-
                             // Add location cluster value to others
                             connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
                                 "$rowNew, ${0}\n"
@@ -234,7 +233,7 @@ object InputProcessHelper {
                             index++
                         } else {
                             first = false
-                            connected = "$rowNew, location\n"
+                            connected = "$rowNew,location\n"
                         }
                         locationNewFile.appendText(connected)
                     }

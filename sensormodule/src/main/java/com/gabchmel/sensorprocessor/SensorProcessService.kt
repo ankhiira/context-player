@@ -18,11 +18,11 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.gabchmel.common.ConvertedData
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
+import com.gabchmel.sensorprocessor.activityDetection.ActivityTransitionReceiver
 import com.gabchmel.sensorprocessor.activityDetection.TransitionList
 import com.gabchmel.sensorprocessor.utility.InputProcessHelper.inputProcessHelper
 import com.gabchmel.sensorprocessor.utility.InputProcessHelper.processInputCSV
@@ -40,8 +40,11 @@ import kotlin.math.sqrt
 
 class SensorProcessService : Service() {
 
-    // Structure to store sensor values
-    var _sensorData = MutableStateFlow(SensorData())
+    companion object {
+        // Structure to store sensor values
+        var _sensorData = MutableStateFlow(SensorData())
+    }
+
     val sensorData: StateFlow<SensorData> = _sensorData
 
     val data = sensorData.value
@@ -421,48 +424,6 @@ class SensorProcessService : Service() {
                 _sensorData.value.chargingType = "WIRELESS"
             "NONE" ->
                 _sensorData.value.chargingType = "NONE"
-        }
-    }
-
-    // For detection of the current activity
-    inner class ActivityTransitionReceiver : BroadcastReceiver() {
-
-        override fun onReceive(context: Context, intent: Intent) {
-            if (ActivityTransitionResult.hasResult(intent)) {
-
-                val result = ActivityTransitionResult.extractResult(intent)
-                for (event in result!!.transitionEvents) {
-                    val activity = activityType(event.activityType)
-                    val transition = transitionType(event.transitionType)
-                    val message = "Transition: $activity ($transition)"
-
-                    Log.d("DetectedActReceiver", message)
-
-                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-
-                    context.sendBroadcast(Intent("MyAction"))
-
-                    _sensorData.value.currentState = activity
-                }
-            }
-        }
-
-        private fun transitionType(transitionType: Int): String {
-            return when (transitionType) {
-                ActivityTransition.ACTIVITY_TRANSITION_ENTER -> "ENTER"
-                ActivityTransition.ACTIVITY_TRANSITION_EXIT -> "EXIT"
-                else -> "UNKNOWN"
-            }
-        }
-
-        private fun activityType(activity: Int): String {
-            return when (activity) {
-                DetectedActivity.IN_VEHICLE -> "IN_VEHICLE"
-                DetectedActivity.STILL -> "STILL"
-                DetectedActivity.WALKING -> "WALKING"
-                DetectedActivity.RUNNING -> "RUNNING"
-                else -> "UNKNOWN"
-            }
         }
     }
 }

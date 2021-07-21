@@ -43,25 +43,25 @@ object SensorManagerUtility {
                         sensorProcessService.coordList = sensorValueList
                     }
                     sensorType == Sensor.TYPE_LIGHT -> {
-                        sensorProcessService._sensorData.value.lightSensorValue = values[0]
+                        SensorProcessService._sensorData.value.lightSensorValue = values[0]
                     }
                     sensorType == Sensor.TYPE_PRESSURE -> {
-                        sensorProcessService._sensorData.value.pressure = values[0]
+                        SensorProcessService._sensorData.value.pressure = values[0]
                     }
                     sensorType == Sensor.TYPE_AMBIENT_TEMPERATURE -> {
-                        sensorProcessService._sensorData.value.temperature = values[0]
+                        SensorProcessService._sensorData.value.temperature = values[0]
                     }
                     sensorType == Sensor.TYPE_PROXIMITY -> {
-                        sensorProcessService._sensorData.value.proximity = values[0]
+                        SensorProcessService._sensorData.value.proximity = values[0]
                     }
                     sensorType == Sensor.TYPE_RELATIVE_HUMIDITY -> {
-                        sensorProcessService._sensorData.value.humidity = values[0]
+                        SensorProcessService._sensorData.value.humidity = values[0]
                     }
                     sensorType == Sensor.TYPE_HEART_BEAT -> {
-                        sensorProcessService._sensorData.value.heartBeat = values[0]
+                        SensorProcessService._sensorData.value.heartBeat = values[0]
                     }
                     sensorType == Sensor.TYPE_HEART_RATE -> {
-                        sensorProcessService._sensorData.value.heartRate = values[0]
+                        SensorProcessService._sensorData.value.heartRate = values[0]
                     }
                 }
 

@@ -129,9 +129,9 @@ class NowPlayingFragment : Fragment() {
                 content = {
                     Column(
                         modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.SpaceAround,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
 
@@ -144,15 +144,15 @@ class NowPlayingFragment : Fragment() {
                             contentDescription = "Album Art",
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .fillMaxWidth()
-                                    .padding(24.dp)
-                                    .height(210.dp)
+                                .clip(RoundedCornerShape(percent = 10))
+                                .fillMaxWidth()
+                                .padding(24.dp)
+                                .height(210.dp)
                         )
 
                         Column(
-                            modifier = Modifier
-                                .weight(1.0f),
+//                            modifier = Modifier
+//                                .weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
 
@@ -200,9 +200,9 @@ class NowPlayingFragment : Fragment() {
 
                             Row(
                                 modifier = Modifier
-                                        .padding(vertical = 16.dp, horizontal = 8.dp)
-                                        .fillMaxWidth()
-                                        .height(92.dp),
+                                    .padding(vertical = 16.dp, horizontal = 8.dp)
+                                    .fillMaxWidth()
+                                    .height(92.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
@@ -225,11 +225,11 @@ class NowPlayingFragment : Fragment() {
                                         playSong()
                                     },
                                     modifier = Modifier
-                                            .size(92.dp)
+                                        .size(92.dp)
 //                                        .drawColoredShadow(color = Color.White, borderRadius = 2.dp,shadowRadius = 25.dp)
 //                                        .shadow(elevation = 25.dp, shape = CircleShape,
 //                                        clip = true)
-                                            .padding(horizontal = 8.dp)
+                                        .padding(horizontal = 8.dp)
                                 ) {
                                     Image(
                                         painter =

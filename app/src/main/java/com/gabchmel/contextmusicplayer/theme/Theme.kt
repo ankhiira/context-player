@@ -33,6 +33,6 @@ fun JetnewsTheme(
     MaterialTheme(
         colors = DarkColors,
         content = content,
-//        typography = MyTypography
+        typography = MyTypography
     )
 }

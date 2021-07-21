@@ -74,9 +74,8 @@ class SongListFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Song List",
-                                        fontWeight = FontWeight.Bold,
                                         modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.Center
+                                        textAlign = TextAlign.Center,
                                     )
                                 },
                                 actions = {
@@ -187,8 +186,9 @@ class SongListFragment : Fragment() {
         ) {
             Text(
                 text = "${song.title}",
-                fontWeight = FontWeight.W300,
-                color = fontColor
+                fontWeight = FontWeight.W400,
+                color = fontColor,
+                fontSize = 16.sp
             )
             Text(
                 text = "${song.author}",

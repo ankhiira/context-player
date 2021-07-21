@@ -6,15 +6,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.filled.Sensors
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -80,14 +85,21 @@ class SettingsFragment : Fragment() {
                                         }),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = "On device sensors",
-                                        color = materialYel400,
-                                        fontSize = 18.sp
+                                    Row {
+                                        Icon(
+                                            imageVector = Icons.Filled.Sensors,
+                                            contentDescription = "Back",
                                         )
+                                        Text(
+                                            text = "On device sensors",
+                                            color = materialYel400,
+                                            fontSize = 18.sp,
+                                            modifier = Modifier.padding(horizontal = 8.dp)
+                                        )
+                                    }
                                     Icon(
                                         imageVector = Icons.Filled.NavigateNext,
-                                        contentDescription = "Settings",
+                                        contentDescription = "NavigateToNext",
                                     )
                                 }
                                 Row(
@@ -101,11 +113,18 @@ class SettingsFragment : Fragment() {
                                         }),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = "Collected sensor data",
-                                        color = materialYel400,
-                                        fontSize = 18.sp
-                                    )
+                                    Row {
+                                        Icon(
+                                            imageVector = Icons.Filled.DriveFileRenameOutline,
+                                            contentDescription = "Back",
+                                        )
+                                        Text(
+                                            text = "Collected sensor data",
+                                            color = materialYel400,
+                                            fontSize = 18.sp,
+                                            modifier = Modifier.padding(horizontal = 8.dp)
+                                        )
+                                    }
                                     Icon(
                                         imageVector = Icons.Filled.NavigateNext,
                                         contentDescription = "Settings",
@@ -113,72 +132,91 @@ class SettingsFragment : Fragment() {
                                 }
                                 Row() {
                                     Column(
-                                        modifier = Modifier
-                                            .clickable(onClick = {
-                                                MediaBrowserConnector(
-                                                    ProcessLifecycleOwner.get(),
-                                                    requireContext()
-                                                )
-                                            })
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         Text(
-                                            text = "Recreate model",
-                                            fontWeight = FontWeight.Bold,
-                                            color = materialYel400,
-                                            fontSize = 18.sp
-                                        )
-                                        Text(
                                             text = "Clicking on this causes recreation of the model and triggers new song prediction",
-                                            color = materialYel400
+                                            color = materialYel400,
                                         )
-                                    }
-                                }
-                                Row() {
-                                    Card {
-                                        Column(
-                                            modifier = Modifier
-                                                .clickable(onClick = {
-                                                    val inputFile =
-                                                        File(requireContext().filesDir, "data.csv")
-                                                    if (inputFile.exists()) {
-                                                        requireContext().deleteFile("data.csv")
-                                                    }
-                                                })
+                                        Button(onClick = {
+                                            MediaBrowserConnector(
+                                                ProcessLifecycleOwner.get(),
+                                                requireContext()
+                                            )},
+                                            shape = RoundedCornerShape(50)
                                         ) {
                                             Text(
-                                                text = "Delete saved data",
-                                                fontWeight = FontWeight.Bold,
+                                                text = "Recreate model",
                                                 color = materialYel400,
-                                                fontSize = 18.sp
-                                            )
-                                            Text(
-                                                text = "Clicking on this deletes all collected sensor data used for song prediction",
-                                                color = materialYel400
                                             )
                                         }
                                     }
                                 }
-//                                Row(
-//                                    modifier = Modifier
-//                                        .fillMaxWidth()
-//                                        .clickable(onClick = {
-//                                            findNavController().navigate(
-//                                                SettingsFragmentDirections
-//                                                    .actionSettingsFragmentToPredictionModelSettingsFragment()
-//                                            )
-//                                        }),
-//                                    horizontalArrangement = Arrangement.SpaceBetween
-//                                ) {
-//                                    Text(
-//                                        text = "Prediction model",
-//                                        color = materialYel400,
-//                                        fontSize = 18.sp
-//                                    )
-//                                    Icon(
-//                                        imageVector = Icons.Filled.NavigateNext,
-//                                        contentDescription = "Settings",
-//                                    )
-//                                }
+                                Row() {
+
+                                    val openDialog = remember { mutableStateOf(false)  }
+
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Clicking on this deletes all collected sensor data used for song prediction",
+                                            color = materialYel400,
+                                        )
+                                        Button(onClick = {
+                                            openDialog.value = true
+                                           },
+                                            shape = RoundedCornerShape(50)
+                                        ) {
+                                            Text(
+                                                text = "Delete saved data",
+                                                color = materialYel400,
+                                            )
+                                        }
+                                        if (openDialog.value) {
+
+                                            AlertDialog(
+                                                onDismissRequest = {
+                                                    // Dismiss the dialog when the user clicks outside the dialog or on the back
+                                                    // button. If you want to disable that functionality, simply use an empty
+                                                    // onCloseRequest.
+                                                    openDialog.value = false
+                                                },
+                                                title = {
+                                                    Text(text = "Delete all saved data")
+                                                },
+                                                text = {
+                                                    Text("Are you sure you want to delete all saved data?")
+                                                },
+                                                confirmButton = {
+                                                    Button(
+
+                                                        onClick = {
+                                                            openDialog.value = false
+                                                            val inputFile =
+                                                                File(requireContext().filesDir, "data.csv")
+                                                            if (inputFile.exists()) {
+                                                                requireContext().deleteFile("data.csv")
+                                                            }
+                                                        }) {
+                                                        Text("YES")
+                                                    }
+                                                },
+                                                dismissButton = {
+                                                    Button(
+
+                                                        onClick = {
+                                                            openDialog.value = false
+                                                        }) {
+                                                        Text("NO")
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     )

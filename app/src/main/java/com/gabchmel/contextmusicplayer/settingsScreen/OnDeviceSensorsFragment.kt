@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
@@ -44,7 +45,7 @@ class OnDeviceSensorsFragment : Fragment() {
                                     Text(
                                         "Device sensors",
                                         color = materialYel400,
-                                        fontSize = 18.sp,
+                                        fontSize = 20.sp,
                                     )
                                 },
                                 navigationIcon = {
@@ -56,7 +57,9 @@ class OnDeviceSensorsFragment : Fragment() {
                                             tint = materialYel400
                                         )
                                     }
-                                })
+                                },
+                                elevation = 0.dp,
+                                backgroundColor = Color.Transparent)
                         },
                         content = {
                             LazyColumn(
@@ -68,7 +71,6 @@ class OnDeviceSensorsFragment : Fragment() {
                                     Text(
                                         text = sensor.name,
                                         color = materialYel400,
-                                        fontSize = 18.sp
                                     )
                                 }
                             }

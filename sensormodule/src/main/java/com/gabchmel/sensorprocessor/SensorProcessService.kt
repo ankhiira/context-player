@@ -20,6 +20,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.gabchmel.common.ConvertedData
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.activityDetection.TransitionList
@@ -196,11 +197,13 @@ class SensorProcessService : Service() {
         return true
     }
 
-    fun triggerPrediction() {
+    fun triggerPrediction() : ConvertedData {
         // Get the processed input values
         val input = inputProcessHelper(sensorData.value)
 
         _prediction.value = predictionModel.predict(input, classNames)
+
+        return input
     }
 
     // Function to compare measured values with saved to determine change in context

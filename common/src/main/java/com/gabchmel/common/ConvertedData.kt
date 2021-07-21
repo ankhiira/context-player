@@ -1,11 +1,11 @@
 package com.gabchmel.common
 
-data class ConvertedData (
-    var sinTime : Double,
-    var cosTime : Double,
-    var dayOfWeekSin : Double,
-    var dayOfWeekCos : Double,
-    var state : String?,
+data class ConvertedData(
+    var sinTime: Double = 0.0,
+    var cosTime: Double = 0.0,
+    var dayOfWeekSin: Double = 0.0,
+    var dayOfWeekCos: Double = 0.0,
+    var state: String? = "NONE",
     var lightSensorValue: Float? = 0.0f,
     var deviceLying: Float? = 0.0f,
     var BTdeviceConnected: Float? = 0.0f,
@@ -21,4 +21,4 @@ data class ConvertedData (
     var heartBeat: Float? = 0.0f,
     var heartRate: Float? = 0.0f,
     var locationCluster: Int = -1
-        )
+)

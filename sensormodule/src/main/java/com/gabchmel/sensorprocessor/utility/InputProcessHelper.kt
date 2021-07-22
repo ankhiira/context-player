@@ -1,5 +1,6 @@
 package com.gabchmel.sensorprocessor.utility
 
+import android.app.Service
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -156,17 +157,14 @@ object InputProcessHelper {
                             classNames.add(row[0])
                         }
 
-                        // TODO if the structure changes, delete csv - mozna shared pref
-//                        var service : SensorProcessService
-//                        var num : Int = 0
-//
-//                        if (headers.size != row.size) {
-//                            val inputFile =
-//                                File(context.filesDir, "data.csv")
-//                            if (inputFile.exists()) {
-//                                context.deleteFile("data.csv")
-//                            }
-//                        }
+                        val prefs = context.getSharedPreferences("MyPrefsFile", Service.MODE_PRIVATE)
+                        val counterOld = prefs.getInt("csv", 0)
+                        if (counterOld != row.size && counterOld != 0) {
+                            val dataInputFile = File(context.filesDir, "data.csv")
+                            if (dataInputFile.exists()) {
+                                context.deleteFile("data.csv")
+                            }
+                        }
 
                         // Add latitude and longitude to dataset for location clustering
                         val location = LocationClusteringAlg.Location(

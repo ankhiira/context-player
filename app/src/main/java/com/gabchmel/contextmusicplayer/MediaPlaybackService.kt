@@ -284,6 +284,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     // Start the player
                     player.start()
 
+                    updateMetadata()
                     updateState()
                     updateNotification(isPlaying)
                     startForeground(NotificationManager.notificationID, notification)

@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -88,7 +89,7 @@ class SettingsFragment : Fragment() {
                                     Row {
                                         Icon(
                                             imageVector = Icons.Filled.Sensors,
-                                            contentDescription = "Back",
+                                            contentDescription = "Sensors",
                                         )
                                         Text(
                                             text = "On device sensors",
@@ -138,6 +139,7 @@ class SettingsFragment : Fragment() {
                                         Text(
                                             text = "Clicking on this causes recreation of the model and triggers new song prediction",
                                             color = materialYel400,
+                                            textAlign = TextAlign.Justify
                                         )
                                         Button(onClick = {
                                             MediaBrowserConnector(
@@ -164,6 +166,7 @@ class SettingsFragment : Fragment() {
                                         Text(
                                             text = "Clicking on this deletes all collected sensor data used for song prediction",
                                             color = materialYel400,
+                                            textAlign = TextAlign.Justify
                                         )
                                         Button(onClick = {
                                             openDialog.value = true

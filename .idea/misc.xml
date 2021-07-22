@@ -4,6 +4,10 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector.xml" value="0.24351851851851852" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector1.xml" value="0.114" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector3.xml" value="0.114" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector3_colored.xml" value="0.114" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector_colored.xml" value="0.114" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_back.xml" value="0.15555555555555556" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_baseline_headset_24.xml" value="0.24351851851851852" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_home_black_24dp.xml" value="0.3148148148148148" />
@@ -16,6 +20,7 @@
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_play1.xml" value="0.22864583333333333" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_play_filled.xml" value="0.26851851851851855" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_plus_48px.xml" value="0.22864583333333333" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_settings.xml" value="0.114" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_next.xml" value="0.3148148148148148" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_next_black_24dp.xml" value="0.3148148148148148" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_prev.xml" value="0.15555555555555556" />

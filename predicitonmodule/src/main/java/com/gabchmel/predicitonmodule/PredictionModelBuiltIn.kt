@@ -259,6 +259,26 @@ class PredictionModelBuiltIn(val context: Context) {
                         classNamesString + "}"
             )
 
+            text = text.replace(
+                "@attribute state \\{.*\\}".toRegex(), "@attribute state {" +
+                        "IN_VEHICLE,STILL,WALKING,RUNNING,UNKNOWN}"
+            )
+
+            text = text.replace(
+                "@attribute connection \\{.*\\}".toRegex(), "@attribute connection {" +
+                        "NONE,TRANSPORT_CELLULAR,TRANSPORT_WIFI,TRANSPORT_ETHERNET}"
+            )
+
+            text = text.replace(
+                "@attribute batteryStatus \\{.*\\}".toRegex(), "@attribute batteryStatus {" +
+                        "NONE,CHARGING,NOT_CHARGING}"
+            )
+
+            text = text.replace(
+                "@attribute chargingType \\{.*\\}".toRegex(), "@attribute chargingType {" +
+                        "NONE,USB,AC,WIRELESS}"
+            )
+
             if(wifiList.isNotEmpty()) {
                 // Replace attribute description in arff file
                 text = text.replace(

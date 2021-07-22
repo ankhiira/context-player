@@ -36,6 +36,7 @@ import java.util.*
 import kotlin.math.acos
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
+import kotlin.reflect.full.memberProperties
 
 
 class SensorProcessService : Service() {
@@ -157,6 +158,27 @@ class SensorProcessService : Service() {
         batteryStatusDetection()
         // Check if the BT device is connected
         bluetoothDevicesConnection()
+
+        var counter = 1
+        for (prop in SensorData::class.memberProperties) {
+            counter++
+        }
+
+        if (csvFile.length() == 0L) {
+            val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
+            editor.putInt("csv", counter)
+            editor.apply()
+        } else {
+            val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
+            val counterOld = prefs.getInt("csv", 0)
+            if (counterOld != counter) {
+                val inputFile = File(this.filesDir, "data.csv")
+                if (inputFile.exists()) {
+                    this.deleteFile("data.csv")
+                }
+                csvFile = File(this.filesDir, "data.csv")
+            }
+        }
 
         try {
             // Write to csv file

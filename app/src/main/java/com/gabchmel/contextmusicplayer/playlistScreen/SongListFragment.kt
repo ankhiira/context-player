@@ -2,24 +2,33 @@ package com.gabchmel.contextmusicplayer.playlistScreen
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,7 +41,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.extensions.getAlbumArt
+import com.gabchmel.contextmusicplayer.extensions.getArtist
+import com.gabchmel.contextmusicplayer.extensions.getTitle
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.google.accompanist.glide.rememberGlidePainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -152,13 +165,94 @@ class SongListFragment : Fragment() {
                                 }
                             }
                         },
-//                        bottomBar = {
-//                            BottomAppBar() {
-//                                Text(
-//                                    text = "Bla bla"
-//                                )
-//                            }
-//                        }
+                        bottomBar = {
+                            val musicState by viewModel.musicState.collectAsState()
+                            val musicMetadata by viewModel.musicMetadata.collectAsState()
+                            val connected by viewModel.connected.collectAsState()
+
+                            val fontColor = MaterialTheme.colors.onPrimary
+
+                            if (connected) {
+
+                                BottomAppBar(
+//                                    Modifier.clickable(
+//                                        onClick = {
+//                                            val play = false
+//                                            findNavController().navigate(
+//                                                SongListFragmentDirections.actionSongListFragmentToHomeFragment(
+//                                                    Uri.EMPTY,
+//                                                    play
+//                                                )
+//                                            )
+//                                        }
+//                                    )
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(end = 8.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp)
+                                        ) {
+                                            // Album art
+                                            Image(
+                                                painter = musicMetadata?.getAlbumArt()?.let {
+                                                    rememberGlidePainter(it)
+                                                }
+                                                    ?: rememberVectorPainter(
+                                                        ImageVector.vectorResource(
+                                                            R.drawable.ic_album_cover_vector3_colored
+                                                        )
+                                                    ),
+                                                contentDescription = "Album Art",
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(percent = 10))
+                                                    .height(46.dp)
+                                            )
+                                            Column(
+                                                modifier = Modifier.padding(horizontal = 8.dp)
+                                            ) {
+                                                Text(
+                                                    text = musicMetadata?.getTitle() ?: "Loading",
+                                                    color = fontColor
+                                                )
+                                                Text(
+                                                    text = musicMetadata?.getArtist() ?: "Loading",
+                                                    color = fontColor,
+                                                    modifier = Modifier.alpha(0.54f)
+                                                )
+                                            }
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                playSong()
+                                            },
+                                            modifier = Modifier
+                                                .size(34.dp)
+                                                .padding(horizontal = 8.dp)
+                                        ) {
+                                            Icon(
+                                                painter = rememberVectorPainter(
+                                                    ImageVector.vectorResource(
+                                                        if (musicState?.state == PlaybackStateCompat.STATE_PLAYING)
+                                                            R.drawable.ic_pause_new
+                                                        else
+                                                            R.drawable.ic_play_button_arrowhead
+                                                    )
+                                                ),
+                                                contentDescription = "Play",
+                                                tint = Color(0xFFB1B1B1)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -170,7 +264,7 @@ class SongListFragment : Fragment() {
     fun SongRow(song: Song) {
 
         val fontColor = MaterialTheme.colors.onPrimary
-        Column(
+        Row(
             Modifier
                 .clickable(onClick = {
                     val play = true
@@ -181,22 +275,64 @@ class SongListFragment : Fragment() {
                         )
                     )
                 })
-                .padding(vertical = 8.dp)
-                .fillMaxWidth()
         ) {
-            Text(
-                text = "${song.title}",
-                fontWeight = FontWeight.W400,
-                color = fontColor,
-                fontSize = 16.sp
+
+            val metadataRetriever = MediaMetadataRetriever()
+            metadataRetriever.setDataSource(context?.applicationContext, song.URI)
+
+            // Album art
+            Image(
+                painter = metadataRetriever.getAlbumArt()?.let {
+                    rememberGlidePainter(it)
+
+                }
+                    ?: rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_album_cover_vector3)),
+                contentDescription = "Album Art",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .padding(top = 14.dp)
+//                    .align(CenterVertically)
+                    .clip(RoundedCornerShape(percent = 10))
+                    .height(36.dp)
             )
-            Text(
-                text = "${song.author}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.W400,
-                color = fontColor,
-                modifier = Modifier.alpha(0.54f)
-            )
+            Column(
+                Modifier
+                    .padding(vertical = 8.dp, horizontal = 8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "${song.title}",
+                    fontWeight = FontWeight.W400,
+                    color = fontColor,
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "${song.author}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.W400,
+                    color = fontColor,
+                    modifier = Modifier.alpha(0.54f)
+                )
+            }
+        }
+    }
+
+    private fun playSong() {
+        val pbState = viewModel.musicState.value?.state ?: return
+        if (pbState == PlaybackStateCompat.STATE_PLAYING) {
+            viewModel.pause()
+
+//            // Preemptively set icon
+//            binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+        } else {
+            if (viewModel.notPlayed) {
+//                viewModel.play(uri)
+            } else {
+                viewModel.play()
+            }
+
+//            // Preemptively set icon
+//            binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
         }
     }
 

@@ -2,18 +2,17 @@ package com.gabchmel.sensorprocessor.utility
 
 import android.app.Service
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import com.gabchmel.common.ConvertedData
 import com.gabchmel.sensorprocessor.LocationClusteringAlg
 import com.gabchmel.sensorprocessor.SensorData
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.math.*
 import kotlin.reflect.KProperty1
@@ -24,7 +23,7 @@ object InputProcessHelper {
 
     private val dataset = mutableListOf<LocationClusteringAlg.Location>()
 
-    // Calculation of harvesine distance, serves for location clustering
+    // Calculation of haversine distance, serves for location clustering
     private val haversineDistance = object :
         LocationClusteringAlg.Distance<LocationClusteringAlg.Location> {
         override fun LocationClusteringAlg.Location.distance(to: LocationClusteringAlg.Location): Double {
@@ -50,8 +49,8 @@ object InputProcessHelper {
         val latitude = sensorData.latitude
         val longitude = sensorData.longitude
 
-        var dayOfWeek: Int = 0
-        var timeInSeconds: Int = 0
+        var dayOfWeek = 0
+        var timeInSeconds = 0
 
         currentTime?.let {
             // Convert to similar representation as in other models
@@ -93,17 +92,17 @@ object InputProcessHelper {
         )
         dataset.add(location)
 
-        val locationCluster = 0
+//        val locationCluster = 0
 
-//        // Clustering the location values
-//        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 4)
-//        val dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
-//
-//        val locationCluster = if (dbscanClusters.last() == LocationClusteringAlg.Outsider) {
-//            0
-//        } else {
-//            (dbscanClusters.last() as LocationClusteringAlg.Identified).id
-//        }
+        // Clustering the location values
+        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 4)
+        val dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
+
+        val locationCluster = if (dbscanClusters.last() == LocationClusteringAlg.Outsider) {
+            0
+        } else {
+            (dbscanClusters.last() as LocationClusteringAlg.Identified).id
+        }
 
 //        val doubleArr = doubleArrayOf(
 //            sinTime, cosTime, dayOfWeekSin,
@@ -138,28 +137,30 @@ object InputProcessHelper {
             csvReader().open(inputFile) {
                 readAllAsSequence()
                     .map { row ->
-                        val dateNew = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            val format =
-                                DateTimeFormatter.ofPattern(
-                                    "E MMM dd HH:mm:ss ZZZZ yyyy",
-                                    context.resources.configuration.locales.get(0)
-                                )
-                            val localDate = LocalDateTime.parse(row[1], format)
-                            Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant())
-                        } else {
+//                        val dateNew = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//                            val format =
+//                                DateTimeFormatter.ofPattern(
+//                                    "E MMM dd HH:mm:ss ZZZZ yyyy",
+//                                    context.resources.configuration.locales.get(0)
+//                                )
+//                            val localDate = LocalDateTime.parse(row[1], format)
+//                            Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant())
+//                        } else {
                             val formatter =
                                 SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.ENGLISH)
-                            formatter.parse(row[1])!!
-                        }
+                            val dateNew = formatter.parse(row[1])!!
+//                        }
 
                         // Check if the target class is int he list of classes, if not add it
                         if (!classNames.contains(row[0])) {
                             classNames.add(row[0])
                         }
 
+                        // Check if the SensorData structure changed
                         val prefs = context.getSharedPreferences("MyPrefsFile", Service.MODE_PRIVATE)
                         val counterOld = prefs.getInt("csv", 0)
                         if (counterOld != row.size && counterOld != 0) {
+                            // If yes, delete the data.csv file
                             val dataInputFile = File(context.filesDir, "data.csv")
                             if (dataInputFile.exists()) {
                                 context.deleteFile("data.csv")
@@ -223,13 +224,13 @@ object InputProcessHelper {
             Log.e("File", "The input file doesn't exist")
         }
 
-//        var dbscanClusters = emptyList<LocationClusteringAlg.Cluster>()
-//
-//        GlobalScope.launch(Dispatchers.Default) {
-//        // Clustering the location values
-//        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 2)
-//        dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
-//        }
+        var dbscanClusters = emptyList<LocationClusteringAlg.Cluster>()
+
+        GlobalScope.launch(Dispatchers.Default) {
+        // Clustering the location values
+        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 2)
+        dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
+        }
 
         var index = 0
         var first = true
@@ -244,21 +245,21 @@ object InputProcessHelper {
                     .forEach { row ->
                         // Convert row to String without spaces
                         var rowNew = row.toString().replace("\\s".toRegex(), "")
-                        rowNew = rowNew.substring(1, rowNew.length-1)
-                        var connected : String = ""
+                        rowNew = rowNew.substring(1, rowNew.length-3)
+                        var connected = ""
                         // Detecting the first row, which has header information
-//                        if (!first) {
-//                            // Add location cluster value to others
-////                            connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
-////                                "$rowNew, ${0}\n"
-////                            } else {
-////                                "$rowNew, ${(dbscanClusters[index] as LocationClusteringAlg.Identified).id}\n"
-////                            }
-////                            index++
-//                        } else {
-//                            first = false
+                        if (!first) {
+                            // Add location cluster value to others
+                            connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
+                                "$rowNew,${0}\n"
+                            } else {
+                                "$rowNew,${(dbscanClusters[index] as LocationClusteringAlg.Identified).id}\n"
+                            }
+                            index++
+                        } else {
+                            first = false
                             connected = "$rowNew\n"
-//                        }
+                        }
                         locationNewFile.appendText(connected)
                     }
             }

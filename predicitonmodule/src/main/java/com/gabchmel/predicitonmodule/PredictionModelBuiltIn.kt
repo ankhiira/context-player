@@ -43,11 +43,18 @@ class PredictionModelBuiltIn(val context: Context) {
         // Randomize dataset values
         dataSet.randomize(Random(0))
 
+        // If the class is of the nominal type, stratify the data
+        dataSet.stratify(10)
+
         // Split train and test data in 80 percent to train data
         val trainSize = (dataSet.numInstances() * 0.8).roundToInt()
         val testSize = dataSet.numInstances() - trainSize
         val train = Instances(dataSet, 0, trainSize)
         val test = Instances(dataSet, trainSize, testSize)
+//        val test = Instances(dataSet, 0, trainSize)
+
+//        val trainData = Instances(dataSet.trainCV(10,0))
+//        val testData = Instances(dataSet.testCV(10,0))
 
         return Pair(train, test)
     }
@@ -65,9 +72,15 @@ class PredictionModelBuiltIn(val context: Context) {
 
             val (trainingDataSet, testDataSet) = getDataset()
 
+            trainingDataSet.setClassIndex(0)
+            testDataSet.setClassIndex(0)
+
             val test = trainingDataSet.equalHeaders(testDataSet)
 
             forest = RandomForest()
+
+            // Set number of trees to 100
+            forest.numTrees = 100
             // Train the model
             forest.buildClassifier(trainingDataSet)
             // Test the dataset

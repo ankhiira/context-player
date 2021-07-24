@@ -168,11 +168,11 @@ class SongListFragment : Fragment() {
                         bottomBar = {
                             val musicState by viewModel.musicState.collectAsState()
                             val musicMetadata by viewModel.musicMetadata.collectAsState()
-                            val connected by viewModel.connected.collectAsState()
+//                            val connected by viewModel.connected.collectAsState()
 
                             val fontColor = MaterialTheme.colors.onPrimary
 
-                            if (connected) {
+//                            if (connected) {
 
                                 BottomAppBar(
 //                                    Modifier.clickable(
@@ -251,7 +251,7 @@ class SongListFragment : Fragment() {
                                         }
                                     }
                                 }
-                            }
+//                            }
                         }
                     )
                 }

@@ -1,6 +1,7 @@
 package com.gabchmel.contextmusicplayer
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.*
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +48,7 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
                     ExistingWorkPolicy.REPLACE,
                     tenMinutesRequest)
 
-//            Log.d("Work", "Done Work")
+            Log.d("Work", "Done Work")
         }
         // Indicate whether the work finished successfully with the Result
         return Result.success()

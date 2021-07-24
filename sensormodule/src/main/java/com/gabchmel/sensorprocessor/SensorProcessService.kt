@@ -171,7 +171,7 @@ class SensorProcessService : Service() {
         } else {
             val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
             val counterOld = prefs.getInt("csv", 0)
-            if (counterOld != counter) {
+            if (counterOld != counter && counterOld != 0) {
                 val inputFile = File(this.filesDir, "data.csv")
                 if (inputFile.exists()) {
                     this.deleteFile("data.csv")
@@ -223,6 +223,21 @@ class SensorProcessService : Service() {
     }
 
     fun triggerPrediction() : ConvertedData {
+
+        // Read current time
+        _sensorData.value.currentTime = Calendar.getInstance().time
+
+        // Check to which Wi-Fi is the device connected
+        wifiConnection()
+        // Check the internet connection type
+        internetConnectivity(this)
+        // Get the orientation of the device
+        processOrientation()
+        // Detect if the device is charging
+        batteryStatusDetection()
+        // Check if the BT device is connected
+        bluetoothDevicesConnection()
+
         // Get the processed input values
         val input = inputProcessHelper(sensorData.value)
 
@@ -234,15 +249,31 @@ class SensorProcessService : Service() {
     // Function to compare measured values with saved to determine change in context
     fun detectContextChange(): Boolean {
         val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
-        val time = prefs.getString("time", "No name defined")
-        val headphones = prefs.getFloat("headphones", -1.0f)
+        val state = prefs.getString("state", "UNDEFINED")
+        val deviceLying = prefs.getFloat("deviceLying", -1.0f)
         val bluetooth = prefs.getFloat("bluetooth", -1.0f)
-        val light = prefs.getFloat("light", -1.0f)
-        if (sensorData.value.BTdeviceConnected != bluetooth) {
-            return true
-        }
-        if (sensorData.value.lightSensorValue != light) {
-            return true
+        val headphones = prefs.getFloat("headphones", -1.0f)
+        val wifi = prefs.getInt("wifi", -1)
+        val connection = prefs.getString("connection", "UNDEFINED")
+        val batteryStat = prefs.getString("batteryStat", "UNDEFINED")
+        val chargingType = prefs.getString("chargingType", "UNDEFINED")
+        when {
+            (sensorData.value.currentState != state && state != "UNDEFINED") ->
+                return true
+            (sensorData.value.deviceLying != deviceLying && deviceLying != -1.0f) ->
+                return true
+            (sensorData.value.BTdeviceConnected != bluetooth && bluetooth != -1.0f) ->
+                return true
+            (sensorData.value.headphonesPluggedIn != headphones && headphones != -1.0f) ->
+                return true
+            (sensorData.value.wifi != wifi.toUInt() && wifi != -1) ->
+                return true
+            (sensorData.value.connection != connection && connection != "UNDEFINED") ->
+                return true
+            (sensorData.value.batteryStatus != batteryStat && batteryStat != "UNDEFINED") ->
+                return true
+            (sensorData.value.chargingType != chargingType && chargingType != "UNDEFINED") ->
+                return true
         }
         return false
     }
@@ -250,14 +281,14 @@ class SensorProcessService : Service() {
     // Function to save current context values to shared preferences for later comparison
     fun saveSensorData() {
         val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
-        editor.putString("time", sensorData.value.currentTime.toString())
-        sensorData.value.longitude?.let { editor.putFloat("longitude", it.toFloat()) }
-        sensorData.value.latitude?.let { editor.putFloat("latitude", it.toFloat()) }
         editor.putString("state", sensorData.value.currentState)
-        sensorData.value.lightSensorValue?.let { editor.putFloat("light", it) }
-        sensorData.value.deviceLying?.let { editor.putFloat("lying", it) }
+        sensorData.value.deviceLying?.let { editor.putFloat("deviceLying", it) }
         sensorData.value.BTdeviceConnected?.let { editor.putFloat("bluetooth", it) }
         sensorData.value.headphonesPluggedIn?.let { editor.putFloat("headphones", it) }
+        sensorData.value.wifi?.let { editor.putInt("wifi", it.toInt()) }
+        editor.putString("connection", sensorData.value.connection)
+        editor.putString("batteryStat", sensorData.value.batteryStatus)
+        editor.putString("chargingType", sensorData.value.chargingType)
         editor.apply()
     }
 

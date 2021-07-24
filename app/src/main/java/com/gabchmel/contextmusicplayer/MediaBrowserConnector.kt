@@ -142,6 +142,10 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 val sensorProcessService = sensorProcessService.await()
                 val hasContextChanged = sensorProcessService.detectContextChange()
 
+                if(hasContextChanged) {
+                    Log.d("context", "context changed")
+                }
+
 //                if(hasContextChanged) {
                 // Setting MediaBrowser for connecting to the MediaBrowserService
                 mediaBrowser = MediaBrowserCompat(
@@ -274,7 +278,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
         // Definition of notification layout
         val builder = NotificationCompat.Builder(context, NotificationManager.CHANNEL_ID)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSilent(true)
             .setSmallIcon(R.drawable.ic_baseline_headset_24)

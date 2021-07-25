@@ -50,8 +50,8 @@ class PredictionModelBuiltIn(val context: Context) {
         val trainSize = (dataSet.numInstances() * 0.8).roundToInt()
         val testSize = dataSet.numInstances() - trainSize
         val train = Instances(dataSet, 0, trainSize)
-        val test = Instances(dataSet, trainSize, testSize)
-//        val test = Instances(dataSet, 0, trainSize)
+//        val test = Instances(dataSet, trainSize, testSize)
+        val test = Instances(dataSet, 0, trainSize)
 
 //        val trainData = Instances(dataSet.trainCV(10,0))
 //        val testData = Instances(dataSet.testCV(10,0))

@@ -37,6 +37,8 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     private val _connected = MutableStateFlow(false)
     val connected: StateFlow<Boolean> = _connected
 
+    var uri : Uri? = null
+
     var notPlayed = false
 
     inner class BoundService(
@@ -164,6 +166,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
     @ExperimentalCoroutinesApi
     fun loadSongs() {
+//        this.uri =uri
         try {boundService.getCompleted().service.loadSongs()} catch (e:Exception){}
     }
 

@@ -134,10 +134,8 @@ dependencies {
     // For occuring error of duplicate library?
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 
-    // Exoplayer
-//    implementation 'com.google.android.exoplayer:exoplayer:2.14.0'
-//    implementation 'com.google.android.exoplayer:extension-mediasession:2.14.0'
+    // For iterating through class properties
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
 
-    // For data binding
-//    kapt 'groupId:artifactId:1.5.0'
+    implementation "androidx.room:room-runtime:2.3.0"
 }

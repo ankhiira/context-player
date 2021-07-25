@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.playlistScreen
+package com.gabchmel.contextmusicplayer
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.content.ContentUris
@@ -47,7 +47,18 @@ object SongScanner {
                     songID
                 )
 
-                val song = Song(title, author, uri)
+//                val metadataRetriever = MediaMetadataRetriever()
+//                metadataRetriever.setDataSource(context, Uri.parse(uri.toString()))
+//                val albumArt =
+//                    try {
+//                        metadataRetriever.embeddedPicture?.let { data ->
+//                            BitmapFactory.decodeByteArray(data, 0, data.size) }
+//                    } catch (e: Exception) {
+//                        Log.e("Album Art:", e.toString())
+//                        null
+//                    }
+
+                val song = Song(title, author, null, uri)
                 songList.add(song)
             }
         }

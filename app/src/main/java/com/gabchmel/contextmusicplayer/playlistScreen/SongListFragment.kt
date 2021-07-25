@@ -1,14 +1,15 @@
 package com.gabchmel.contextmusicplayer.playlistScreen
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -41,6 +42,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.Song
 import com.gabchmel.contextmusicplayer.extensions.getAlbumArt
 import com.gabchmel.contextmusicplayer.extensions.getArtist
 import com.gabchmel.contextmusicplayer.extensions.getTitle
@@ -73,6 +75,15 @@ class SongListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            // Handle the back button event
+            val a = Intent(Intent.ACTION_MAIN)
+            a.addCategory(Intent.CATEGORY_HOME)
+            a.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(a)
+        }
+
         // compose layout for this fragment
         return ComposeView(requireContext()).apply {
             setContent {
@@ -133,6 +144,8 @@ class SongListFragment : Fragment() {
                                     ) {
                                         Button({
 
+//                                            openDirectory(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+
                                             requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
 
                                         }) {
@@ -147,7 +160,7 @@ class SongListFragment : Fragment() {
                             ) {
                                 Column {
                                     val isRefreshing by viewModel.isRefreshing.collectAsState()
-                                    viewModel.loadSongs()
+//                                    viewModel.loadSongs()
 
                                     SwipeRefresh(
                                         state = rememberSwipeRefreshState(isRefreshing),
@@ -168,11 +181,11 @@ class SongListFragment : Fragment() {
                         bottomBar = {
                             val musicState by viewModel.musicState.collectAsState()
                             val musicMetadata by viewModel.musicMetadata.collectAsState()
-//                            val connected by viewModel.connected.collectAsState()
+                            val connected by viewModel.connected.collectAsState()
 
                             val fontColor = MaterialTheme.colors.onPrimary
 
-//                            if (connected) {
+                            if (connected) {
 
                                 BottomAppBar(
 //                                    Modifier.clickable(
@@ -251,7 +264,7 @@ class SongListFragment : Fragment() {
                                         }
                                     }
                                 }
-//                            }
+                            }
                         }
                     )
                 }
@@ -276,22 +289,16 @@ class SongListFragment : Fragment() {
                     )
                 })
         ) {
-
-            val metadataRetriever = MediaMetadataRetriever()
-            metadataRetriever.setDataSource(context?.applicationContext, song.URI)
-
             // Album art
             Image(
-                painter = metadataRetriever.getAlbumArt()?.let {
+                painter = song.albumArt?.let {
                     rememberGlidePainter(it)
-
                 }
                     ?: rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_album_cover_vector3)),
                 contentDescription = "Album Art",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .padding(top = 14.dp)
-//                    .align(CenterVertically)
                     .clip(RoundedCornerShape(percent = 10))
                     .height(36.dp)
             )
@@ -336,11 +343,34 @@ class SongListFragment : Fragment() {
         }
     }
 
+//    fun openDirectory(pickerInitialUri: Uri) {
+//        // Choose a directory using the system's file picker.
+//        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+//            // Optionally, specify a URI for the directory that should be opened in
+//            // the system file picker when it loads.
+//            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+//        }
+//
+//        startActivityForResult(intent, 1234)
+//    }
+//
+//    override fun onActivityResult(
+//        requestCode: Int, resultCode: Int, resultData: Intent?) {
+//        if (requestCode == your-request-code
+//            && resultCode == Activity.RESULT_OK) {
+//            // The result data contains a URI for the document or directory that
+//            // the user selected.
+//            resultData?.data?.also { uri ->
+//                // Perform operations on the document using its URI.
+//            }
+//        }
+//    }
+
     // Function for preview
     @Preview
     @Composable
     fun ExampleSongRow() {
-        SongRow(Song("Title", "author", Uri.EMPTY))
+        SongRow(Song("Title", "author", null, Uri.EMPTY))
     }
 }
 

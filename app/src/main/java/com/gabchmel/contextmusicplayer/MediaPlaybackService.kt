@@ -24,8 +24,6 @@ import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.contextmusicplayer.extensions.*
-import com.gabchmel.contextmusicplayer.playlistScreen.Song
-import com.gabchmel.contextmusicplayer.playlistScreen.SongScanner
 import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
@@ -529,6 +527,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 Manifest.permission.READ_EXTERNAL_STORAGE
             ) != PackageManager.PERMISSION_GRANTED
         ) return
+
+//        val metadataRetriever = MediaMetadataRetriever()
+//        metadataRetriever.setDataSource(context?.applicationContext, song.URI)
 
         songs.value = SongScanner.loadSongs(baseContext)
     }

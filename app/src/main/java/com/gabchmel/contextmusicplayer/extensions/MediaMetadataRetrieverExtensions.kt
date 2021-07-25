@@ -1,8 +1,9 @@
 package com.gabchmel.contextmusicplayer.extensions
 
-import android.media.MediaMetadataRetriever
-import android.graphics.BitmapFactory
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
+import android.util.Log
 
 
 fun MediaMetadataRetriever.getTitle() = extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
@@ -12,5 +13,10 @@ fun MediaMetadataRetriever.getDuration() = extractMetadata(MediaMetadataRetrieve
 
 // Bitmap for album art on notification
 fun MediaMetadataRetriever.getAlbumArt(): Bitmap? {
-    return this.embeddedPicture?.let { data -> BitmapFactory.decodeByteArray(data, 0, data.size) }
+    return try {
+        this.embeddedPicture?.let { data -> BitmapFactory.decodeByteArray(data, 0, data.size) }
+    } catch (e: Exception) {
+        Log.e("Album Art:", e.toString())
+        return null
+    }
 }

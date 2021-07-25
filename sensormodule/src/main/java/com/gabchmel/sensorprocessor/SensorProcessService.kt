@@ -319,23 +319,27 @@ class SensorProcessService : Service() {
     // Function for detection if the device is lying
     private fun processOrientation() {
 
-        val normOfg = sqrt(
-            (coordList[0] * coordList[0]
-                    + coordList[1] * coordList[1] + coordList[2] * coordList[2]).toDouble()
-        )
+        if (coordList.size != 0) {
+            val normOfg = sqrt(
+                (coordList[0] * coordList[0]
+                        + coordList[1] * coordList[1] + coordList[2] * coordList[2]).toDouble()
+            )
 
-        // Normalize the accelerometer vector
-        coordList[0] = (coordList[0] / normOfg).toFloat()
-        coordList[1] = (coordList[1] / normOfg).toFloat()
-        coordList[2] = (coordList[2] / normOfg).toFloat()
+            // Normalize the accelerometer vector
+            coordList[0] = (coordList[0] / normOfg).toFloat()
+            coordList[1] = (coordList[1] / normOfg).toFloat()
+            coordList[2] = (coordList[2] / normOfg).toFloat()
 
-        val inclination = Math.toDegrees(acos(coordList[2]).toDouble()).roundToInt()
+            val inclination = Math.toDegrees(acos(coordList[2]).toDouble()).roundToInt()
 
-        // Device detected as lying is with inclination in range < 25 or > 155 degrees
-        _sensorData.value.deviceLying = if (inclination < 25 || inclination > 155) {
-            1.0f
+            // Device detected as lying is with inclination in range < 25 or > 155 degrees
+            _sensorData.value.deviceLying = if (inclination < 25 || inclination > 155) {
+                1.0f
+            } else {
+                0.0f
+            }
         } else {
-            0.0f
+            _sensorData.value.deviceLying = 0.0f
         }
     }
 

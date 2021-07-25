@@ -7,9 +7,6 @@ import com.gabchmel.common.ConvertedData
 import com.gabchmel.sensorprocessor.LocationClusteringAlg
 import com.gabchmel.sensorprocessor.SensorData
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -92,17 +89,17 @@ object InputProcessHelper {
         )
         dataset.add(location)
 
-//        val locationCluster = 0
+        val locationCluster = 0
 
         // Clustering the location values
         val dbscan = LocationClusteringAlg.DBSCAN(150.0, 4)
         val dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
 
-        val locationCluster = if (dbscanClusters.last() == LocationClusteringAlg.Outsider) {
-            0
-        } else {
-            (dbscanClusters.last() as LocationClusteringAlg.Identified).id
-        }
+//        val locationCluster = if (dbscanClusters.last() == LocationClusteringAlg.Outsider) {
+//            0
+//        } else {
+//            (dbscanClusters.last() as LocationClusteringAlg.Identified).id
+//        }
 
 //        val doubleArr = doubleArrayOf(
 //            sinTime, cosTime, dayOfWeekSin,
@@ -225,15 +222,14 @@ object InputProcessHelper {
         }
 
         var dbscanClusters = emptyList<LocationClusteringAlg.Cluster>()
-
-        GlobalScope.launch(Dispatchers.Default) {
-        // Clustering the location values
-        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 2)
-        dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
-        }
-
         var index = 0
         var first = true
+
+//        GlobalScope.launch(Dispatchers.Default) {
+//            // Clustering the location values
+//            val dbscan = LocationClusteringAlg.DBSCAN(150.0, 2)
+//            dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
+//        }
 
         // File to save data with clustered location
         val locationNewFile = File(context.filesDir, "convertedLocData.csv")
@@ -245,21 +241,21 @@ object InputProcessHelper {
                     .forEach { row ->
                         // Convert row to String without spaces
                         var rowNew = row.toString().replace("\\s".toRegex(), "")
-                        rowNew = rowNew.substring(1, rowNew.length-3)
+                        rowNew = rowNew.substring(1, rowNew.length-1)
                         var connected = ""
                         // Detecting the first row, which has header information
-                        if (!first) {
-                            // Add location cluster value to others
-                            connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
-                                "$rowNew,${0}\n"
-                            } else {
-                                "$rowNew,${(dbscanClusters[index] as LocationClusteringAlg.Identified).id}\n"
-                            }
-                            index++
-                        } else {
+//                        if (!first) {
+//                            // Add location cluster value to others
+//                            connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
+//                                "$rowNew,${0}\n"
+//                            } else {
+//                                "$rowNew,${(dbscanClusters[index] as LocationClusteringAlg.Identified).id}\n"
+//                            }
+//                            index++
+//                        } else {
                             first = false
                             connected = "$rowNew\n"
-                        }
+//                        }
                         locationNewFile.appendText(connected)
                     }
             }

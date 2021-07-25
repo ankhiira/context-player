@@ -16,17 +16,20 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
+import com.gabchmel.common.ConvertedData
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.common.utilities.bindService
-import com.gabchmel.contextmusicplayer.playlistScreen.Song
 import com.gabchmel.contextmusicplayer.settingsScreen.CollectedSensorDataFragment
 import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.primaryConstructor
 
 class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Context) :
     LifecycleObserver {
@@ -80,12 +83,13 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
     private lateinit var mediaBrowser: MediaBrowserCompat
     val bs = CompletableDeferred<MediaBrowserConnector.BoundService>()
+    private var input = ConvertedData()
 
     private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
         lifecycleOwner.whenCreated {
             val service = context.bindService(SensorProcessService::class.java)
             if (service.createModel()) {
-                val input = service.triggerPrediction()
+                input = service.triggerPrediction()
                 CollectedSensorDataFragment.updateUI(input)
             }
             service
@@ -173,6 +177,25 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
             launch {
                 prediction.collectLatest { prediction ->
+
+                    // Save predictions with their input to CSV file
+                    val locationNewFile = File(context.filesDir, "predictions.csv")
+//                    locationNewFile.writeText("")
+                    var predictionString = "$prediction,$input"
+                    for (property in ConvertedData::class.primaryConstructor?.parameters!!) {
+                        val propertyNew = input::class.members
+                            .first { it.name == property.name } as KProperty1<Any, *>
+                        predictionString += if (property.name == "wifi") {
+                            "${input.wifi},"
+                        } else {
+                            "${propertyNew.get(input)},"
+                        }
+                    }
+                    predictionString = predictionString.dropLast(1)
+                    predictionString += "\n"
+                    locationNewFile.appendText(predictionString)
+
+                    // Find song that matches the prediction hash
                     for (song in songs.filterNotNull().first()) {
                         if ("${song.title},${song.author}".hashCode().toUInt()
                                 .toString() == prediction
@@ -225,6 +248,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }
     }
 
+    // Function to create prediction notification
     private fun createNotification(song: Song) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             var description = "Test notification"
@@ -302,6 +326,5 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         with(NotificationManagerCompat.from(context)) {
             notify(678, notification)
         }
-
     }
 }

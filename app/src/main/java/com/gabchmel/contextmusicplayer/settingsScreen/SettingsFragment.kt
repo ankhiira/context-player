@@ -1,5 +1,7 @@
 package com.gabchmel.contextmusicplayer.settingsScreen
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +25,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.fragment.findNavController
@@ -30,6 +33,9 @@ import com.gabchmel.contextmusicplayer.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+
 
 class SettingsFragment : Fragment() {
 
@@ -141,11 +147,13 @@ class SettingsFragment : Fragment() {
                                             color = materialYel400,
                                             textAlign = TextAlign.Justify
                                         )
-                                        Button(onClick = {
-                                            MediaBrowserConnector(
-                                                ProcessLifecycleOwner.get(),
-                                                requireContext()
-                                            )},
+                                        Button(
+                                            onClick = {
+                                                MediaBrowserConnector(
+                                                    ProcessLifecycleOwner.get(),
+                                                    requireContext()
+                                                )
+                                            },
                                             shape = RoundedCornerShape(50)
                                         ) {
                                             Text(
@@ -157,7 +165,7 @@ class SettingsFragment : Fragment() {
                                 }
                                 Row() {
 
-                                    val openDialog = remember { mutableStateOf(false)  }
+                                    val openDialog = remember { mutableStateOf(false) }
 
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -168,9 +176,10 @@ class SettingsFragment : Fragment() {
                                             color = materialYel400,
                                             textAlign = TextAlign.Justify
                                         )
-                                        Button(onClick = {
-                                            openDialog.value = true
-                                           },
+                                        Button(
+                                            onClick = {
+                                                openDialog.value = true
+                                            },
                                             shape = RoundedCornerShape(50)
                                         ) {
                                             Text(
@@ -199,7 +208,10 @@ class SettingsFragment : Fragment() {
                                                         onClick = {
                                                             openDialog.value = false
                                                             val inputFile =
-                                                                File(requireContext().filesDir, "data.csv")
+                                                                File(
+                                                                    requireContext().filesDir,
+                                                                    "data.csv"
+                                                                )
                                                             if (inputFile.exists()) {
                                                                 requireContext().deleteFile("data.csv")
                                                             }
@@ -220,11 +232,124 @@ class SettingsFragment : Fragment() {
                                         }
                                     }
                                 }
+                                Row {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Clicking on this sends all data collected for song prediction",
+                                            color = materialYel400,
+                                            textAlign = TextAlign.Justify
+                                        )
+
+                                        Button(
+                                            onClick = {
+                                                val locationNewFile =
+                                                    File(context.filesDir, "convertedData.csv")
+                                                val origFileArff =
+                                                    File(
+                                                        context.filesDir,
+                                                        "arffData_converted.arff"
+                                                    )
+                                                val origFilePrediction =
+                                                    File(context.filesDir, "predictions.csv")
+
+                                                val arrayList = ArrayList<Uri>()
+
+                                                val pathResultData =
+                                                    convertFileForSend(
+                                                        "convertedData",
+                                                        ".csv",
+                                                        locationNewFile
+                                                    )
+                                                val pathResultArff =
+                                                    convertFileForSend(
+                                                        "arffData_converted",
+                                                        ".arff",
+                                                        origFileArff
+                                                    )
+                                                val pathResultPrediction =
+                                                    convertFileForSend(
+                                                        "predictions",
+                                                        ".csv",
+                                                        origFilePrediction
+                                                    )
+                                                arrayList.add(pathResultData)
+                                                arrayList.add(pathResultArff)
+                                                arrayList.add(pathResultPrediction)
+
+                                                val emailIntent =
+                                                    Intent(Intent.ACTION_SEND_MULTIPLE)
+                                                // Email type
+                                                emailIntent.type = "text/csv"
+                                                // The email recipient
+                                                emailIntent.putExtra(
+                                                    Intent.EXTRA_EMAIL,
+                                                    arrayOf("chmelarova.gabik@gmail.com")
+                                                )
+                                                // the attachment
+                                                emailIntent.putParcelableArrayListExtra(
+                                                    Intent.EXTRA_STREAM,
+                                                    arrayList
+                                                );
+                                                // the mail subject
+                                                emailIntent.putExtra(
+                                                    Intent.EXTRA_SUBJECT,
+                                                    "Data from "
+                                                )
+                                                emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+                                                startActivityForResult(
+                                                    Intent.createChooser(
+                                                        emailIntent,
+                                                        "Send email..."
+                                                    ), 1234
+                                                )
+                                            },
+                                            shape = RoundedCornerShape(50)
+                                        ) {
+                                            Text(
+                                                text = "Send collected data",
+                                                color = materialYel400,
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     )
                 }
             }
         }
+    }
+
+    private fun convertFileForSend(filename: String, ext: String, origFile: File): Uri {
+        val tempFile = File.createTempFile(
+            filename,
+            ext,
+            context?.cacheDir
+        )
+
+        val inputStream = FileInputStream(origFile)
+        inputStream.use { inStream ->
+            val outputStream = FileOutputStream(tempFile)
+            outputStream.use { outStream ->
+                // Transfer bytes from in to out
+                val buf = ByteArray(1024)
+                var len: Int
+                while (inStream.read(buf)
+                        .also { len = it } > 0
+                ) {
+                    outStream.write(buf, 0, len)
+                }
+            }
+        }
+
+        return FileProvider.getUriForFile(
+            requireContext(),
+            "com.gabchmel.contextmusicplayer.fileProvider",
+            tempFile
+        )
     }
 }

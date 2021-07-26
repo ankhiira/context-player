@@ -27,6 +27,7 @@ import com.gabchmel.contextmusicplayer.extensions.*
 import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
 import kotlin.coroutines.suspendCoroutine
@@ -528,10 +529,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             ) != PackageManager.PERMISSION_GRANTED
         ) return
 
-//        val metadataRetriever = MediaMetadataRetriever()
-//        metadataRetriever.setDataSource(context?.applicationContext, song.URI)
-
-        songs.value = SongScanner.loadSongs(baseContext)
+//        if (uri != null) {
+            GlobalScope.launch {
+                songs.value = SongScanner.loadSongs(baseContext)
+            }
+//        }
     }
 
     fun preparePlayer(uri: Uri) {

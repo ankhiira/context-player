@@ -7,6 +7,8 @@ import com.gabchmel.common.ConvertedData
 import com.gabchmel.sensorprocessor.LocationClusteringAlg
 import com.gabchmel.sensorprocessor.SensorData
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -18,7 +20,8 @@ import kotlin.reflect.full.primaryConstructor
 
 object InputProcessHelper {
 
-    private val dataset = mutableListOf<LocationClusteringAlg.Location>()
+    private val locationList = mutableListOf<LocationClusteringAlg.Location>()
+    private val locationListDouble = mutableListOf<DoubleArray>()
 
     // Calculation of haversine distance, serves for location clustering
     private val haversineDistance = object :
@@ -84,38 +87,42 @@ object InputProcessHelper {
             sin(lat)
         }
 
-        val location = LocationClusteringAlg.Location(
-            longitude!!, latitude!!
-        )
-        dataset.add(location)
+//        val location = LocationClusteringAlg.Location(
+//            longitude!!, latitude!!
+//        )
+//        locationList.add(location)
 
         val locationCluster = 0
 
-        // Clustering the location values
-        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 4)
-        val dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
+//        val clusters = DblClusters<DoubleArray>(2, 10)
+////        clusters.setKeyer()
+//
+//        for (loc in locationListDouble) {
+//            clusters.add(1.0, loc, DoubleArray(0))
+//        }
+//
+//        val results = clusters.results()
 
+//        // Clustering the location values
+//        val dbscan = LocationClusteringAlg.DBSCAN(150.0, 4)
+//        val dbscanClusters = dbscan.fit_transform(locationList, haversineDistance)
+//
 //        val locationCluster = if (dbscanClusters.last() == LocationClusteringAlg.Outsider) {
 //            0
 //        } else {
 //            (dbscanClusters.last() as LocationClusteringAlg.Identified).id
 //        }
 
-//        val doubleArr = doubleArrayOf(
-//            sinTime, cosTime, dayOfWeekSin,
-//            dayOfWeekCos, (xCoord ?: 0.0), (yCoord ?: 0.0), (zCoord ?: 0.0)
-//        )
-
         return ConvertedData(sinTime, cosTime, dayOfWeekSin, dayOfWeekCos, sensorData.currentState,
             sensorData.lightSensorValue, sensorData.deviceLying, sensorData.BTdeviceConnected,
             sensorData.headphonesPluggedIn, sensorData.pressure,sensorData.temperature,
             sensorData.wifi,sensorData.connection,sensorData.batteryStatus,sensorData.chargingType,
             sensorData.proximity,sensorData.humidity,sensorData.heartBeat,sensorData.heartRate,
-            locationCluster)
+            locationCluster, (xCoord ?: 0.0), (yCoord ?: 0.0), (zCoord ?: 0.0))
     }
 
     // Give header to the file and process dates
-    fun processInputCSV(context: Context): Pair<ArrayList<String>, ArrayList<UInt>> {
+    suspend fun processInputCSV(context: Context): Pair<ArrayList<String>, ArrayList<UInt>> = withContext(Dispatchers.Default) {
         val inputFile = File(context.filesDir, "data.csv")
         val csvFile = File(context.filesDir, "convertedData.csv")
         val classNames = arrayListOf<String>()
@@ -125,7 +132,7 @@ object InputProcessHelper {
             "class,sinTime,cosTime,dayOfWeekSin," +
                 "dayOfWeekCos,state,light,orientation,BTconnected,headphonesPlugged," +
                 "pressure,temperature,wifi,connection,batteryStatus,chargingType," +
-                "proximity,humidity,heartRate,heartBeat,location" + "\n"
+                "proximity,humidity,heartRate,heartBeat,location,xCoord,yCoord,zCoord" + "\n"
         )
 
         val wifiList = arrayListOf<UInt>()
@@ -168,7 +175,8 @@ object InputProcessHelper {
                         val location = LocationClusteringAlg.Location(
                             row[3].toDouble(), row[2].toDouble()
                         )
-                        dataset.add(location)
+                        locationList.add(location)
+//                        locationListDouble.add(doubleArrayOf(row[3].toDouble(), row[2].toDouble()))
 
                         row[0] to SensorData(
                             dateNew, row[2].toDouble(), row[3].toDouble(), row[4], row[5].toFloat(),
@@ -228,22 +236,22 @@ object InputProcessHelper {
 //        GlobalScope.launch(Dispatchers.Default) {
 //            // Clustering the location values
 //            val dbscan = LocationClusteringAlg.DBSCAN(150.0, 2)
-//            dbscanClusters = dbscan.fit_transform(dataset, haversineDistance)
+//            dbscanClusters = dbscan.fit_transform(locationList, haversineDistance)
 //        }
 
         // File to save data with clustered location
         val locationNewFile = File(context.filesDir, "convertedLocData.csv")
         locationNewFile.writeText("")
 
-        if (csvFile.exists()) {
-            csvReader().open(csvFile) {
-                readAllAsSequence()
-                    .forEach { row ->
-                        // Convert row to String without spaces
-                        var rowNew = row.toString().replace("\\s".toRegex(), "")
-                        rowNew = rowNew.substring(1, rowNew.length-1)
-                        var connected = ""
-                        // Detecting the first row, which has header information
+//        if (csvFile.exists()) {
+//            csvReader().open(csvFile) {
+//                readAllAsSequence()
+//                    .forEach { row ->
+//                        // Convert row to String without spaces
+//                        var rowNew = row.toString().replace("\\s".toRegex(), "")
+//                        rowNew = rowNew.substring(1, rowNew.length-3)
+//                        var connected = ""
+//                        // Detecting the first row, which has header information
 //                        if (!first) {
 //                            // Add location cluster value to others
 //                            connected = if (dbscanClusters[index] == LocationClusteringAlg.Outsider) {
@@ -253,14 +261,14 @@ object InputProcessHelper {
 //                            }
 //                            index++
 //                        } else {
-                            first = false
-                            connected = "$rowNew\n"
+//                            first = false
+//                            connected = "$rowNew\n"
 //                        }
-                        locationNewFile.appendText(connected)
-                    }
-            }
-        }
+//                        locationNewFile.appendText(connected)
+//                    }
+//            }
+//        }
 
-        return Pair(classNames, wifiList)
+        return@withContext Pair(classNames, wifiList)
     }
 }

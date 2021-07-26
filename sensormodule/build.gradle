@@ -57,6 +57,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect"
 
     implementation 'com.github.chrfrantz:DBSCAN:v0.1'
+
+    implementation files('libs/cluster-gvm-1.0.jar')
 }
 repositories {
     mavenCentral()

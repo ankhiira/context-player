@@ -26,15 +26,18 @@
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_prev.xml" value="0.15555555555555556" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_previous_black_24dp.xml" value="0.15555555555555556" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_stop_black_24dp.xml" value="0.15555555555555556" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/splash_sceen.xml" value="0.1255" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_home.xml" value="0.18" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_song_list.xml" value="0.1" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/launch_screen.xml" value="0.3120471014492754" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/seekbar.xml" value="0.1953125" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/menu-v29/bottom_nav_menu.xml" value="0.19479166666666667" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/menu/bottom_nav_menu.xml" value="0.15648148148148147" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.15555555555555556" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/mipmap-anydpi-v26/ic_launcher2.xml" value="0.1" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.15555555555555556" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/xml/provider_paths.xml" value="0.16302083333333334" />
         <entry key="..\:/src/ContextMusicPlayer/sensormodule/common/src/main/res/layout/activity_main.xml" value="0.14427083333333332" />
       </map>
     </option>

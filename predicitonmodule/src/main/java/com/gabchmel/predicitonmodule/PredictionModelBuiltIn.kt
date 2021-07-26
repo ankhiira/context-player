@@ -24,7 +24,7 @@ class PredictionModelBuiltIn(val context: Context) {
     private lateinit var forest: RandomForest
     // Name of the input arff file
     val file = "arffData_converted.arff"
-    private val csvConvertedFile = "convertedLocData.csv"
+    private val csvConvertedFile = "convertedData.csv"
 
     // Function to read the dataset from arff file
     private fun getDataset(): Pair<Instances, Instances> {
@@ -51,12 +51,12 @@ class PredictionModelBuiltIn(val context: Context) {
         val testSize = dataSet.numInstances() - trainSize
         val train = Instances(dataSet, 0, trainSize)
 //        val test = Instances(dataSet, trainSize, testSize)
-        val test = Instances(dataSet, 0, trainSize)
+//        val test = Instances(dataSet, 0, trainSize)
 
 //        val trainData = Instances(dataSet.trainCV(10,0))
 //        val testData = Instances(dataSet.testCV(10,0))
 
-        return Pair(train, test)
+        return Pair(train, train)
     }
 
     // Function to create and evaluate model
@@ -125,9 +125,6 @@ class PredictionModelBuiltIn(val context: Context) {
         val cosTime = Attribute("cosTime")
         val dayOfWeekSin = Attribute("dayOfWeekSin")
         val dayOfWeekCos = Attribute("dayOfWeekCos")
-//        val xCoord = Attribute("xCoord")
-//        val yCoord = Attribute("yCoord")
-//        val zCoord = Attribute("zCoord")
         val state = Attribute("state", stateVector)
         val light = Attribute("light")
         val orientation = Attribute("orientation")
@@ -144,6 +141,9 @@ class PredictionModelBuiltIn(val context: Context) {
         val heartRate = Attribute("heartRate")
         val heartBeat = Attribute("heartBeat")
         val location = Attribute("location")
+        val xCoord = Attribute("xCoord")
+        val yCoord = Attribute("yCoord")
+        val zCoord = Attribute("zCoord")
 
         // Create a list of input attributes
         val attributeList = object : ArrayList<Attribute?>(2) {
@@ -154,9 +154,6 @@ class PredictionModelBuiltIn(val context: Context) {
                 add(cosTime)
                 add(dayOfWeekSin)
                 add(dayOfWeekCos)
-//                add(xCoord)
-//                add(yCoord)
-//                add(zCoord)
                 add(state)
                 add(light)
                 add(orientation)
@@ -173,6 +170,9 @@ class PredictionModelBuiltIn(val context: Context) {
                 add(heartRate)
                 add(heartBeat)
                 add(location)
+                add(xCoord)
+                add(yCoord)
+                add(zCoord)
             }
         }
 
@@ -192,9 +192,6 @@ class PredictionModelBuiltIn(val context: Context) {
                 setValue(cosTime, input.cosTime)
                 setValue(dayOfWeekSin, input.dayOfWeekSin)
                 setValue(dayOfWeekCos, input.dayOfWeekCos)
-//                setValue(xCoord, input[4])
-//                setValue(yCoord, input[5])
-//                setValue(zCoord, input[6])
                 setValue(state, input.state)
                 setValue(light, input.lightSensorValue!!.toDouble())
                 setValue(orientation, input.deviceLying!!.toDouble())
@@ -210,6 +207,9 @@ class PredictionModelBuiltIn(val context: Context) {
                 setValue(heartRate, input.heartRate!!.toDouble())
                 setValue(heartBeat, input.heartBeat!!.toDouble())
                 setValue(location, input.locationCluster.toDouble())
+                setValue(xCoord, input.xCoord)
+                setValue(yCoord, input.yCoord)
+                setValue(zCoord, input.zCoord)
             }
         }
 

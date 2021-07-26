@@ -1,10 +1,12 @@
 package com.gabchmel.contextmusicplayer.playlistScreen
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
@@ -59,6 +61,8 @@ class SongListFragment : Fragment() {
     private val viewModel: SongListViewModel by viewModels()
     private var _isPermGranted = MutableStateFlow(false)
     private var isPermGranted: StateFlow<Boolean> = _isPermGranted
+    private var _uriSelected = MutableStateFlow<Uri?>(null)
+    private var uriSelected: StateFlow<Uri?> = _uriSelected
 
     // permissions callback
     private val requestPermissionLauncher =
@@ -76,12 +80,20 @@ class SongListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            // Handle the back button event
-            val a = Intent(Intent.ACTION_MAIN)
-            a.addCategory(Intent.CATEGORY_HOME)
-            a.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(a)
+//        val db = Room.databaseBuilder(
+//            requireContext(),
+//            AppDatabase.AppDatabase::class.java, "database-name"
+//        ).build()
+//
+//        val userDao = db.userDao()
+//        val users: List<AppDatabase.Song> = userDao.getAll()
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            // This part handles the back button event
+            val action = Intent(Intent.ACTION_MAIN)
+            action.addCategory(Intent.CATEGORY_HOME)
+            action.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(action)
         }
 
         // compose layout for this fragment
@@ -120,6 +132,8 @@ class SongListFragment : Fragment() {
                         content = {
                             // Component to grant the permissions
                             val granted by isPermGranted.collectAsState()
+                            val selUri by uriSelected.collectAsState()
+
                             if ((ActivityCompat.checkSelfPermission(
                                     requireContext(),
                                     Manifest.permission.READ_EXTERNAL_STORAGE
@@ -143,11 +157,8 @@ class SongListFragment : Fragment() {
 
                                     ) {
                                         Button({
-
-//                                            openDirectory(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
-
+//                                            openDirectory()
                                             requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-
                                         }) {
                                             Text("Grant permission")
                                         }
@@ -160,7 +171,7 @@ class SongListFragment : Fragment() {
                             ) {
                                 Column {
                                     val isRefreshing by viewModel.isRefreshing.collectAsState()
-//                                    viewModel.loadSongs()
+                                    viewModel.loadSongs()
 
                                     SwipeRefresh(
                                         state = rememberSwipeRefreshState(isRefreshing),
@@ -170,7 +181,7 @@ class SongListFragment : Fragment() {
                                             LazyColumn(
                                                 modifier = Modifier.padding(16.dp)
                                             ) {
-                                                items(songs!!) { song ->
+                                                items(songs!!, key = { it.URI }) { song ->
                                                     SongRow(song)
                                                 }
                                             }
@@ -186,7 +197,6 @@ class SongListFragment : Fragment() {
                             val fontColor = MaterialTheme.colors.onPrimary
 
                             if (connected) {
-
                                 BottomAppBar(
 //                                    Modifier.clickable(
 //                                        onClick = {
@@ -275,7 +285,6 @@ class SongListFragment : Fragment() {
     // Function for creating one song compose object row
     @Composable
     fun SongRow(song: Song) {
-
         val fontColor = MaterialTheme.colors.onPrimary
         Row(
             Modifier
@@ -291,7 +300,8 @@ class SongListFragment : Fragment() {
         ) {
             // Album art
             Image(
-                painter = song.albumArt?.let {
+                painter =
+                song.albumArt?.let {
                     rememberGlidePainter(it)
                 }
                     ?: rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_album_cover_vector3)),
@@ -328,43 +338,51 @@ class SongListFragment : Fragment() {
         val pbState = viewModel.musicState.value?.state ?: return
         if (pbState == PlaybackStateCompat.STATE_PLAYING) {
             viewModel.pause()
-
 //            // Preemptively set icon
 //            binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
         } else {
-            if (viewModel.notPlayed) {
-//                viewModel.play(uri)
-            } else {
-                viewModel.play()
-            }
-
+            viewModel.play()
 //            // Preemptively set icon
 //            binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
         }
     }
 
-//    fun openDirectory(pickerInitialUri: Uri) {
-//        // Choose a directory using the system's file picker.
-//        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-//            // Optionally, specify a URI for the directory that should be opened in
-//            // the system file picker when it loads.
-//            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
-//        }
-//
-//        startActivityForResult(intent, 1234)
-//    }
-//
-//    override fun onActivityResult(
-//        requestCode: Int, resultCode: Int, resultData: Intent?) {
-//        if (requestCode == your-request-code
-//            && resultCode == Activity.RESULT_OK) {
-//            // The result data contains a URI for the document or directory that
-//            // the user selected.
-//            resultData?.data?.also { uri ->
-//                // Perform operations on the document using its URI.
-//            }
-//        }
-//    }
+    private fun openDirectory() {
+        // Choose a directory using the system's file picker.
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+            // Optionally, specify a URI for the directory that should be opened in
+            // the system file picker when it loads.
+            val pickerInitialUri =
+                this.getParcelableExtra<Uri>("android.provider.extra.INITIAL_URI")    // get system root uri
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+        }
+        startActivityForResult(intent, 1234)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?
+    ) {
+        if (requestCode == 1234
+            && resultCode == Activity.RESULT_OK
+        ) {
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+            resultData?.data?.also { uri ->
+                // Perform operations on the document using its URI.
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                // Check for the freshest data.
+                requireContext().contentResolver.takePersistableUriPermission(
+                    uri, takeFlags
+                )
+
+                _isPermGranted.value = true
+                _uriSelected.value = uri
+
+//                viewModel.loadSongs()
+            }
+        }
+    }
 
     // Function for preview
     @Preview

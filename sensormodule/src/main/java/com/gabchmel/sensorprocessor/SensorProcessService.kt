@@ -146,7 +146,7 @@ class SensorProcessService : Service() {
         // Read current time
         _sensorData.value.currentTime = Calendar.getInstance().time
 
-        Log.d("Sensor", "write")
+//        Log.d("Sensor", "write")
 
         // Check to which Wi-Fi is the device connected
         wifiConnection()
@@ -208,7 +208,7 @@ class SensorProcessService : Service() {
         }
     }
 
-    fun createModel(): Boolean {
+    suspend fun createModel(): Boolean {
         // Process input CSV file and save class names and wifi list into ArrayList<String>
         val (classNamesNew, wifiList) = processInputCSV(this)
 
@@ -294,6 +294,16 @@ class SensorProcessService : Service() {
 
     // Function to detect current activity
     private fun activityDetection() {
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.e("permission", "permission not granted")
+            return
+        }
+
         val request = ActivityTransitionRequest(TransitionList.getTransitions())
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
@@ -437,9 +447,6 @@ class SensorProcessService : Service() {
             ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACTIVITY_RECOGNITION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             Log.e("permission", "permission not granted")

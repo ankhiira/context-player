@@ -157,7 +157,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                     Log.d("context", "context changed")
                 }
 
-                if (hasContextChanged) {
+//                if (hasContextChanged) {
                     // Setting MediaBrowser for connecting to the MediaBrowserService
                     mediaBrowser = MediaBrowserCompat(
                         context,
@@ -169,7 +169,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                     // Connects to the MediaBrowseService
                     mediaBrowser.connect()
                     setNotification()
-                }
+//                }
 
                 // Save current sensor values to later detect if the context changed
                 sensorProcessService.saveSensorData()

@@ -62,6 +62,8 @@ class SensorProcessService : Service() {
     // Song IDs
     private var classNames = arrayListOf<String>()
 
+    private var wifiNamesList = arrayListOf<UInt>()
+
     // Saved prediction result as StateFlow to show notification
     private val _prediction = MutableStateFlow<String?>(null)
     val prediction: StateFlow<String?> = _prediction
@@ -213,6 +215,7 @@ class SensorProcessService : Service() {
         val (classNamesNew, wifiList) = processInputCSV(this)
 
         classNames = classNamesNew
+        wifiNamesList = wifiList
 
         // If we don't have enough input data, don't create a model
         if (!predictionModel.createModel(classNames, wifiList)) {
@@ -240,7 +243,10 @@ class SensorProcessService : Service() {
         // Get the processed input values
         val input = inputProcessHelper(sensorData.value)
 
-        _prediction.value = predictionModel.predict(input, classNames)
+        // Check for the case that there is different wifi
+        if(wifiNamesList.contains(input.wifi)) {
+            _prediction.value = predictionModel.predict(input, classNames)
+        }
 
         return input
     }
@@ -284,7 +290,7 @@ class SensorProcessService : Service() {
         sensorData.value.deviceLying?.let { editor.putFloat("deviceLying", it) }
         sensorData.value.BTdeviceConnected?.let { editor.putFloat("bluetooth", it) }
         sensorData.value.headphonesPluggedIn?.let { editor.putFloat("headphones", it) }
-        sensorData.value.wifi?.let { editor.putInt("wifi", it.toInt()) }
+        sensorData.value.wifi.let { editor.putInt("wifi", it.toInt()) }
         editor.putString("connection", sensorData.value.connection)
         editor.putString("batteryStat", sensorData.value.batteryStatus)
         editor.putString("chargingType", sensorData.value.chargingType)
@@ -397,7 +403,9 @@ class SensorProcessService : Service() {
         val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.connectionInfo
 
-        _sensorData.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+        if (wifiInfo.ssid != "<unknown ssid>") {
+            _sensorData.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+        }
     }
 
     // Function to retrieve current internet connection type

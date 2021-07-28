@@ -12,7 +12,7 @@ data class ConvertedData(
     var headphonesPluggedIn: Float? = 0.0f,
     var pressure: Float? = 0.0f,
     var temperature: Float? = 0.0f,
-    var wifi: UInt? = 0u,
+    var wifi: UInt = 0u,
     var connection: String? = "NONE",
     var batteryStatus: String? = "NONE",
     var chargingType: String = "NONE",

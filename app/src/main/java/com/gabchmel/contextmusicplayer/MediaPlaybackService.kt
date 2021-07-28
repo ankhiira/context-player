@@ -381,6 +381,17 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
         }, 10000)
 
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (isPlaying)
+                currentSong.value?.title?.let { title ->
+                    currentSong.value?.author?.let { author ->
+                        // Create a hashCode to use it as ID of the song
+                        val titleAuthor = "$title,$author".hashCode().toUInt()
+                        sensorProcessService.value?.writeToFile(titleAuthor.toString())
+                    }
+                }
+        }, 5000)
+
         // Every 10 second write to file sensor measurements with the song ID
         fixedRateTimer(period = 40000) {
             if (isPlaying)

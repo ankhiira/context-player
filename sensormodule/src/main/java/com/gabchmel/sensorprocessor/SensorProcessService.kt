@@ -146,7 +146,7 @@ class SensorProcessService : Service() {
         // Read current time
         _sensorData.value.currentTime = Calendar.getInstance().time
 
-//        Log.d("Sensor", "write")
+        Log.d("Sensor", "write")
 
         // Check to which Wi-Fi is the device connected
         wifiConnection()

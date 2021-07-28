@@ -172,10 +172,10 @@ object InputProcessHelper {
                         }
 
                         // Add latitude and longitude to dataset for location clustering
-                        val location = LocationClusteringAlg.Location(
-                            row[3].toDouble(), row[2].toDouble()
-                        )
-                        locationList.add(location)
+//                        val location = LocationClusteringAlg.Location(
+//                            row[3].toDouble(), row[2].toDouble()
+//                        )
+//                        locationList.add(location)
 //                        locationListDouble.add(doubleArrayOf(row[3].toDouble(), row[2].toDouble()))
 
                         row[0] to SensorData(

@@ -5,7 +5,6 @@ package com.gabchmel.predicitonmodule
 import android.content.Context
 import android.util.Log
 import com.gabchmel.common.ConvertedData
-import weka.classifiers.Evaluation
 import weka.classifiers.trees.RandomForest
 import weka.core.Attribute
 import weka.core.DenseInstance
@@ -14,9 +13,10 @@ import weka.core.Instances
 import weka.core.converters.ArffLoader
 import weka.core.converters.ArffSaver
 import weka.core.converters.CSVLoader
+import weka.filters.Filter
+import weka.filters.unsupervised.instance.RemovePercentage
 import java.io.File
 import java.util.*
-import kotlin.math.roundToInt
 
 
 class PredictionModelBuiltIn(val context: Context) {
@@ -24,7 +24,9 @@ class PredictionModelBuiltIn(val context: Context) {
     private lateinit var forest: RandomForest
     // Name of the input arff file
     val file = "arffData_converted.arff"
+    val fileTest = "arffData_convertedTest.arff"
     private val csvConvertedFile = "convertedData.csv"
+    private var wifiList = arrayListOf<UInt>()
 
     // Function to read the dataset from arff file
     private fun getDataset(): Pair<Instances, Instances> {
@@ -37,30 +39,35 @@ class PredictionModelBuiltIn(val context: Context) {
         loader.setFile(initialFile)
         val dataSet = loader.dataSet
 
-        // Set index of the class attribute
-        dataSet.setClassIndex(classIdx)
-
         // Randomize dataset values
         dataSet.randomize(Random(0))
 
-        // If the class is of the nominal type, stratify the data
-        dataSet.stratify(10)
+        //        // If the class is of the nominal type, stratify the data
+//        dataSet.stratify(10)
 
-        // Split train and test data in 80 percent to train data
-        val trainSize = (dataSet.numInstances() * 0.8).roundToInt()
-        val testSize = dataSet.numInstances() - trainSize
-        val train = Instances(dataSet, 0, trainSize)
-//        val test = Instances(dataSet, trainSize, testSize)
-//        val test = Instances(dataSet, 0, trainSize)
+        // Remove test percentage from data to get the train set
+        var removePercentage = RemovePercentage()
+        removePercentage.setInputFormat(dataSet)
+        removePercentage.percentage = 20.0
+        val train: Instances = Filter.useFilter(dataSet, removePercentage)
+        // Remove trainpercentage from data to get the test set
+        removePercentage = RemovePercentage()
+        removePercentage.setInputFormat(dataSet)
+        removePercentage.percentage = 20.0
+        removePercentage.invertSelection = true
+        val test: Instances = Filter.useFilter(dataSet, removePercentage)
 
-//        val trainData = Instances(dataSet.trainCV(10,0))
-//        val testData = Instances(dataSet.testCV(10,0))
+        // Set index of the class attribute
+        train.setClassIndex(classIdx)
+        test.setClassIndex(classIdx)
 
-        return Pair(train, train)
+        return Pair(train, test)
     }
 
     // Function to create and evaluate model
     fun createModel(classNames: ArrayList<String>, wifiList: ArrayList<UInt>): Boolean {
+
+        this.wifiList = wifiList
 
         convertCSVtoarrf(context, classNames, wifiList)
 
@@ -84,17 +91,20 @@ class PredictionModelBuiltIn(val context: Context) {
             // Train the model
             forest.buildClassifier(trainingDataSet)
             // Test the dataset
-            val eval = Evaluation(trainingDataSet)
-            eval.evaluateModel(forest, testDataSet)
-
-            // Print the evaluation summary
-            println("Decision Tress Evaluation")
-            println(eval.toSummaryString())
-            print(" the expression for the input data as per algorithm is ")
-            println(forest)
-            println(eval.toMatrixString())
-            println(eval.toClassDetailsString())
-            eval.predictions()
+//            val eval = Evaluation(trainingDataSet)
+////            eval.evaluateModel(forest, testDataSet)
+//
+//            eval.crossValidateModel(forest, trainingDataSet, 10, Random(1))
+//            println("Estimated Accuracy: ${eval.pctCorrect()}")
+//
+//            // Print the evaluation summary
+//            println("Decision Tress Evaluation")
+//            println(eval.toSummaryString())
+//            print(" the expression for the input data as per algorithm is ")
+//            println(forest)
+//            println(eval.toMatrixString())
+//            println(eval.toClassDetailsString())
+//            eval.predictions()
         }
         return true
     }
@@ -103,10 +113,17 @@ class PredictionModelBuiltIn(val context: Context) {
     fun predict(input: ConvertedData, classNames: ArrayList<String>): String {
 
         // To create attributes with all possible values
-        val stateList = listOf("IN_VEHICLE","STILL","WALKING","RUNNING","UNKNOWN")
+        val stateList = listOf("IN_VEHICLE","STILL","WALKING","RUNNING","ON_BICYCLE","UNKNOWN")
         val connectionList = listOf("NONE","TRANSPORT_CELLULAR","TRANSPORT_WIFI","TRANSPORT_ETHERNET")
         val batteryStatusList = listOf("NONE","CHARGING","NOT_CHARGING")
         val chargingTypeList = listOf("NONE","USB","AC","WIRELESS")
+        val wifiNamesList = mutableListOf<String>()
+
+        if(wifiList.isNotEmpty()) {
+            for (wifiName in wifiList) {
+                wifiNamesList.add(wifiName.toString())
+            }
+        }
 
         val stateVector = FastVector<String>(5)
         stateVector.addAll(stateList)
@@ -120,6 +137,12 @@ class PredictionModelBuiltIn(val context: Context) {
         val chargingTypeVector = FastVector<String>(4)
         chargingTypeVector.addAll(chargingTypeList)
 
+        val boolVec = FastVector<String>(2)
+        boolVec.addAll(listOf("0","1"))
+
+        val wifiListVec = FastVector<String>(2)
+        wifiListVec.addAll(wifiNamesList)
+
         // Names of the attributes used in input
         val sinTime = Attribute("sinTime")
         val cosTime = Attribute("cosTime")
@@ -127,12 +150,12 @@ class PredictionModelBuiltIn(val context: Context) {
         val dayOfWeekCos = Attribute("dayOfWeekCos")
         val state = Attribute("state", stateVector)
         val light = Attribute("light")
-        val orientation = Attribute("orientation")
-        val BTconnected = Attribute("BTconnected")
-        val headphonesPlugged = Attribute("headphonesPlugged")
+        val orientation = Attribute("orientation", boolVec)
+        val BTconnected = Attribute("BTconnected", boolVec)
+        val headphonesPlugged = Attribute("headphonesPlugged", boolVec)
         val pressure = Attribute("pressure")
         val temperature = Attribute("temperature")
-        val wifi = Attribute("wifi")
+        val wifi = Attribute("wifi", wifiListVec)
         val connection = Attribute("connection", connectionVector)
         val batteryStatus = Attribute("batteryStatus", batteryStatVector)
         val chargingType = Attribute("chargingType", chargingTypeVector)
@@ -194,11 +217,12 @@ class PredictionModelBuiltIn(val context: Context) {
                 setValue(dayOfWeekCos, input.dayOfWeekCos)
                 setValue(state, input.state)
                 setValue(light, input.lightSensorValue!!.toDouble())
-                setValue(orientation, input.deviceLying!!.toDouble())
-                setValue(BTconnected, input.BTdeviceConnected!!.toDouble())
+                setValue(orientation, input.deviceLying!!.toInt().toString())
+                setValue(BTconnected, input.BTdeviceConnected!!.toInt().toString())
+                setValue(headphonesPlugged, input.headphonesPluggedIn!!.toInt().toString())
                 setValue(pressure, input.pressure!!.toDouble())
                 setValue(temperature, input.temperature!!.toDouble())
-                setValue(wifi, input.wifi!!.toDouble())
+                setValue(wifi, input.wifi!!.toString())
                 setValue(connection, input.connection)
                 setValue(batteryStatus, input.batteryStatus)
                 setValue(chargingType, input.chargingType)
@@ -274,7 +298,7 @@ class PredictionModelBuiltIn(val context: Context) {
 
             text = text.replace(
                 "@attribute state \\{.*\\}".toRegex(), "@attribute state {" +
-                        "IN_VEHICLE,STILL,WALKING,RUNNING,UNKNOWN}"
+                        "IN_VEHICLE,STILL,WALKING,RUNNING,ON_BICYCLE,UNKNOWN}"
             )
 
             text = text.replace(
@@ -290,6 +314,19 @@ class PredictionModelBuiltIn(val context: Context) {
             text = text.replace(
                 "@attribute chargingType \\{.*\\}".toRegex(), "@attribute chargingType {" +
                         "NONE,USB,AC,WIRELESS}"
+            )
+
+            text = text.replace(
+                "@attribute orientation numeric", "@attribute orientation {" +
+                        "0,1}"
+            )
+            text = text.replace(
+                "@attribute BTconnected numeric", "@attribute BTconnected {" +
+                        "0,1}"
+            )
+            text = text.replace(
+                "@attribute headphonesPlugged numeric", "@attribute headphonesPlugged {" +
+                        "0,1}"
             )
 
             if(wifiList.isNotEmpty()) {

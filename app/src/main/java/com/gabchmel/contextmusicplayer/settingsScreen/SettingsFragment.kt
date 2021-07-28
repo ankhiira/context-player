@@ -29,6 +29,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.fragment.findNavController
+import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
@@ -254,6 +255,8 @@ class SettingsFragment : Fragment() {
                                                     )
                                                 val origFilePrediction =
                                                     File(context.filesDir, "predictions.csv")
+                                                val origFileData=
+                                                    File(context.filesDir, "data.csv")
 
                                                 val arrayList = ArrayList<Uri>()
 
@@ -275,9 +278,16 @@ class SettingsFragment : Fragment() {
                                                         ".csv",
                                                         origFilePrediction
                                                     )
+                                                val pathResultDataOrigo =
+                                                    convertFileForSend(
+                                                        "data",
+                                                        ".csv",
+                                                        origFileData
+                                                    )
                                                 arrayList.add(pathResultData)
                                                 arrayList.add(pathResultArff)
                                                 arrayList.add(pathResultPrediction)
+                                                arrayList.add(pathResultDataOrigo)
 
                                                 val emailIntent =
                                                     Intent(Intent.ACTION_SEND_MULTIPLE)
@@ -348,7 +358,7 @@ class SettingsFragment : Fragment() {
 
         return FileProvider.getUriForFile(
             requireContext(),
-            "com.gabchmel.contextmusicplayer.fileProvider",
+            "${BuildConfig.APPLICATION_ID}.fileProvider",
             tempFile
         )
     }

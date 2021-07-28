@@ -218,7 +218,6 @@ class SensorProcessService : Service() {
         if (!predictionModel.createModel(classNames, wifiList)) {
             return false
         }
-
         return true
     }
 

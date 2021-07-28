@@ -8,10 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.*
 import android.net.Uri
-import android.os.Binder
-import android.os.Build
-import android.os.Bundle
-import android.os.IBinder
+import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -373,8 +370,19 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             updateState()
         }
 
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (isPlaying)
+                currentSong.value?.title?.let { title ->
+                    currentSong.value?.author?.let { author ->
+                        // Create a hashCode to use it as ID of the song
+                        val titleAuthor = "$title,$author".hashCode().toUInt()
+                        sensorProcessService.value?.writeToFile(titleAuthor.toString())
+                    }
+                }
+        }, 10000)
+
         // Every 10 second write to file sensor measurements with the song ID
-        fixedRateTimer(period = 10000) {
+        fixedRateTimer(period = 40000) {
             if (isPlaying)
                 currentSong.value?.title?.let { title ->
                     currentSong.value?.author?.let { author ->

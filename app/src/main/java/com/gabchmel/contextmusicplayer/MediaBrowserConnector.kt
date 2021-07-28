@@ -45,7 +45,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         val name: ComponentName?,
         val service: MediaPlaybackService,
         val conn: ServiceConnection,
-        var isBinded : Boolean
+        var isBinded: Boolean
     ) {
         fun unbind() {
             if (isBinded) {
@@ -64,15 +64,19 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
     suspend fun bindServiceAndWait(context: Context, intent: Intent, flags: Int) =
         suspendCoroutine<BoundService> { continuation ->
 
-            val conn = object: ServiceConnection {
+            val conn = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     val binder = service as LocalBinder<MediaPlaybackService>
                     val serviceVal = binder.getService()
-                    continuation.resume(BoundService(context, name,
-                        serviceVal
-                        , this, true))
+                    continuation.resume(
+                        BoundService(
+                            context, name,
+                            serviceVal, this, true
+                        )
+                    )
 
                 }
+
                 override fun onServiceDisconnected(name: ComponentName?) {
                     // ignore, not much we can do
                 }
@@ -126,8 +130,11 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 val intent = Intent(context, MediaPlaybackService::class.java)
                 intent.putExtra("is_binding", true)
                 bs.complete(
-                bindServiceAndWait(context,
-                    intent, Context.BIND_AUTO_CREATE))
+                    bindServiceAndWait(
+                        context,
+                        intent, Context.BIND_AUTO_CREATE
+                    )
+                )
             }
         }
     }
@@ -146,23 +153,23 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 val sensorProcessService = sensorProcessService.await()
                 val hasContextChanged = sensorProcessService.detectContextChange()
 
-                if(hasContextChanged) {
+                if (hasContextChanged) {
                     Log.d("context", "context changed")
                 }
 
-//                if(hasContextChanged) {
-                // Setting MediaBrowser for connecting to the MediaBrowserService
-                mediaBrowser = MediaBrowserCompat(
-                    context,
-                    ComponentName(context, MediaPlaybackService::class.java),
-                    connectionCallbacks,
-                    null
-                )
+                if (hasContextChanged) {
+                    // Setting MediaBrowser for connecting to the MediaBrowserService
+                    mediaBrowser = MediaBrowserCompat(
+                        context,
+                        ComponentName(context, MediaPlaybackService::class.java),
+                        connectionCallbacks,
+                        null
+                    )
 
-                // Connects to the MediaBrowseService
-                mediaBrowser.connect()
-                setNotification()
-//                }
+                    // Connects to the MediaBrowseService
+                    mediaBrowser.connect()
+                    setNotification()
+                }
 
                 // Save current sensor values to later detect if the context changed
                 sensorProcessService.saveSensorData()
@@ -179,9 +186,9 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 prediction.collectLatest { prediction ->
 
                     // Save predictions with their input to CSV file
-                    val locationNewFile = File(context.filesDir, "predictions.csv")
+                    val predictionFile = File(context.filesDir, "predictions.csv")
 //                    locationNewFile.writeText("")
-                    var predictionString = "$prediction,$input"
+                    var predictionString = "$prediction,"
                     for (property in ConvertedData::class.primaryConstructor?.parameters!!) {
                         val propertyNew = input::class.members
                             .first { it.name == property.name } as KProperty1<Any, *>
@@ -193,7 +200,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                     }
                     predictionString = predictionString.dropLast(1)
                     predictionString += "\n"
-                    locationNewFile.appendText(predictionString)
+                    predictionFile.appendText(predictionString)
 
                     // Find song that matches the prediction hash
                     for (song in songs.filterNotNull().first()) {
@@ -271,7 +278,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }
 
         // Definition of the intent execution that execute the according activity
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+        val pendingIntent = PendingIntent.getActivity(
             context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -285,7 +292,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 context,
                 0,
                 intentPlay,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_IMMUTABLE
             )
 
         val intentSkip = Intent(context, ActionReceiver::class.java).apply {
@@ -297,7 +304,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 context,
                 0,
                 intentSkip,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_IMMUTABLE
             )
 
         // Definition of notification layout

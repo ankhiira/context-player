@@ -5,15 +5,23 @@ apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
+    signingConfigs {
+        release {
+        storeFile file('D:\\ContextPlayer\\context_player_key_new.jks')
+            keyAlias 'key0'
+            storePassword var
+            keyPassword var1
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion '30.0.2'
 
     defaultConfig {
-        applicationId "com.gabchmel.contextmusicplayer"
+        applicationId "com.gabchmel.contextmusicplayer.release"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 4
-        versionName "1.2"
+        versionCode 9
+        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -51,7 +59,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            debuggable false
+            debuggable true
+            signingConfig signingConfigs.release
+            jniDebuggable false
+            renderscriptDebuggable false
         }
     }
 

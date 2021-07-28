@@ -328,7 +328,7 @@ class SensorProcessService : Service() {
     // Function for detection if the device is lying
     private fun processOrientation() {
 
-        if (coordList.size != 0) {
+        if (coordList.size == 3) {
             val normOfg = sqrt(
                 (coordList[0] * coordList[0]
                         + coordList[1] * coordList[1] + coordList[2] * coordList[2]).toDouble()

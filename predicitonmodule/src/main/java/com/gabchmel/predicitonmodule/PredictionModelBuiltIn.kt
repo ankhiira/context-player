@@ -50,7 +50,7 @@ class PredictionModelBuiltIn(val context: Context) {
         removePercentage.setInputFormat(dataSet)
         removePercentage.percentage = 20.0
         val train: Instances = Filter.useFilter(dataSet, removePercentage)
-        // Remove trainpercentage from data to get the test set
+        // Remove train percentage from data to get the test set
         removePercentage = RemovePercentage()
         removePercentage.setInputFormat(dataSet)
         removePercentage.percentage = 20.0

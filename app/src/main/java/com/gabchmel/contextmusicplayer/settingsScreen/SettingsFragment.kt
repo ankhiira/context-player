@@ -1,6 +1,5 @@
 package com.gabchmel.contextmusicplayer.settingsScreen
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -233,99 +232,99 @@ class SettingsFragment : Fragment() {
                                         }
                                     }
                                 }
-                                Row {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Text(
-                                            text = "Clicking on this sends all data collected for song prediction",
-                                            color = materialYel400,
-                                            textAlign = TextAlign.Justify
-                                        )
-
-                                        Button(
-                                            onClick = {
-                                                val locationNewFile =
-                                                    File(context.filesDir, "convertedData.csv")
-                                                val origFileArff =
-                                                    File(
-                                                        context.filesDir,
-                                                        "arffData_converted.arff"
-                                                    )
-                                                val origFilePrediction =
-                                                    File(context.filesDir, "predictions.csv")
-                                                val origFileData=
-                                                    File(context.filesDir, "data.csv")
-
-                                                val arrayList = ArrayList<Uri>()
-
-                                                val pathResultData =
-                                                    convertFileForSend(
-                                                        "convertedData",
-                                                        ".csv",
-                                                        locationNewFile
-                                                    )
-                                                val pathResultArff =
-                                                    convertFileForSend(
-                                                        "arffData_converted",
-                                                        ".arff",
-                                                        origFileArff
-                                                    )
-                                                val pathResultPrediction =
-                                                    convertFileForSend(
-                                                        "predictions",
-                                                        ".csv",
-                                                        origFilePrediction
-                                                    )
-                                                val pathResultDataOrigo =
-                                                    convertFileForSend(
-                                                        "data",
-                                                        ".csv",
-                                                        origFileData
-                                                    )
-                                                arrayList.add(pathResultData)
-                                                arrayList.add(pathResultArff)
-                                                arrayList.add(pathResultPrediction)
-                                                arrayList.add(pathResultDataOrigo)
-
-                                                val emailIntent =
-                                                    Intent(Intent.ACTION_SEND_MULTIPLE)
-                                                // Email type
-                                                emailIntent.type = "text/csv"
-                                                // The email recipient
-                                                emailIntent.putExtra(
-                                                    Intent.EXTRA_EMAIL,
-                                                    arrayOf("chmelarova.gabik@gmail.com")
-                                                )
-                                                // the attachment
-                                                emailIntent.putParcelableArrayListExtra(
-                                                    Intent.EXTRA_STREAM,
-                                                    arrayList
-                                                );
-                                                // the mail subject
-                                                emailIntent.putExtra(
-                                                    Intent.EXTRA_SUBJECT,
-                                                    "Data from "
-                                                )
-                                                emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-                                                startActivityForResult(
-                                                    Intent.createChooser(
-                                                        emailIntent,
-                                                        "Send email..."
-                                                    ), 1234
-                                                )
-                                            },
-                                            shape = RoundedCornerShape(50)
-                                        ) {
-                                            Text(
-                                                text = "Send collected data",
-                                                color = materialYel400,
-                                            )
-                                        }
-                                    }
-                                }
+//                                Row {
+//                                    Column(
+//                                        horizontalAlignment = Alignment.CenterHorizontally,
+//                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+//                                    ) {
+//                                        Text(
+//                                            text = "Clicking on this sends all data collected for song prediction",
+//                                            color = materialYel400,
+//                                            textAlign = TextAlign.Justify
+//                                        )
+//
+//                                        Button(
+//                                            onClick = {
+//                                                val locationNewFile =
+//                                                    File(context.filesDir, "convertedData.csv")
+//                                                val origFileArff =
+//                                                    File(
+//                                                        context.filesDir,
+//                                                        "arffData_converted.arff"
+//                                                    )
+//                                                val origFilePrediction =
+//                                                    File(context.filesDir, "predictions.csv")
+//                                                val origFileData=
+//                                                    File(context.filesDir, "data.csv")
+//
+//                                                val arrayList = ArrayList<Uri>()
+//
+//                                                val pathResultData =
+//                                                    convertFileForSend(
+//                                                        "convertedData",
+//                                                        ".csv",
+//                                                        locationNewFile
+//                                                    )
+//                                                val pathResultArff =
+//                                                    convertFileForSend(
+//                                                        "arffData_converted",
+//                                                        ".arff",
+//                                                        origFileArff
+//                                                    )
+//                                                val pathResultPrediction =
+//                                                    convertFileForSend(
+//                                                        "predictions",
+//                                                        ".csv",
+//                                                        origFilePrediction
+//                                                    )
+//                                                val pathResultDataOrigo =
+//                                                    convertFileForSend(
+//                                                        "data",
+//                                                        ".csv",
+//                                                        origFileData
+//                                                    )
+//                                                arrayList.add(pathResultData)
+//                                                arrayList.add(pathResultArff)
+//                                                arrayList.add(pathResultPrediction)
+//                                                arrayList.add(pathResultDataOrigo)
+//
+//                                                val emailIntent =
+//                                                    Intent(Intent.ACTION_SEND_MULTIPLE)
+//                                                // Email type
+//                                                emailIntent.type = "text/csv"
+//                                                // The email recipient
+//                                                emailIntent.putExtra(
+//                                                    Intent.EXTRA_EMAIL,
+//                                                    arrayOf("chmelarova.gabik@gmail.com")
+//                                                )
+//                                                // the attachment
+//                                                emailIntent.putParcelableArrayListExtra(
+//                                                    Intent.EXTRA_STREAM,
+//                                                    arrayList
+//                                                );
+//                                                // the mail subject
+//                                                emailIntent.putExtra(
+//                                                    Intent.EXTRA_SUBJECT,
+//                                                    "Data from "
+//                                                )
+//                                                emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//
+//                                                startActivityForResult(
+//                                                    Intent.createChooser(
+//                                                        emailIntent,
+//                                                        "Send email..."
+//                                                    ), 1234
+//                                                )
+//                                            },
+//                                            shape = RoundedCornerShape(50)
+//                                        ) {
+//                                            Text(
+//                                                text = "Send collected data",
+//                                                color = materialYel400,
+//                                            )
+//                                        }
+//                                    }
+//                                }
                             }
                         }
                     )

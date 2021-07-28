@@ -153,9 +153,9 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 val sensorProcessService = sensorProcessService.await()
                 val hasContextChanged = sensorProcessService.detectContextChange()
 
-                if (hasContextChanged) {
-                    Log.d("context", "context changed")
-                }
+//                if (hasContextChanged) {
+//                    Log.d("context", "context changed")
+//                }
 
                 if (hasContextChanged) {
                     // Setting MediaBrowser for connecting to the MediaBrowserService

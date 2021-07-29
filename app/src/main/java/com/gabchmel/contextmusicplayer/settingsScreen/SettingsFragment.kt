@@ -44,11 +44,11 @@ class SettingsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Compose view of the Settings screen
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
                     val materialYel400 = MaterialTheme.colors.onPrimary
-
                     Scaffold(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -57,8 +57,6 @@ class SettingsFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Settings",
-//                                        color = materialYel400,
-//                                        fontSize = 20.sp,
                                         fontFamily = appFontFamily
                                     )
                                 },
@@ -234,133 +232,11 @@ class SettingsFragment : Fragment() {
                                         }
                                     }
                                 }
-//                                Row {
-//                                    Column(
-//                                        horizontalAlignment = Alignment.CenterHorizontally,
-//                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-//                                    ) {
-//                                        Text(
-//                                            text = "Clicking on this sends all data collected for song prediction",
-//                                            color = materialYel400,
-//                                            textAlign = TextAlign.Justify
-//                                        )
-//
-//                                        Button(
-//                                            onClick = {
-//                                                val locationNewFile =
-//                                                    File(context.filesDir, "convertedData.csv")
-//                                                val origFileArff =
-//                                                    File(
-//                                                        context.filesDir,
-//                                                        "arffData_converted.arff"
-//                                                    )
-//                                                val origFilePrediction =
-//                                                    File(context.filesDir, "predictions.csv")
-//                                                val origFileData=
-//                                                    File(context.filesDir, "data.csv")
-//
-//                                                val arrayList = ArrayList<Uri>()
-//
-//                                                val pathResultData =
-//                                                    convertFileForSend(
-//                                                        "convertedData",
-//                                                        ".csv",
-//                                                        locationNewFile
-//                                                    )
-//                                                val pathResultArff =
-//                                                    convertFileForSend(
-//                                                        "arffData_converted",
-//                                                        ".arff",
-//                                                        origFileArff
-//                                                    )
-//                                                val pathResultPrediction =
-//                                                    convertFileForSend(
-//                                                        "predictions",
-//                                                        ".csv",
-//                                                        origFilePrediction
-//                                                    )
-//                                                val pathResultDataOrigo =
-//                                                    convertFileForSend(
-//                                                        "data",
-//                                                        ".csv",
-//                                                        origFileData
-//                                                    )
-//                                                arrayList.add(pathResultData)
-//                                                arrayList.add(pathResultArff)
-//                                                arrayList.add(pathResultPrediction)
-//                                                arrayList.add(pathResultDataOrigo)
-//
-//                                                val emailIntent =
-//                                                    Intent(Intent.ACTION_SEND_MULTIPLE)
-//                                                // Email type
-//                                                emailIntent.type = "text/csv"
-//                                                // The email recipient
-//                                                emailIntent.putExtra(
-//                                                    Intent.EXTRA_EMAIL,
-//                                                    arrayOf("chmelarova.gabik@gmail.com")
-//                                                )
-//                                                // the attachment
-//                                                emailIntent.putParcelableArrayListExtra(
-//                                                    Intent.EXTRA_STREAM,
-//                                                    arrayList
-//                                                );
-//                                                // the mail subject
-//                                                emailIntent.putExtra(
-//                                                    Intent.EXTRA_SUBJECT,
-//                                                    "Data from "
-//                                                )
-//                                                emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//
-//                                                startActivityForResult(
-//                                                    Intent.createChooser(
-//                                                        emailIntent,
-//                                                        "Send email..."
-//                                                    ), 1234
-//                                                )
-//                                            },
-//                                            shape = RoundedCornerShape(50)
-//                                        ) {
-//                                            Text(
-//                                                text = "Send collected data",
-//                                                color = materialYel400,
-//                                            )
-//                                        }
-//                                    }
-//                                }
                             }
                         }
                     )
                 }
             }
         }
-    }
-
-    private fun convertFileForSend(filename: String, ext: String, origFile: File): Uri {
-        val tempFile = File.createTempFile(
-            filename,
-            ext,
-            context?.cacheDir
-        )
-
-        val inputStream = FileInputStream(origFile)
-        inputStream.use { inStream ->
-            val outputStream = FileOutputStream(tempFile)
-            outputStream.use { outStream ->
-                // Transfer bytes from in to out
-                val buf = ByteArray(1024)
-                var len: Int
-                while (inStream.read(buf)
-                        .also { len = it } > 0
-                ) {
-                    outStream.write(buf, 0, len)
-                }
-            }
-        }
-
-        return FileProvider.getUriForFile(
-            requireContext(),
-            "${BuildConfig.APPLICATION_ID}.fileProvider",
-            tempFile
-        )
     }
 }

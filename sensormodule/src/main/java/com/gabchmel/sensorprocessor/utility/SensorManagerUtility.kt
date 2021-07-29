@@ -64,13 +64,6 @@ object SensorManagerUtility {
                         SensorProcessService._sensorData.value.heartRate = values[0]
                     }
                 }
-
-                // Log the values of sensors
-//                if (isOrientSensor) {
-//                    Log.d("SensorValues", "$sensorName: ${values[0]}, ${values[1]}, ${values[2]}")
-//                } else {
-//                    Log.d("SensorValues", "$sensorName: ${values[0]}")
-//                }
             }
 
             override fun onAccuracyChanged(sensor: Sensor, i: Int) {}

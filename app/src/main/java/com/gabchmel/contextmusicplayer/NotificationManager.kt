@@ -19,6 +19,7 @@ object NotificationManager {
     const val CHANNEL_ID = "channel"
     const val notificationID = 1234
 
+    // Function to create a playback notification
     fun createNotification(
         context: Context,
         sessionToken: MediaSessionCompat.Token?,
@@ -27,7 +28,7 @@ object NotificationManager {
         albumArt: Bitmap,
         isPlaying: Boolean
 
-        ): Notification {
+    ): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             var description = "Test notification"
             val descriptionText = "description"
@@ -92,15 +93,18 @@ object NotificationManager {
             .setContentIntent(pendingIntent)
             .setSilent(true)
             // Stop the service when the notification is swiped away
-            .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(
-                context,
-                PlaybackStateCompat.ACTION_STOP
-            ))
+            .setDeleteIntent(
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    context,
+                    PlaybackStateCompat.ACTION_STOP
+                )
+            )
 
         return builder.build()
     }
 
-    fun displayNotification(context: Context,notification: Notification ) {
+    // Function to display the notification
+    fun displayNotification(context: Context, notification: Notification) {
         // Creates notification object with set parameters
         with(NotificationManagerCompat.from(context)) {
             notify(notificationID, notification)

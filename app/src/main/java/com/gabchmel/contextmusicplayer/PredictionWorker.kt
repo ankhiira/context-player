@@ -13,10 +13,7 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
         appContext, workerParams
     ) {
 
-    companion object {
-        const val Progress = "progress"
-    }
-
+    // Function to be run when the WorkManager is triggered
     override suspend fun doWork(): Result {
         withContext(Dispatchers.IO) {
             // Run prediction only if there are input data
@@ -32,9 +29,11 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
                 .addTag("WIFIJOB1")
                 .build()
             WorkManager.getInstance(appContext)
-                .enqueueUniqueWork("work2",
+                .enqueueUniqueWork(
+                    "work2",
                     ExistingWorkPolicy.REPLACE,
-                    tenMinutesRequest)
+                    tenMinutesRequest
+                )
         }
         // Indicate whether the work finished successfully with the Result
         return Result.success()

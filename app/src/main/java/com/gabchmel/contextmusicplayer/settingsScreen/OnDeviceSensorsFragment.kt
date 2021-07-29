@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
@@ -28,6 +27,7 @@ class OnDeviceSensorsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Compose view of the On-device sensors screen
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
@@ -45,8 +45,6 @@ class OnDeviceSensorsFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Device sensors",
-//                                        color = materialYel400,
-//                                        fontSize = 20.sp,
                                         fontFamily = appFontFamily
                                     )
                                 },
@@ -61,7 +59,8 @@ class OnDeviceSensorsFragment : Fragment() {
                                     }
                                 },
                                 elevation = 0.dp,
-                                backgroundColor = Color.Transparent)
+                                backgroundColor = Color.Transparent
+                            )
                         },
                         content = {
                             LazyColumn(

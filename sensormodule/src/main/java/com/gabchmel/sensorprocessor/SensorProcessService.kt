@@ -148,8 +148,6 @@ class SensorProcessService : Service() {
         // Read current time
         _sensorData.value.currentTime = Calendar.getInstance().time
 
-//        Log.d("Sensor", "write")
-
         // Check to which Wi-Fi is the device connected
         wifiConnection()
         // Check the internet connection type
@@ -166,18 +164,23 @@ class SensorProcessService : Service() {
             counter++
         }
 
+        // Check the size of SensorData structure if it didn't change
         if (csvFile.length() == 0L) {
+            // If the file is empty, save the current SensorData size
             val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
             editor.putInt("csv", counter)
             editor.apply()
         } else {
+            // If the file is not empty, then check if the size of SensorData didn't change
             val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
             val counterOld = prefs.getInt("csv", 0)
             if (counterOld != counter && counterOld != 0) {
+                // If the size changed, delete the CSV file
                 val inputFile = File(this.filesDir, "data.csv")
                 if (inputFile.exists()) {
                     this.deleteFile("data.csv")
                 }
+                // Create new CSV file
                 csvFile = File(this.filesDir, "data.csv")
             }
         }
@@ -224,7 +227,7 @@ class SensorProcessService : Service() {
         return true
     }
 
-    fun triggerPrediction() : ConvertedData {
+    fun triggerPrediction(): ConvertedData {
 
         // Read current time
         _sensorData.value.currentTime = Calendar.getInstance().time
@@ -243,7 +246,7 @@ class SensorProcessService : Service() {
         // Get the processed input values
         val input = inputProcessHelper(sensorData.value)
 
-        if(wifiNamesList.contains(input.wifi)) {
+        if (wifiNamesList.contains(input.wifi)) {
             _prediction.value = predictionModel.predict(input, classNames)
         }
 
@@ -329,7 +332,7 @@ class SensorProcessService : Service() {
         val task = ActivityRecognition.getClient(this)
             .requestActivityTransitionUpdates(request, pendingIntent)
 
-        // used: https://heartbeat.fritz.ai/detect-users-activity-in-android-using-activity-transition-api-f718c844efb2
+        // implemented from: https://heartbeat.fritz.ai/detect-users-activity-in-android-using-activity-transition-api-f718c844efb2
         task.addOnSuccessListener {
         }
 
@@ -345,16 +348,17 @@ class SensorProcessService : Service() {
     // Function for detection if the device is lying
     private fun processOrientation() {
 
+        // Inspired by: https://stackoverflow.com/questions/30948131/how-to-know-if-android-device-is-flat-on-table
         if (coordList.size == 3) {
-            val normOfg = sqrt(
+            val norm = sqrt(
                 (coordList[0] * coordList[0]
                         + coordList[1] * coordList[1] + coordList[2] * coordList[2]).toDouble()
             )
 
             // Normalize the accelerometer vector
-            coordList[0] = (coordList[0] / normOfg).toFloat()
-            coordList[1] = (coordList[1] / normOfg).toFloat()
-            coordList[2] = (coordList[2] / normOfg).toFloat()
+            coordList[0] = (coordList[0] / norm).toFloat()
+            coordList[1] = (coordList[1] / norm).toFloat()
+            coordList[2] = (coordList[2] / norm).toFloat()
 
             val inclination = Math.toDegrees(acos(coordList[2]).toDouble()).roundToInt()
 
@@ -374,10 +378,6 @@ class SensorProcessService : Service() {
         // Check if the device supports bluetooth
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
             val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-//            val pairedDevices = bluetoothAdapter.bondedDevices
-
-//            val s: MutableList<String> = ArrayList()
-//            for (bt in pairedDevices) s.add(bt.name)
 
             // Check if the bluetooth headphones are connected
             _sensorData.value.BTdeviceConnected =

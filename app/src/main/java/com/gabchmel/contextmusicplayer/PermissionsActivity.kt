@@ -23,30 +23,13 @@ class PermissionsActivity : AppCompatActivity() {
 
     // request multiple permissions on application start
     private val requestMultiplePermissions =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-
-            var isGranted = true
-
-            permissions.entries.forEach {
-//                Log.e("DEBUG", "${it.key} = ${it.value}")
-                if (it.value == false) {
-                    isGranted = false
-                }
-            }
-            val intent = Intent(this, MainActivity::class.java)
-
-//            if (isGranted) {
-                // Start the main activity
-                startActivity(intent)
-//            }
-
-            // TODO if some permission not granted create screen informing about
-            // the lack of functionality
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            startActivity(Intent(this, MainActivity::class.java))
         }
 
+    // Composable function to show the permissions screen if some permission are not requested
     @Composable
     fun PermissionsScreen() {
-
         var array = arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,

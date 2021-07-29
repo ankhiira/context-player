@@ -3,7 +3,6 @@ package com.gabchmel.predicitonmodule
 //import smile.classification.RandomForest
 
 import android.content.Context
-import android.util.Log
 import com.gabchmel.common.ConvertedData
 import weka.classifiers.trees.RandomForest
 import weka.core.Attribute
@@ -22,6 +21,7 @@ import java.util.*
 class PredictionModelBuiltIn(val context: Context) {
 
     private lateinit var forest: RandomForest
+
     // Name of the input arff file
     val file = "arffData_converted.arff"
     val fileTest = "arffData_convertedTest.arff"
@@ -42,8 +42,8 @@ class PredictionModelBuiltIn(val context: Context) {
         // Randomize dataset values
         dataSet.randomize(Random(0))
 
-        //        // If the class is of the nominal type, stratify the data
-//        dataSet.stratify(10)
+        // If the class is of the nominal type, stratify the data
+        // dataSet.stratify(10)
 
         // Remove test percentage from data to get the train set
         var removePercentage = RemovePercentage()
@@ -68,12 +68,11 @@ class PredictionModelBuiltIn(val context: Context) {
     fun createModel(classNames: ArrayList<String>, wifiList: ArrayList<UInt>): Boolean {
 
         this.wifiList = wifiList
-
-        convertCSVtoarrf(context, classNames, wifiList)
-
         if (classNames.size == 1) {
             return false
         }
+
+        convertCSVtoarrf(context, classNames, wifiList)
 
         if (File(context.filesDir, file).exists()) {
 
@@ -90,21 +89,6 @@ class PredictionModelBuiltIn(val context: Context) {
             forest.numTrees = 100
             // Train the model
             forest.buildClassifier(trainingDataSet)
-            // Test the dataset
-//            val eval = Evaluation(trainingDataSet)
-////            eval.evaluateModel(forest, testDataSet)
-//
-//            eval.crossValidateModel(forest, trainingDataSet, 10, Random(1))
-//            println("Estimated Accuracy: ${eval.pctCorrect()}")
-//
-//            // Print the evaluation summary
-//            println("Decision Tress Evaluation")
-//            println(eval.toSummaryString())
-//            print(" the expression for the input data as per algorithm is ")
-//            println(forest)
-//            println(eval.toMatrixString())
-//            println(eval.toClassDetailsString())
-//            eval.predictions()
         }
         return true
     }
@@ -113,13 +97,14 @@ class PredictionModelBuiltIn(val context: Context) {
     fun predict(input: ConvertedData, classNames: ArrayList<String>): String {
 
         // To create attributes with all possible values
-        val stateList = listOf("IN_VEHICLE","STILL","WALKING","RUNNING","ON_BICYCLE","UNKNOWN")
-        val connectionList = listOf("NONE","TRANSPORT_CELLULAR","TRANSPORT_WIFI","TRANSPORT_ETHERNET")
-        val batteryStatusList = listOf("NONE","CHARGING","NOT_CHARGING")
-        val chargingTypeList = listOf("NONE","USB","AC","WIRELESS")
+        val stateList = listOf("IN_VEHICLE", "STILL", "WALKING", "RUNNING", "ON_BICYCLE", "UNKNOWN")
+        val connectionList =
+            listOf("NONE", "TRANSPORT_CELLULAR", "TRANSPORT_WIFI", "TRANSPORT_ETHERNET")
+        val batteryStatusList = listOf("NONE", "CHARGING", "NOT_CHARGING")
+        val chargingTypeList = listOf("NONE", "USB", "AC", "WIRELESS")
         val wifiNamesList = mutableListOf<String>()
 
-        if(wifiList.isNotEmpty()) {
+        if (wifiList.isNotEmpty()) {
             for (wifiName in wifiList) {
                 wifiNamesList.add(wifiName.toString())
             }
@@ -138,7 +123,7 @@ class PredictionModelBuiltIn(val context: Context) {
         chargingTypeVector.addAll(chargingTypeList)
 
         val boolVec = FastVector<String>(2)
-        boolVec.addAll(listOf("0","1"))
+        boolVec.addAll(listOf("0", "1"))
 
         val wifiListVec = FastVector<String>(2)
         wifiListVec.addAll(wifiNamesList)
@@ -241,7 +226,7 @@ class PredictionModelBuiltIn(val context: Context) {
         newInstance.setDataset(dataUnpredicted)
 
         var className = ""
-        val resultArray = Array<String?>(4) {null}
+        val resultArray = Array<String?>(4) { null }
 
         // predict new sample
         try {
@@ -249,10 +234,8 @@ class PredictionModelBuiltIn(val context: Context) {
             for (i in 0..3) {
                 val result = forest.classifyInstance(newInstance)
                 resultArray[i] = classNames[result.toInt()]
-//                Log.d("WekaTest", "Nr: itemNumber, predicted: ${resultArray[i]}")
             }
             className = resultArray.random().toString()
-            Log.d("random", className)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -260,14 +243,16 @@ class PredictionModelBuiltIn(val context: Context) {
     }
 
     // Function to convert CSV file to arff file representation
-    private fun convertCSVtoarrf(context: Context, classNames: ArrayList<String>,
-                                 wifiList: ArrayList<UInt>) {
+    private fun convertCSVtoarrf(
+        context: Context, classNames: ArrayList<String>,
+        wifiList: ArrayList<UInt>
+    ) {
 
         // load the CSV file
         val load = CSVLoader()
         val csvFile = File(context.filesDir, csvConvertedFile)
 
-        if(csvFile.exists()) {
+        if (csvFile.exists()) {
             load.setSource(csvFile)
             val data = load.dataSet
 
@@ -297,22 +282,22 @@ class PredictionModelBuiltIn(val context: Context) {
             )
 
             text = text.replace(
-                "@attribute state \\{.*\\}".toRegex(), "@attribute state {" +
+                "@attribute state \\{.*}".toRegex(), "@attribute state {" +
                         "IN_VEHICLE,STILL,WALKING,RUNNING,ON_BICYCLE,UNKNOWN}"
             )
 
             text = text.replace(
-                "@attribute connection \\{.*\\}".toRegex(), "@attribute connection {" +
+                "@attribute connection \\{.*}".toRegex(), "@attribute connection {" +
                         "NONE,TRANSPORT_CELLULAR,TRANSPORT_WIFI,TRANSPORT_ETHERNET}"
             )
 
             text = text.replace(
-                "@attribute batteryStatus \\{.*\\}".toRegex(), "@attribute batteryStatus {" +
+                "@attribute batteryStatus \\{.*}".toRegex(), "@attribute batteryStatus {" +
                         "NONE,CHARGING,NOT_CHARGING}"
             )
 
             text = text.replace(
-                "@attribute chargingType \\{.*\\}".toRegex(), "@attribute chargingType {" +
+                "@attribute chargingType \\{.*}".toRegex(), "@attribute chargingType {" +
                         "NONE,USB,AC,WIRELESS}"
             )
 
@@ -329,7 +314,7 @@ class PredictionModelBuiltIn(val context: Context) {
                         "0,1}"
             )
 
-            if(wifiList.isNotEmpty()) {
+            if (wifiList.isNotEmpty()) {
                 // Replace attribute description in arff file
                 text = text.replace(
                     "@attribute wifi numeric", "@attribute wifi {" +

@@ -5,7 +5,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:fontFamily">@font/hk_grotesque_regular</item>
+        <item name="android:fontFamily">@font/bahnschrift_14</item>
     </style>
 
     <!-- The launcher theme. It sets the main window background to the launch_screen drawable -->

@@ -5,7 +5,6 @@ package com.gabchmel.predicitonmodule
 import android.content.Context
 import android.util.Log
 import com.gabchmel.common.ConvertedData
-import weka.classifiers.Evaluation
 import weka.classifiers.trees.RandomForest
 import weka.core.Attribute
 import weka.core.DenseInstance
@@ -92,20 +91,20 @@ class PredictionModelBuiltIn(val context: Context) {
             // Train the model
             forest.buildClassifier(trainingDataSet)
             // Test the dataset
-            val eval = Evaluation(trainingDataSet)
-//            eval.evaluateModel(forest, testDataSet)
-
-            eval.crossValidateModel(forest, trainingDataSet, 10, Random(1))
-            println("Estimated Accuracy: ${eval.pctCorrect()}")
-
-            // Print the evaluation summary
-            println("Decision Tress Evaluation")
-            println(eval.toSummaryString())
-            print(" the expression for the input data as per algorithm is ")
-            println(forest)
-            println(eval.toMatrixString())
-            println(eval.toClassDetailsString())
-            eval.predictions()
+//            val eval = Evaluation(trainingDataSet)
+////            eval.evaluateModel(forest, testDataSet)
+//
+//            eval.crossValidateModel(forest, trainingDataSet, 10, Random(1))
+//            println("Estimated Accuracy: ${eval.pctCorrect()}")
+//
+//            // Print the evaluation summary
+//            println("Decision Tress Evaluation")
+//            println(eval.toSummaryString())
+//            print(" the expression for the input data as per algorithm is ")
+//            println(forest)
+//            println(eval.toMatrixString())
+//            println(eval.toClassDetailsString())
+//            eval.predictions()
         }
         return true
     }

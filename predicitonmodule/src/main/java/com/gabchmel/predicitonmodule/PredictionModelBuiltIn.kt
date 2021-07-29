@@ -282,22 +282,22 @@ class PredictionModelBuiltIn(val context: Context) {
             )
 
             text = text.replace(
-                "@attribute state \\{.*}".toRegex(), "@attribute state {" +
+                "@attribute state \\{.*\\}".toRegex(), "@attribute state {" +
                         "IN_VEHICLE,STILL,WALKING,RUNNING,ON_BICYCLE,UNKNOWN}"
             )
 
             text = text.replace(
-                "@attribute connection \\{.*}".toRegex(), "@attribute connection {" +
+                "@attribute connection \\{.*\\}".toRegex(), "@attribute connection {" +
                         "NONE,TRANSPORT_CELLULAR,TRANSPORT_WIFI,TRANSPORT_ETHERNET}"
             )
 
             text = text.replace(
-                "@attribute batteryStatus \\{.*}".toRegex(), "@attribute batteryStatus {" +
+                "@attribute batteryStatus \\{.*\\}".toRegex(), "@attribute batteryStatus {" +
                         "NONE,CHARGING,NOT_CHARGING}"
             )
 
             text = text.replace(
-                "@attribute chargingType \\{.*}".toRegex(), "@attribute chargingType {" +
+                "@attribute chargingType \\{.*\\}".toRegex(), "@attribute chargingType {" +
                         "NONE,USB,AC,WIRELESS}"
             )
 

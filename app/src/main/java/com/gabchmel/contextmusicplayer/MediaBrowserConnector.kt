@@ -60,7 +60,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
     }
 
     // Binds to service and waits for onServiceConnected
-    // Bind service inspired from: https://stackoverflow.com/questions/48381902/wait-for-service-to-be-bound-using-coroutines
+    // Bind to service function inspired by: https://stackoverflow.com/questions/48381902/wait-for-service-to-be-bound-using-coroutines
     suspend fun bindServiceAndWait(context: Context, intent: Intent, flags: Int) =
         suspendCoroutine<BoundService> { continuation ->
 

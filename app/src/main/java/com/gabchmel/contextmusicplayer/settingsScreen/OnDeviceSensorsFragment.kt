@@ -14,11 +14,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.gabchmel.contextmusicplayer.theme.appFontFamily
 import com.gabchmel.sensorprocessor.utility.SensorListDisplay
 
 class OnDeviceSensorsFragment : Fragment() {
@@ -44,8 +44,7 @@ class OnDeviceSensorsFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Device sensors",
-                                        color = materialYel400,
-                                        fontSize = 20.sp,
+                                        fontFamily = appFontFamily
                                     )
                                 },
                                 navigationIcon = {

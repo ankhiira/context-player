@@ -7,9 +7,9 @@ import androidx.compose.ui.text.font.FontWeight
 import com.gabchmel.contextmusicplayer.R
 
 val appFontFamily = FontFamily(
-    Font(R.font.encodesanssemicondensed_medium),
-    Font(R.font.encodesanssemicondensed_regular, FontWeight.W500),
-    Font(R.font.encodesanssemicondensed_bold, FontWeight.Bold)
+    Font(R.font.bahnschrift_14),
+    Font(R.font.bahnschrift_14, FontWeight.W500),
+    Font(R.font.bahnschrift_14, FontWeight.Bold)
 )
 
 private val defaultTypography = Typography()

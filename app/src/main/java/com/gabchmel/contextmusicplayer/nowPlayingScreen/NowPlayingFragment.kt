@@ -34,6 +34,7 @@ import com.gabchmel.contextmusicplayer.extensions.getArtist
 import com.gabchmel.contextmusicplayer.extensions.getDuration
 import com.gabchmel.contextmusicplayer.extensions.getTitle
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.gabchmel.contextmusicplayer.theme.appFontFamily
 import com.google.accompanist.glide.rememberGlidePainter
 
 class NowPlayingFragment : Fragment() {
@@ -96,8 +97,7 @@ class NowPlayingFragment : Fragment() {
                         title = {
                             Text(
                                 "Playing from library",
-                                color = materialYel400,
-                                fontSize = 18.sp,
+                                fontFamily = appFontFamily
                             )
                         },
                         navigationIcon = {
@@ -147,15 +147,13 @@ class NowPlayingFragment : Fragment() {
                                 .clip(RoundedCornerShape(percent = 10))
                                 .fillMaxWidth()
                                 .padding(24.dp)
-                                .height(210.dp)
+                                .height(215.dp)
                         )
 
                         Column(
-//                            modifier = Modifier
-//                                .weight(1.0f),
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-
                             // Title
                             Text(
                                 text = musicMetadata?.getTitle() ?: "Loading",
@@ -172,7 +170,11 @@ class NowPlayingFragment : Fragment() {
                                 modifier = Modifier
                                     .absolutePadding(bottom = 16.dp)
                             )
+                        }
 
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
                             // Slider
                             var sliderPosition by remember { mutableStateOf(0f) }
                             val songLength = musicMetadata?.getDuration()?.toFloat() ?: 0.0f

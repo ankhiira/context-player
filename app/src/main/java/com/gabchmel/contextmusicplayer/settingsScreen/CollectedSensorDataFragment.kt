@@ -22,13 +22,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.common.ConvertedData
 import com.gabchmel.common.LocalBinder
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.gabchmel.contextmusicplayer.theme.appFontFamily
 import com.gabchmel.sensorprocessor.SensorProcessService
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -81,8 +81,7 @@ class CollectedSensorDataFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Collected sensor values",
-                                        color = materialYel400,
-                                        fontSize = 20.sp,
+                                        fontFamily = appFontFamily
                                     )
                                 },
                                 navigationIcon = {

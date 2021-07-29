@@ -20,7 +20,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     private var mediaBrowserConnectionCallback = MediaBrowserCompat.ConnectionCallback()
 
     val service = CompletableDeferred<MediaPlaybackService>()
-    lateinit var mediaController: MediaControllerCompat
+    var mediaController: MediaControllerCompat? = null
 
     private val _musicState = MutableStateFlow<PlaybackStateCompat?>(null)
     val musicState: StateFlow<PlaybackStateCompat?> = _musicState
@@ -44,13 +44,13 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
             }
 
             // Display initial state
-            val metadata = mediaController.metadata
-            val pbstate = mediaController.playbackState
+            val metadata = mediaController?.metadata
+            val pbstate = mediaController?.playbackState
 
             _musicState.value = pbstate
 
             // Register a callback to stay in sync
-            mediaController.registerCallback(controllerCallback)
+            mediaController?.registerCallback(controllerCallback)
 
             // Play after fragment is open
             if (args.play && notPlayed) {
@@ -82,7 +82,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     override fun onCleared() {
-        mediaController.unregisterCallback(controllerCallback)
+        mediaController?.unregisterCallback(controllerCallback)
         mediaBrowser.disconnect()
         super.onCleared()
     }
@@ -100,27 +100,27 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
     // To play for the first time
     fun play(uri: Uri) {
-        mediaController.transportControls.playFromUri(uri, null)
+        mediaController?.transportControls?.playFromUri(uri, null)
     }
 
     // To play any other time
     fun play() {
-        mediaController.transportControls.play()
+        mediaController?.transportControls?.play()
     }
 
     fun pause() {
-        mediaController.transportControls.pause()
+        mediaController?.transportControls?.pause()
     }
 
     fun next() {
-        mediaController.transportControls.skipToNext()
+        mediaController?.transportControls?.skipToNext()
     }
 
     fun prev() {
-        mediaController.transportControls.skipToPrevious()
+        mediaController?.transportControls?.skipToPrevious()
     }
 
     fun setMusicProgress(progress: Float) {
-        mediaController.transportControls.seekTo(progress.toLong())
+        mediaController?.transportControls?.seekTo(progress.toLong())
     }
 }

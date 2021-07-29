@@ -49,6 +49,7 @@ import com.gabchmel.contextmusicplayer.extensions.getAlbumArt
 import com.gabchmel.contextmusicplayer.extensions.getArtist
 import com.gabchmel.contextmusicplayer.extensions.getTitle
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.gabchmel.contextmusicplayer.theme.appFontFamily
 import com.google.accompanist.glide.rememberGlidePainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -112,6 +113,7 @@ class SongListFragment : Fragment() {
                                         "Song List",
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Center,
+                                        fontFamily = appFontFamily
                                     )
                                 },
                                 actions = {

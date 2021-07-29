@@ -32,6 +32,7 @@ import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.theme.JetnewsTheme
+import com.gabchmel.contextmusicplayer.theme.appFontFamily
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -56,8 +57,9 @@ class SettingsFragment : Fragment() {
                                 title = {
                                     Text(
                                         "Settings",
-                                        color = materialYel400,
-                                        fontSize = 20.sp,
+//                                        color = materialYel400,
+//                                        fontSize = 20.sp,
+                                        fontFamily = appFontFamily
                                     )
                                 },
                                 navigationIcon = {

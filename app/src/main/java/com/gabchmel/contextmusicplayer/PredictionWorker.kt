@@ -15,21 +15,10 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
 
     companion object {
         const val Progress = "progress"
-        private const val delayDuration = 2000L
     }
 
     override suspend fun doWork(): Result {
         withContext(Dispatchers.IO) {
-
-//            val firstUpdate = workDataOf(Progress to 0)
-//            val lastUpdate = workDataOf(Progress to 100)
-
-//            setProgress(firstUpdate)
-//            delay(delayDuration)
-//            Log.d("WorkManager", "Working")
-//            setProgress(lastUpdate)
-//            delay(delayDuration)
-
             // Run prediction only if there are input data
             val inputFile = File(appContext.filesDir, "data.csv")
             if (inputFile.exists()) {
@@ -46,8 +35,6 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
                 .enqueueUniqueWork("work2",
                     ExistingWorkPolicy.REPLACE,
                     tenMinutesRequest)
-
-//            Log.d("Work", "Done Work")
         }
         // Indicate whether the work finished successfully with the Result
         return Result.success()

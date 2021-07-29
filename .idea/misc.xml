@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/bg_gradient.xml" value="0.1135" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector.xml" value="0.24351851851851852" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector1.xml" value="0.114" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_album_cover_vector3.xml" value="0.114" />
@@ -27,6 +28,7 @@
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_skip_previous_black_24dp.xml" value="0.15555555555555556" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/ic_stop_black_24dp.xml" value="0.15555555555555556" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/splash_sceen.xml" value="0.1255" />
+        <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/drawable/splash_screen.xml" value="0.1135" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_home.xml" value="0.18" />
         <entry key="..\:/src/ContextMusicPlayer/app/src/main/res/layout/fragment_song_list.xml" value="0.1" />

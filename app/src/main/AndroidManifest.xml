@@ -49,7 +49,7 @@
         <activity
             android:name=".PermissionsActivity"
             android:exported="true"
-            android:theme="@style/AppTheme.Launcher"
+            android:theme="@style/SplashTheme"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

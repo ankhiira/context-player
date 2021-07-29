@@ -34,7 +34,7 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
             val inputFile = File(appContext.filesDir, "data.csv")
             if (inputFile.exists()) {
                 // Connect to the MediaBrowserService, run prediction and create notification
-                val connector = MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
+                MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
             }
 
             // Enqueue this unique work again so it achieves periodicity

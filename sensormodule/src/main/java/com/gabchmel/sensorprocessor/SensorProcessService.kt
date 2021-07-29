@@ -62,6 +62,8 @@ class SensorProcessService : Service() {
     // Song IDs
     private var classNames = arrayListOf<String>()
 
+    private var wifiNamesList = arrayListOf<UInt>()
+
     // Saved prediction result as StateFlow to show notification
     private val _prediction = MutableStateFlow<String?>(null)
     val prediction: StateFlow<String?> = _prediction
@@ -213,6 +215,7 @@ class SensorProcessService : Service() {
         val (classNamesNew, wifiList) = processInputCSV(this)
 
         classNames = classNamesNew
+        wifiNamesList = wifiList
 
         // If we don't have enough input data, don't create a model
         if (!predictionModel.createModel(classNames, wifiList)) {
@@ -240,7 +243,9 @@ class SensorProcessService : Service() {
         // Get the processed input values
         val input = inputProcessHelper(sensorData.value)
 
-        _prediction.value = predictionModel.predict(input, classNames)
+        if(wifiNamesList.contains(input.wifi)) {
+            _prediction.value = predictionModel.predict(input, classNames)
+        }
 
         return input
     }
@@ -279,6 +284,18 @@ class SensorProcessService : Service() {
 
     // Function to save current context values to shared preferences for later comparison
     fun saveSensorData() {
+
+        // Check to which Wi-Fi is the device connected
+        wifiConnection()
+        // Check the internet connection type
+        internetConnectivity(this)
+        // Get the orientation of the device
+        processOrientation()
+        // Detect if the device is charging
+        batteryStatusDetection()
+        // Check if the BT device is connected
+        bluetoothDevicesConnection()
+
         val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
         editor.putString("state", sensorData.value.currentState)
         sensorData.value.deviceLying?.let { editor.putFloat("deviceLying", it) }
@@ -397,7 +414,10 @@ class SensorProcessService : Service() {
         val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.connectionInfo
 
-        _sensorData.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+        // Check if there is a WiFi name
+        if (wifiInfo.ssid != "<unknown ssid>") {
+            _sensorData.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+        }
     }
 
     // Function to retrieve current internet connection type

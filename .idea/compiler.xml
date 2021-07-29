@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="1.7">
-      <module name="ContextMusicPlayer.app" target="12" />
-      <module name="ContextMusicPlayer.common" target="12" />
+    <bytecodeTargetLevel target="12">
       <module name="ContextMusicPlayer.common2" target="12" />
-      <module name="ContextMusicPlayer.predicitonmodule" target="12" />
-      <module name="ContextMusicPlayer.sensormodule" target="12" />
     </bytecodeTargetLevel>
   </component>
 </project>

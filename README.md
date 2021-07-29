@@ -2,7 +2,7 @@
 
 ## Screenshots
 
-![alt text](https://github.com/4Gabby4/context-player/blob/master/screenshots/SettingsScreen.png?raw=true)
+![alt text](https://github.com/4Gabby4/context-player/blob/master/screenshots/SettingsScreen.png =100x20 ?raw=true)
 
 ## Features
 

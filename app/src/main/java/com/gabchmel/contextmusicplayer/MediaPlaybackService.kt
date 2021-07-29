@@ -14,7 +14,6 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.MediaBrowserServiceCompat
@@ -58,26 +57,22 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private lateinit var notification: Notification
     private lateinit var timer: Timer
     private lateinit var headsetPlugReceiver: BroadcastReceiver
-//    private val binder = MediaBinder()
-    private val binder = object : LocalBinder<MediaPlaybackService>() {
-        override fun getService() = this@MediaPlaybackService
-    }
+
+    // To check if the noisy receiver is registered
     private var isRegistered = false
     private var isPredicted = false
+    var isBinded = false
+    var isPlaying = false
 
     // Update metadata
     private val metadataRetriever = MediaMetadataRetriever()
-
     private val myNoisyAudioStreamReceiver = BecomingNoisyReceiver()
 
-    var isBinded = false
-
-    // Binder to a service
-    inner class MediaBinder : Binder() {
-        fun getService() = this@MediaPlaybackService
-    }
-
     private var sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
+
+    private val binder = object : LocalBinder<MediaPlaybackService>() {
+        override fun getService() = this@MediaPlaybackService
+    }
 
     /** Defines callbacks for service binding, passed to bindService()  */
     private val connection = object : ServiceConnection {
@@ -136,8 +131,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         songs.value.getOrNull(index - 1)
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
 
-    var isPlaying = false
-
     // On Service bind
     override fun onBind(intent: Intent): IBinder? {
         if (intent.getBooleanExtra("is_binding", false)) {
@@ -170,6 +163,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         val afChangeListener: AudioManager.OnAudioFocusChangeListener =
             AudioManager.OnAudioFocusChangeListener { }
 
+        // Set the audio focus
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioFocusRequest =
                 AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
@@ -183,39 +177,27 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
         }
 
+        // Set the volume level on headphones plugged in
         headsetPlugReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
                 val action = intent.action
                 if (Intent.ACTION_HEADSET_PLUG == action) {
                     val headphonesPluggedIn = intent.getIntExtra("state", -1)
-                    if (headphonesPluggedIn == 0) {
-//                        Toast.makeText(
-//                            applicationContext,
-//                            "Headphones not plugged in",
-//                            Toast.LENGTH_LONG
-//                        ).show()
-                    } else if (headphonesPluggedIn == 1) {
+                    if (headphonesPluggedIn == 1) {
                         player.setVolume(0.5f, 0.5f)
-//                        Toast.makeText(
-//                            applicationContext,
-//                            "Headphones plugged in",
-//                            Toast.LENGTH_LONG
-//                        ).show()
                     }
                 }
             }
         }
 
-        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
-        registerReceiver(headsetPlugReceiver, receiverFilter)
+        // Register receiver of the headphones plugged in
+        registerReceiver(headsetPlugReceiver, IntentFilter(Intent.ACTION_HEADSET_PLUG))
 
         // Create and initialize MediaSessionCompat
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
 
+        // Setup the mediaSession
         with(mediaSession) {
-
-            // Set of initial PlaybackState set to ACTION_PLAY, so the media buttons can start the player
-            // (current operational state of the player - transport state - playing, paused)
             stateBuilder = PlaybackStateCompat.Builder()
                 .setActions(
                     PlaybackStateCompat.ACTION_PLAY_PAUSE or
@@ -227,6 +209,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
             setPlaybackState(stateBuilder.build())
 
+            // Set the mediaSession callback
             val mediaSessionCallback = object : MediaSessionCompat.Callback() {
 
                 val am =
@@ -241,13 +224,13 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                 override fun onPlay() {
 
-                    if(isPredicted) {
+                    if (isPredicted) {
                         currentSongUri.value?.let { preparePlayer(it) }
                     }
 
                     isPlaying = true
 
-                    val result= if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         // Request audio focus so only on app is playing audio at a time
                         am.requestAudioFocus(audioFocusRequest)
                     } else {
@@ -299,7 +282,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     isPlaying = false
 
                     // Check if the audio focus was requested
-                    if(AudioManager.AUDIOFOCUS_REQUEST_GRANTED == 1) {
+                    if (AudioManager.AUDIOFOCUS_REQUEST_GRANTED == 1) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             am.abandonAudioFocusRequest(audioFocusRequest)
                         } else {
@@ -359,6 +342,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
             }
 
+            // Set the created callback to the mediaSession
             setCallback(mediaSessionCallback)
 
             // Set session token, so the client activities can communicate with it
@@ -369,39 +353,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         timer = fixedRateTimer(period = 1000) {
             updateState()
         }
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (isPlaying)
-                currentSong.value?.title?.let { title ->
-                    currentSong.value?.author?.let { author ->
-                        // Create a hashCode to use it as ID of the song
-                        val titleAuthor = "$title,$author".hashCode().toUInt()
-                        sensorProcessService.value?.writeToFile(titleAuthor.toString())
-                    }
-                }
-        }, 10000)
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (isPlaying)
-                currentSong.value?.title?.let { title ->
-                    currentSong.value?.author?.let { author ->
-                        // Create a hashCode to use it as ID of the song
-                        val titleAuthor = "$title,$author".hashCode().toUInt()
-                        sensorProcessService.value?.writeToFile(titleAuthor.toString())
-                    }
-                }
-        }, 5000)
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (isPlaying)
-                currentSong.value?.title?.let { title ->
-                    currentSong.value?.author?.let { author ->
-                        // Create a hashCode to use it as ID of the song
-                        val titleAuthor = "$title,$author".hashCode().toUInt()
-                        sensorProcessService.value?.writeToFile(titleAuthor.toString())
-                    }
-                }
-        }, 5000)
 
         // Every 10 second write to file sensor measurements with the song ID
         fixedRateTimer(period = 10000) {
@@ -419,8 +370,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // Function to update playback state of the service
     fun updateState() {
         // Update playback state
-        // TODO update playback state
-//        val newPlaybackState = PlaybackStateCompat.Builder(mediaSession)
         mediaSession.setPlaybackState(
             player.toPlaybackStateBuilder().setActions(
                 PlaybackStateCompat.ACTION_PLAY_PAUSE or
@@ -436,7 +385,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // Function to set metadata of the song
     fun updateMetadata() {
         // provide metadata
-        // TODO extract metadata builder to be created only once
         metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadataRetriever.getTitle())
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, metadataRetriever.getArtist())
@@ -448,6 +396,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
         }
 
+        // Set metadata to the mediaSession
         mediaSession.setMetadata(metadataBuilder.build())
     }
 
@@ -469,6 +418,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         NotificationManager.displayNotification(baseContext, notification)
     }
 
+    // Function to set the metadata for a current song from URI
     fun setMetadata(songUri: Uri): MediaMetadataRetriever {
         // Set source to current song to retrieve metadata
         metadataRetriever.setDataSource(applicationContext, songUri)
@@ -481,7 +431,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         return metadataRetriever
     }
 
-    // controls access to the service
+    // To control access to the service
     override fun onGetRoot(
         clientPackageName: String,
         clientUid: Int,
@@ -490,7 +440,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         return BrowserRoot(MY_MEDIA_ROOT_ID, null)
     }
 
-    // client can build and display menu from MediaBrowserService's content hierarchy
+    // For clients to be able to display offered music hierarchy
     override fun onLoadChildren(
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
@@ -501,9 +451,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     @SuppressLint("ServiceCast")
     override fun onTaskRemoved(rootIntent: Intent?) {
-
-        Toast.makeText(this, "task removed", Toast.LENGTH_SHORT).show()
-
         if (isRegistered)
             unregisterReceiver(headsetPlugReceiver)
         isRegistered = false
@@ -520,10 +467,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
 
-        // unregister BECOME_NOISY BroadcastReceiver
+        // unregister BECOME_NOISY and headphones plugged in BroadcastReceiver
         if (isRegistered)
             unregisterReceiver(myNoisyAudioStreamReceiver)
-            unregisterReceiver(headsetPlugReceiver)
+        unregisterReceiver(headsetPlugReceiver)
         isRegistered = false
 
         player.seekTo(0)
@@ -559,13 +506,12 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             ) != PackageManager.PERMISSION_GRANTED
         ) return
 
-//        if (uri != null) {
-            GlobalScope.launch {
-                songs.value = SongScanner.loadSongs(baseContext)
-            }
-//        }
+        GlobalScope.launch {
+            songs.value = SongScanner.loadSongs(baseContext)
+        }
     }
 
+    // Prepare the player for the song play
     fun preparePlayer(uri: Uri) {
         val songUri = Uri.parse(uri.toString())
 

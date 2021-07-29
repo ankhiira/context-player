@@ -30,9 +30,7 @@ object SongScanner {
                 TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES).toString()
             )
 
-//            val documentId = DocumentsContract.getTreeDocumentId(selUri)
-//            val newUri = DocumentsContract.buildDocumentUriUsingTree(selUri, documentId)
-
+            // Query the local media folder
             context.contentResolver.query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null,
@@ -40,16 +38,13 @@ object SongScanner {
                 selectionArgs,
                 null
             )?.use { cursor ->
-
                 val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
                 val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
                 val authorColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
 
                 while (cursor.moveToNext()) {
-                    // Use an ID column from the projection to get
-                    // a URI representing the media item itself.
+                    // Get the song metadata
                     val songID = cursor.getLong(idColumn)
-
                     val title = cursor.getStringOrNull(titleColumn)
                     val author = cursor.getStringOrNull(authorColumn)
                     val uri: Uri = ContentUris.withAppendedId(
@@ -57,6 +52,7 @@ object SongScanner {
                         songID
                     )
 
+                    // Retrieve the album art
                     val metadataRetriever = MediaMetadataRetriever()
                     metadataRetriever.setDataSource(
                         context,
@@ -72,11 +68,12 @@ object SongScanner {
                             null
                         }
 
+                    // Save the retrieved song data to Song class
                     val song = Song(title, author, albumArt, uri)
+                    // Add it to the list of songs
                     songList.add(song)
                 }
             }
-
             return@withContext songList
         }
 }

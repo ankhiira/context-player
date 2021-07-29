@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class CollectedSensorDataFragment : Fragment() {
 
     companion object {
+        // Saved new collected sensor data
         var convertedData = ConvertedData()
         fun updateUI(input: ConvertedData) {
             convertedData = input
@@ -43,7 +44,7 @@ class CollectedSensorDataFragment : Fragment() {
 
     private var sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
 
-    /** Defines callbacks for service binding, passed to bindService()  */
+    // Callbacks for service binding
     private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -60,18 +61,14 @@ class CollectedSensorDataFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
+        // Compose view of the Collected sensor data screen
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
-
                     val materialYel400 = MaterialTheme.colors.onPrimary
-
                     val scaffoldState =
                         rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
-
                     val sensorProcessService by sensorProcessService.collectAsState()
-
                     Scaffold(
                         scaffoldState = scaffoldState,
                         modifier = Modifier
@@ -158,10 +155,11 @@ class CollectedSensorDataFragment : Fragment() {
         }
     }
 
+    // Function to represent one sensor value description
     @Composable
     fun SensorRow(sensor: String, value: Any) {
         val materialYel400 = MaterialTheme.colors.onPrimary
-        Row() {
+        Row {
             Text(
                 text = "$sensor: ",
                 color = materialYel400,
@@ -184,6 +182,7 @@ class CollectedSensorDataFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
+        // On stop unbind from SensorProcessService
         requireActivity().applicationContext.unbindService(connection)
     }
 }

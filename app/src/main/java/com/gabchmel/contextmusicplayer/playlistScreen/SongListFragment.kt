@@ -1,12 +1,10 @@
 package com.gabchmel.contextmusicplayer.playlistScreen
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
@@ -58,7 +56,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 class SongListFragment : Fragment() {
-
     private val viewModel: SongListViewModel by viewModels()
     private var _isPermGranted = MutableStateFlow(false)
     private var isPermGranted: StateFlow<Boolean> = _isPermGranted
@@ -80,15 +77,6 @@ class SongListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-//        val db = Room.databaseBuilder(
-//            requireContext(),
-//            AppDatabase.AppDatabase::class.java, "database-name"
-//        ).build()
-//
-//        val userDao = db.userDao()
-//        val users: List<AppDatabase.Song> = userDao.getAll()
-
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             // This part handles the back button event
             val action = Intent(Intent.ACTION_MAIN)
@@ -97,14 +85,12 @@ class SongListFragment : Fragment() {
             startActivity(action)
         }
 
-        // compose layout for this fragment
+        // Compose view for the Song list fragment
         return ComposeView(requireContext()).apply {
             setContent {
-                val songs by viewModel.songs.collectAsState()
-
                 JetnewsTheme {
                     val onPrimary = MaterialTheme.colors.onPrimary
-
+                    val songs by viewModel.songs.collectAsState()
                     Scaffold(
                         topBar = {
                             TopAppBar(
@@ -195,23 +181,10 @@ class SongListFragment : Fragment() {
                             val musicState by viewModel.musicState.collectAsState()
                             val musicMetadata by viewModel.musicMetadata.collectAsState()
                             val connected by viewModel.connected.collectAsState()
-
                             val fontColor = MaterialTheme.colors.onPrimary
 
                             if (connected) {
-                                BottomAppBar(
-//                                    Modifier.clickable(
-//                                        onClick = {
-//                                            val play = false
-//                                            findNavController().navigate(
-//                                                SongListFragmentDirections.actionSongListFragmentToHomeFragment(
-//                                                    Uri.EMPTY,
-//                                                    play
-//                                                )
-//                                            )
-//                                        }
-//                                    )
-                                ) {
+                                BottomAppBar {
                                     Row(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically,
@@ -336,53 +309,18 @@ class SongListFragment : Fragment() {
         }
     }
 
+    // Function to play song from a bottom bar
     private fun playSong() {
         val pbState = viewModel.musicState.value?.state ?: return
         if (pbState == PlaybackStateCompat.STATE_PLAYING) {
             viewModel.pause()
-//            // Preemptively set icon
-//            binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+            // Preemptively set icon
+            // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
         } else {
             viewModel.play()
-//            // Preemptively set icon
-//            binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
-        }
-    }
+            // Preemptively set icon
+            // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
 
-    private fun openDirectory() {
-        // Choose a directory using the system's file picker.
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            // Optionally, specify a URI for the directory that should be opened in
-            // the system file picker when it loads.
-            val pickerInitialUri =
-                this.getParcelableExtra<Uri>("android.provider.extra.INITIAL_URI")    // get system root uri
-            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
-        }
-        startActivityForResult(intent, 1234)
-    }
-
-    override fun onActivityResult(
-        requestCode: Int, resultCode: Int, resultData: Intent?
-    ) {
-        if (requestCode == 1234
-            && resultCode == Activity.RESULT_OK
-        ) {
-            // The result data contains a URI for the document or directory that
-            // the user selected.
-            resultData?.data?.also { uri ->
-                // Perform operations on the document using its URI.
-                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                // Check for the freshest data.
-                requireContext().contentResolver.takePersistableUriPermission(
-                    uri, takeFlags
-                )
-
-                _isPermGranted.value = true
-                _uriSelected.value = uri
-
-//                viewModel.loadSongs()
-            }
         }
     }
 

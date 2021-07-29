@@ -3,6 +3,7 @@ package com.gabchmel.contextmusicplayer
 import android.graphics.Bitmap
 import android.net.Uri
 
+// Data class for saving one Song instance
 data class Song(
     val title: String?,
     val author: String?,

@@ -57,7 +57,6 @@
             android:exported="false"
             android:stopWithTask="true">
             <intent-filter>
-                <!-- IDK if delete -->
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />
 

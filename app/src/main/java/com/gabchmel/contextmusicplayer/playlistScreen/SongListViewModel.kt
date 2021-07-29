@@ -37,9 +37,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     private val _connected = MutableStateFlow(false)
     val connected: StateFlow<Boolean> = _connected
 
-    var uri : Uri? = null
-
-    var notPlayed = false
+    var uri: Uri? = null
 
     inner class BoundService(
         private val context: Context,
@@ -70,36 +68,40 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
             _musicMetadata.value = metadata
             _musicState.value = pbstate
 
-            // Register a callback to stay in sync
+            // Register a media controller callback
             mediaController.registerCallback(controllerCallback)
         }
     }
 
+    // Media Controller callback to detect data or state change
     private var controllerCallback = object : MediaControllerCompat.Callback() {
-
+        // on Metadata change save the new value
         override fun onMetadataChanged(metadata: MediaMetadataCompat) {
             _musicMetadata.value = metadata
             _connected.value = true
         }
 
+        // on PlaybackState change save the new value
         override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
             _musicState.value = state
         }
     }
 
-    // call within a coroutine to bind service, waiting for onServiceConnected
-    // before the coroutine resumes
+    // Binds to service and waits for onServiceConnected
     private suspend fun bindService(context: Context, intent: Intent, flags: Int) =
         suspendCoroutine<BoundService> { continuation ->
 
             // Create a connection object
-            val conn = object: ServiceConnection {
+            val connection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     val binder = service as LocalBinder<MediaPlaybackService>
                     val serviceVal = binder.getService()
-                    continuation.resume(BoundService(context, name,
-                        serviceVal
-                        , this))
+                    continuation.resume(
+                        BoundService(
+                            context, name,
+                            serviceVal, this
+                        )
+                    )
                 }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
@@ -107,7 +109,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
             }
 
             // Bind to a service using connection
-            context.bindService(intent, conn, flags)
+            context.bindService(intent, connection, flags)
         }
 
     private val boundService = viewModelScope.async {
@@ -129,13 +131,14 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         mediaBrowser.connect()
     }
 
+    // List of songs as a State Flow to get always current data
     var songs = flow {
         val service = boundService.await().service
         emitAll(service.songs)
-    }.stateIn(viewModelScope, SharingStarted.Lazily,null)
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    // Detect if the list refresh was triggered
     private val _isRefreshing = MutableStateFlow(false)
-
     val isRefreshing: StateFlow<Boolean>
         get() = _isRefreshing.asStateFlow()
 
@@ -166,8 +169,10 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
     @ExperimentalCoroutinesApi
     fun loadSongs() {
-//        this.uri = selUri
-        try {boundService.getCompleted().service.loadSongs()} catch (e:Exception){}
+        try {
+            boundService.getCompleted().service.loadSongs()
+        } catch (e: Exception) {
+        }
     }
 
     @ExperimentalCoroutinesApi

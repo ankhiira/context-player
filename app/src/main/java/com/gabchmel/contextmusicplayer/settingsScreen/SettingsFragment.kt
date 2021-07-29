@@ -45,11 +45,11 @@ class SettingsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Compose view of the Settings screen
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
                     val materialYel400 = MaterialTheme.colors.onPrimary
-
                     Scaffold(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -164,7 +164,7 @@ class SettingsFragment : Fragment() {
                                         }
                                     }
                                 }
-                                Row() {
+                                Row {
 
                                     val openDialog = remember { mutableStateOf(false) }
 
@@ -334,6 +334,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    // Function to copy the file to temp file
     private fun convertFileForSend(filename: String, ext: String, origFile: File): Uri {
         val tempFile = File.createTempFile(
             filename,

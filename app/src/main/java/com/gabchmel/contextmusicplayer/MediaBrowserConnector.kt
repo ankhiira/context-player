@@ -44,13 +44,13 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         private val context: Context,
         val name: ComponentName?,
         val service: MediaPlaybackService,
-        val conn: ServiceConnection,
-        var isBinded: Boolean
+        private val connection: ServiceConnection,
+        private var isBinded: Boolean
     ) {
         fun unbind() {
             if (isBinded) {
                 try {
-                    context.unbindService(conn)
+                    context.unbindService(connection)
                     isBinded = false
                 } catch (e: Exception) {
                     Log.e("Exception", e.toString())
@@ -59,8 +59,8 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }
     }
 
-    // call within a coroutine to bind service, waiting for onServiceConnected
-    // before the coroutine resumes
+    // Binds to service and waits for onServiceConnected
+    // Bind service inspired from: https://stackoverflow.com/questions/48381902/wait-for-service-to-be-bound-using-coroutines
     suspend fun bindServiceAndWait(context: Context, intent: Intent, flags: Int) =
         suspendCoroutine<BoundService> { continuation ->
 
@@ -78,9 +78,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
-                    // ignore, not much we can do
                 }
-
             }
             context.bindService(intent, conn, flags)
         }
@@ -147,28 +145,25 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
                 lifecycleOwnerNew = lifecycleOwner
 
+                // Register receiver of the notification button action
                 context.registerReceiver(ActionReceiver(), IntentFilter("action"))
 
                 // Detect if the context changed so we should predict song
                 val sensorProcessService = sensorProcessService.await()
                 val hasContextChanged = sensorProcessService.detectContextChange()
 
-                if (hasContextChanged) {
-                    Log.d("context", "context changed")
-                }
-
 //                if (hasContextChanged) {
-                    // Setting MediaBrowser for connecting to the MediaBrowserService
-                    mediaBrowser = MediaBrowserCompat(
-                        context,
-                        ComponentName(context, MediaPlaybackService::class.java),
-                        connectionCallbacks,
-                        null
-                    )
+                // Setting MediaBrowser for connecting to the MediaBrowserService
+                mediaBrowser = MediaBrowserCompat(
+                    context,
+                    ComponentName(context, MediaPlaybackService::class.java),
+                    connectionCallbacks,
+                    null
+                )
 
-                    // Connects to the MediaBrowseService
-                    mediaBrowser.connect()
-                    setNotification()
+                // Connects to the MediaBrowseService
+                mediaBrowser.connect()
+                setNotification()
 //                }
 
                 // Save current sensor values to later detect if the context changed
@@ -184,10 +179,8 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
             launch {
                 prediction.collectLatest { prediction ->
-
                     // Save predictions with their input to CSV file
                     val predictionFile = File(context.filesDir, "predictions.csv")
-//                    locationNewFile.writeText("")
                     var predictionString = "$prediction,"
                     for (property in ConvertedData::class.primaryConstructor?.parameters!!) {
                         val propertyNew = input::class.members

@@ -15,16 +15,5 @@ val appFontFamily = FontFamily(
 private val defaultTypography = Typography()
 val MyTypography = Typography(
     h1 = defaultTypography.h1.copy(fontFamily = appFontFamily),
-    body1 = defaultTypography.body1.copy(fontFamily = appFontFamily),
-//    h1 = TextStyle(
-//        fontFamily = appFontFamily,
-//        fontWeight = FontWeight.W300,
-//        fontSize = 96.sp
-//    ),
-//    body1 = TextStyle(
-//        fontFamily = appFontFamily,
-//        fontWeight = FontWeight.W600,
-//        fontSize = 16.sp
-//    )
-    /*...*/
+    body1 = defaultTypography.body1.copy(fontFamily = appFontFamily)
 )

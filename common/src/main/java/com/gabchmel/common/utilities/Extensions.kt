@@ -10,7 +10,8 @@ import com.gabchmel.common.LocalBinder
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun <T: Service> Context.bindService(clazz: Class<T>) =
+// Function to handle service binding
+suspend fun <T : Service> Context.bindService(clazz: Class<T>) =
     suspendCoroutine<T> { cont ->
         val connection = object : ServiceConnection {
 

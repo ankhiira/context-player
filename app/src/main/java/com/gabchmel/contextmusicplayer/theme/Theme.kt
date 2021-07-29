@@ -13,17 +13,6 @@ private val DarkColors = darkColors(
     onBackground = Yel900,
     onPrimary = Yel900,
     onSecondary = Yel900
-    // ...
-)
-
-private val LightColors = lightColors(
-    primary = Blue700,
-    primaryVariant = Red900,
-    onPrimary = Color.White,
-    secondary = Yel900,
-    secondaryVariant = Red900,
-    onSecondary = Color.White,
-    error = Red800
 )
 
 @Composable

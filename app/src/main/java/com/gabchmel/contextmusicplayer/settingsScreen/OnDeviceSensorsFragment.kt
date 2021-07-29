@@ -27,6 +27,7 @@ class OnDeviceSensorsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Compose view of the On-device sensors screen
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
@@ -34,7 +35,6 @@ class OnDeviceSensorsFragment : Fragment() {
                     val materialYel400 = MaterialTheme.colors.onPrimary
                     val scaffoldState =
                         rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
-
                     Scaffold(
                         scaffoldState = scaffoldState,
                         modifier = Modifier
@@ -58,7 +58,8 @@ class OnDeviceSensorsFragment : Fragment() {
                                     }
                                 },
                                 elevation = 0.dp,
-                                backgroundColor = Color.Transparent)
+                                backgroundColor = Color.Transparent
+                            )
                         },
                         content = {
                             LazyColumn(

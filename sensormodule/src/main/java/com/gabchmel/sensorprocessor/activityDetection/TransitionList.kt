@@ -3,6 +3,7 @@ package com.gabchmel.sensorprocessor.activityDetection
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.DetectedActivity
 
+// List of collected transition states
 object TransitionList {
     fun getTransitions(): MutableList<ActivityTransition> {
         val transitions = mutableListOf<ActivityTransition>()

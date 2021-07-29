@@ -60,18 +60,16 @@ class NowPlayingFragment : Fragment() {
         val pbState = viewModel.musicState.value?.state ?: return
         if (pbState == PlaybackStateCompat.STATE_PLAYING) {
             viewModel.pause()
-
-//            // Preemptively set icon
-//            binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+            // Preemptively set icon
+            // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
         } else {
             if (viewModel.notPlayed) {
                 viewModel.play(args.uri)
             } else {
                 viewModel.play()
             }
-
-//            // Preemptively set icon
-//            binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+            // Preemptively set icon
+            // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
         }
     }
 
@@ -221,16 +219,12 @@ class NowPlayingFragment : Fragment() {
                                         modifier = Modifier.fillMaxHeight(0.6f)
                                     )
                                 }
-
                                 IconButton(
                                     onClick = {
                                         playSong()
                                     },
                                     modifier = Modifier
                                         .size(92.dp)
-//                                        .drawColoredShadow(color = Color.White, borderRadius = 2.dp,shadowRadius = 25.dp)
-//                                        .shadow(elevation = 25.dp, shape = CircleShape,
-//                                        clip = true)
                                         .padding(horizontal = 8.dp)
                                 ) {
                                     Image(
@@ -245,7 +239,6 @@ class NowPlayingFragment : Fragment() {
                                         ),
                                         contentDescription = "Play",
                                         modifier = Modifier
-//                                        .shadow(elevation = 8.dp, shape = CircleShape)
                                     )
                                 }
 

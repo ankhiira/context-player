@@ -17,8 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
     private lateinit var mediaBrowser: MediaBrowserCompat
-    private var mediaBrowserConnectionCallback = MediaBrowserCompat.ConnectionCallback()
-
     val service = CompletableDeferred<MediaPlaybackService>()
     var mediaController: MediaControllerCompat? = null
 
@@ -29,12 +27,12 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     val musicMetadata: StateFlow<MediaMetadataCompat?> = _musicMetadata
 
     lateinit var args: NowPlayingFragmentArgs
-
     var notPlayed = true
 
     private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
 
+            // Creation of the mediaBrowser
             mediaBrowser.sessionToken.also { token ->
                 // Create MediaControllerCompat
                 mediaController = MediaControllerCompat(
@@ -57,14 +55,6 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
                 play(args.uri)
                 notPlayed = false
             }
-        }
-
-        override fun onConnectionSuspended() {
-            super.onConnectionSuspended()
-        }
-
-        override fun onConnectionFailed() {
-            super.onConnectionFailed()
         }
     }
 

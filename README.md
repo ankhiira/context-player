@@ -1,6 +1,6 @@
 # Context Player
 
-A smart music player that predicts song depending on the user context. 
+A smart music player that predicts a song depending on the user's context.
 
 ## Features
 

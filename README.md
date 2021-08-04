@@ -8,7 +8,7 @@ A smart music player that predicts a song depending on the user's context. Whene
 - context detection via random forest model
 - locally saving current context into CSV file
 
-
+## Screenshots
 
 <p float="left">
 <img src="https://github.com/4Gabby4/context-player/blob/master/screenshots/NowPlayingScreen.png" height="400">

@@ -107,7 +107,7 @@ class CollectedSensorDataFragment : Fragment() {
                                     sensorProcessService.sensorData.collectAsState(null)
 
                                     convertedData.let { value ->
-                                        SensorRow("Time", "No")
+//                                        SensorRow("Time", "No")
                                         SensorRow("Current Activity", value.state!!)
                                         SensorRow("Ambient light", value.lightSensorValue!!)
                                         SensorRow(

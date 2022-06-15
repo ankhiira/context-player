@@ -28,7 +28,7 @@ class PredictionModelBuiltIn(val context: Context) {
     private var wifiList = arrayListOf<UInt>()
 
     // Function to read the dataset from arff file
-    private fun getDataset(): Pair<Instances, Instances> {
+    private fun getDataset(): Triple<Instances, Instances, Instances> {
 
         val initialFile = File(context.filesDir, file)
         val classIdx = 0
@@ -60,7 +60,7 @@ class PredictionModelBuiltIn(val context: Context) {
         train.setClassIndex(classIdx)
         test.setClassIndex(classIdx)
 
-        return Pair(train, test)
+        return Triple(train, test, dataSet)
     }
 
     // Function to create and evaluate model
@@ -75,10 +75,11 @@ class PredictionModelBuiltIn(val context: Context) {
 
         if (File(context.filesDir, file).exists()) {
 
-            val (trainingDataSet, testDataSet) = getDataset()
+            val (trainingDataSet, testDataSet, origDataSet) = getDataset()
 
             trainingDataSet.setClassIndex(0)
             testDataSet.setClassIndex(0)
+            origDataSet.setClassIndex(0)
 
             val test = trainingDataSet.equalHeaders(testDataSet)
 
@@ -92,8 +93,8 @@ class PredictionModelBuiltIn(val context: Context) {
             val eval = Evaluation(trainingDataSet)
             eval.evaluateModel(forest, testDataSet)
 
-            // eval.crossValidateModel(forest, trainingDataSet, 10, Random(1))
-            println("Estimated Accuracy: ${eval.pctCorrect()}")
+//            eval.crossValidateModel(forest, origDataSet, 10, Random(1))
+//            println("Estimated Accuracy: ${eval.pctCorrect()}")
 
             // Print the evaluation summary
             println("Decision Tress Evaluation")

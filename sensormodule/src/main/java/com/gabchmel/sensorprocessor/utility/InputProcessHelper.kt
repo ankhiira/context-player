@@ -7,8 +7,6 @@ import com.gabchmel.common.ConvertedData
 import com.gabchmel.sensorprocessor.LocationClusteringAlg
 import com.gabchmel.sensorprocessor.SensorData
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -142,8 +140,10 @@ object InputProcessHelper {
     }
 
     // Give header to the file and process dates
-    suspend fun processInputCSV(context: Context): Pair<ArrayList<String>, ArrayList<UInt>> =
-        withContext(Dispatchers.Default) {
+    suspend fun processInputCSV(context: Context): Pair<ArrayList<String>, ArrayList<UInt>>
+//    =
+//        withContext(Dispatchers.Default)
+        {
             val inputFile = File(context.filesDir, "data.csv")
             val csvFile = File(context.filesDir, "convertedData.csv")
             val classNames = arrayListOf<String>()
@@ -288,6 +288,7 @@ object InputProcessHelper {
 //            }
 //        }
 
-            return@withContext Pair(classNames, wifiList)
+//            return@withContext Pair(classNames, wifiList)
+            return Pair(classNames, wifiList)
         }
 }

@@ -77,38 +77,43 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        // When the activity is opened again, check if the permission didn't change
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACTIVITY_RECOGNITION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // If the permission is not enabled, save that option to shared preferences file
-            val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
-            editor.putBoolean("locationPermission", false)
-            editor.apply()
-        } else {
-            // If the permission is now enabled, register location listener
-            val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
-            val wasGranted = prefs.getBoolean("locationPermission", true)
+        try {
+            // When the activity is opened again, check if the permission didn't change
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // If the permission is not enabled, save that option to shared preferences file
+                val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
+                editor.putBoolean("locationPermission", false)
+                editor.apply()
+            } else {
+                // If the permission is now enabled, register location listener
+                val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
+                val wasGranted = prefs.getBoolean("locationPermission", true)
 
-            // Save the current permission state
-            val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
-            editor.putBoolean("locationPermission", true)
-            editor.apply()
+                // Save the current permission state
+                val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
+                editor.putBoolean("locationPermission", true)
+                editor.apply()
 
-            if (!wasGranted) {
-                lifecycleScope.launch {
-                    val service = this@MainActivity.bindService(SensorProcessService::class.java)
-                    service.registerLocationListener()
+                if (!wasGranted) {
+                    lifecycleScope.launch {
+                        val service =
+                            this@MainActivity.bindService(SensorProcessService::class.java)
+                        service.registerLocationListener()
+                    }
                 }
             }
+        } catch (e: Exception) {
+            Log.e("Error", e.toString())
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.gabchmel.predicitonmodule
 
 import android.content.Context
-import com.gabchmel.common.ConvertedData
+import com.gabchmel.common.data.ConvertedData
 import weka.classifiers.Evaluation
 import weka.classifiers.trees.RandomForest
 import weka.core.Attribute

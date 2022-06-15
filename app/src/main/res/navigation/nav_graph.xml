@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nowPlayingFragment"
-        android:name="com.gabchmel.contextmusicplayer.nowPlayingScreen.NowPlayingFragment"
+        android:name="com.gabchmel.contextmusicplayer.ui.nowPlayingScreen.NowPlayingFragment"
         android:label="fragment_blank">
 
         <argument
@@ -23,7 +23,7 @@
     </fragment>
     <fragment
         android:id="@+id/songListFragment"
-        android:name="com.gabchmel.contextmusicplayer.playlistScreen.SongListFragment"
+        android:name="com.gabchmel.contextmusicplayer.ui.playlistScreen.SongListFragment"
         android:label="fragment_blank2">
         <action
             android:id="@+id/action_song_list_Fragment_to_homeFragment"
@@ -34,7 +34,7 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.gabchmel.contextmusicplayer.settingsScreen.SettingsFragment"
+        android:name="com.gabchmel.contextmusicplayer.ui.settingsScreen.SettingsFragment"
         android:label="SettingsFragment" >
         <action
             android:id="@+id/action_settingsFragment_to_sensorScreen"
@@ -45,10 +45,10 @@
     </fragment>
     <fragment
         android:id="@+id/sensorScreen"
-        android:name="com.gabchmel.contextmusicplayer.settingsScreen.OnDeviceSensorsFragment"
+        android:name="com.gabchmel.contextmusicplayer.ui.settingsScreen.OnDeviceSensorsFragment"
         android:label="SensorScreen" />
     <fragment
         android:id="@+id/sensorValuesFragment"
-        android:name="com.gabchmel.contextmusicplayer.settingsScreen.CollectedSensorDataFragment"
+        android:name="com.gabchmel.contextmusicplayer.ui.settingsScreen.CollectedSensorDataFragment"
         android:label="SensorValuesFragment" />
 </navigation>

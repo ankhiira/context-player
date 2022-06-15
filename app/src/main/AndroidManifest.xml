@@ -40,10 +40,10 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".MainActivity" />
+        <activity android:name=".ui.MainActivity" />
 
         <activity
-            android:name=".PermissionsActivity"
+            android:name=".ui.PermissionsActivity"
             android:exported="true"
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>
@@ -53,7 +53,7 @@
         </activity>
 
         <service
-            android:name=".MediaPlaybackService"
+            android:name=".data.service.MediaPlaybackService"
             android:exported="false"
             android:stopWithTask="true">
             <intent-filter>
@@ -65,7 +65,7 @@
         </service>
 
         <service
-            android:name="com.gabchmel.sensorprocessor.SensorProcessService"
+            android:name="com.gabchmel.sensorprocessor.data.service.SensorProcessService"
             android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
@@ -83,7 +83,7 @@
         </receiver>
 
         <receiver
-            android:name="com.gabchmel.sensorprocessor.activityDetection.ActivityTransitionReceiver"
+            android:name="com.gabchmel.sensorprocessor.data.receiver.ActivityTransitionReceiver"
             android:exported="false"
             android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
             <intent-filter>
@@ -91,7 +91,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".MediaBrowserConnector$ActionReceiver" />
+        <receiver android:name=".data.service.MediaBrowserConnector$ActionReceiver" />
 
     </application>
 

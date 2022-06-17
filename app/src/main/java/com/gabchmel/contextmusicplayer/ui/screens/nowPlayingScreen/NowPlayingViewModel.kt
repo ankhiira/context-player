@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui.nowPlayingScreen
+package com.gabchmel.contextmusicplayer.ui.screens.nowPlayingScreen
 
 import android.app.Application
 import android.content.ComponentName
@@ -42,10 +42,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
             }
 
             // Display initial state
-            val metadata = mediaController?.metadata
-            val pbstate = mediaController?.playbackState
-
-            _musicState.value = pbstate
+            _musicState.value = mediaController?.playbackState
 
             // Register a callback to stay in sync
             mediaController?.registerCallback(controllerCallback)
@@ -65,10 +62,10 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
             ComponentName(app, MediaPlaybackService::class.java),
             connectionCallbacks,
             null
-        )
-
-        // Connects to the MediaBrowseService
-        mediaBrowser.connect()
+        ).apply {
+            // Connects to the MediaBrowseService
+            connect()
+        }
     }
 
     override fun onCleared() {
@@ -78,7 +75,6 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     private var controllerCallback = object : MediaControllerCompat.Callback() {
-
         override fun onMetadataChanged(metadata: MediaMetadataCompat) {
             _musicMetadata.value = metadata
         }

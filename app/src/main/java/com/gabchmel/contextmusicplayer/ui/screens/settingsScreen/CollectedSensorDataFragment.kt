@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui.settingsScreen
+package com.gabchmel.contextmusicplayer.ui.screens.settingsScreen
 
 import android.content.ComponentName
 import android.content.Context
@@ -34,19 +34,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class CollectedSensorDataFragment : Fragment() {
 
-    companion object {
-        // Saved new collected sensor data
-        var convertedData = ConvertedData()
-        fun updateUI(input: ConvertedData) {
-            convertedData = input
-        }
-    }
-
     private var sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
 
     // Callbacks for service binding
     private val connection = object : ServiceConnection {
-
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
             val binder = service as LocalBinder<SensorProcessService>
@@ -58,7 +49,8 @@ class CollectedSensorDataFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         // Compose view of the Collected sensor data screen
@@ -69,6 +61,7 @@ class CollectedSensorDataFragment : Fragment() {
                     val scaffoldState =
                         rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
                     val sensorProcessService by sensorProcessService.collectAsState()
+
                     Scaffold(
                         scaffoldState = scaffoldState,
                         modifier = Modifier
@@ -95,56 +88,82 @@ class CollectedSensorDataFragment : Fragment() {
                                 backgroundColor = Color.Transparent
                             )
                         },
-                        content = {
+                        content = { padding ->
                             Column(
                                 modifier = Modifier
-                                    .padding(16.dp)
+                                    .padding(padding)
                                     .verticalScroll(rememberScrollState()),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 sensorProcessService?.let { sensorProcessService ->
                                     val sensorData by
-                                    sensorProcessService.sensorData.collectAsState(null)
+                                    sensorProcessService.measuredSensorValues.collectAsState(null)
 
                                     convertedData.let { value ->
-//                                        SensorRow("Time", "No")
-                                        SensorRow("Current Activity", value.state!!)
-                                        SensorRow("Ambient light", value.lightSensorValue!!)
+                                        SensorRow(
+                                            "Current Activity",
+                                            value.state
+                                        )
+                                        SensorRow(
+                                            "Ambient light",
+                                            value.lightSensorValue
+                                        )
                                         SensorRow(
                                             "Is device lying",
-                                            if (value.deviceLying == 0.0f)
-                                                "No"
-                                            else {
-                                                "Yes"
-                                            }
+                                            if (value.deviceLying == 0.0f) "No" else "Yes"
                                         )
                                         SensorRow(
                                             "Are cable headphones connected",
-                                            if (value.headphonesPluggedIn == 0.0f)
-                                                "No"
-                                            else {
-                                                "Yes"
-                                            }
+                                            if (value.headphonesPluggedIn == 0.0f) "No" else "Yes"
                                         )
                                         SensorRow(
                                             "Are bluetooth headphones connected",
-                                            if (value.BTdeviceConnected == 0.0f)
-                                                "No"
-                                            else {
-                                                "Yes"
-                                            }
+                                            if (value.BTDeviceConnected == 0.0f) "No" else "Yes"
                                         )
-                                        SensorRow("Pressure", value.pressure!!)
-                                        SensorRow("Temperature", value.temperature!!)
-                                        SensorRow("Hashed WiFi name", value.wifi!!)
-                                        SensorRow("Connection type", value.connection!!)
-                                        SensorRow("Battery status", value.batteryStatus!!)
-                                        SensorRow("Type of charger", value.chargingType)
-                                        SensorRow("Proximity", value.proximity!!)
-                                        SensorRow("Humidity", value.humidity!!)
-                                        SensorRow("Heart Beat", value.heartBeat!!)
-                                        SensorRow("Heart Rate", value.heartRate!!)
-                                        SensorRow("Location cluster", value.locationCluster)
+                                        SensorRow(
+                                            "Pressure",
+                                            value.pressure
+                                        )
+                                        SensorRow(
+                                            "Temperature",
+                                            value.temperature
+                                        )
+                                        SensorRow(
+                                            "Hashed WiFi name",
+                                            value.wifi
+                                        )
+                                        SensorRow(
+                                            "Connection type",
+                                            value.connection
+                                        )
+                                        SensorRow(
+                                            "Battery status",
+                                            value.batteryStatus
+                                        )
+                                        SensorRow(
+                                            "Type of charger",
+                                            value.chargingType
+                                        )
+                                        SensorRow(
+                                            "Proximity",
+                                            value.proximity
+                                        )
+                                        SensorRow(
+                                            "Humidity",
+                                            value.humidity
+                                        )
+                                        SensorRow(
+                                            "Heart Beat",
+                                            value.heartBeat
+                                        )
+                                        SensorRow(
+                                            "Heart Rate",
+                                            value.heartRate
+                                        )
+                                        SensorRow(
+                                            "Location cluster",
+                                            value.locationCluster
+                                        )
                                     }
                                 }
                             }
@@ -184,5 +203,13 @@ class CollectedSensorDataFragment : Fragment() {
         super.onStop()
         // On stop unbind from SensorProcessService
         requireActivity().applicationContext.unbindService(connection)
+    }
+
+    companion object {
+        // Saved new collected sensor data
+        var convertedData = ConvertedData()
+        fun updateUI(input: ConvertedData) {
+            convertedData = input
+        }
     }
 }

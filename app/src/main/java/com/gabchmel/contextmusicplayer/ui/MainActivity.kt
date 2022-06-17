@@ -14,19 +14,26 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
 import com.gabchmel.common.utils.bindService
-import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.databinding.ActivityMainBinding
+import com.gabchmel.contextmusicplayer.ui.utils.PredictionWorker
 import com.gabchmel.sensorprocessor.data.service.SensorProcessService
 import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
 
+    // View binding for activity_main.xml file
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
+        // Bind the layout with object
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        // Adjust music volume with volume controls
+        // Adjust music volume with volume controls - volume controls adjust right stream
         volumeControlStream = AudioManager.STREAM_MUSIC
 
         // Start SensorProcessService to collect sensor values
@@ -40,8 +47,7 @@ class MainActivity : AppCompatActivity() {
             service.saveSensorData()
         }
 
-        // Create Work
-        val request = OneTimeWorkRequestBuilder<PredictionWorker>()
+        val workRequest = OneTimeWorkRequestBuilder<PredictionWorker>()
             // Set Work to start on device charging
             .setConstraints(
                 Constraints.Builder()
@@ -59,18 +65,18 @@ class MainActivity : AppCompatActivity() {
             .getInstance(this@MainActivity)
 
         // To monitor the Work state
-        val status = workManager.getWorkInfoByIdLiveData(request.id)
-        status.observe(this, { workInfo ->
-            if (workInfo != null) {
+        val status = workManager.getWorkInfoByIdLiveData(workRequest.id)
+        status.observe(this) { workInfo ->
+            workInfo?.let {
                 Log.d("Progress", "State: state:${workInfo.state}")
             }
-        })
+        }
 
         // Enqueue the first Work
         workManager.enqueueUniqueWork(
             "work",
             ExistingWorkPolicy.REPLACE,
-            request
+            workRequest
         )
     }
 

@@ -1,11 +1,12 @@
-package com.gabchmel.common.data
+package com.gabchmel.sensorprocessor.data.model
 
-data class ConvertedData(
-    var sinTime: Double = 0.0,
-    var cosTime: Double = 0.0,
-    var dayOfWeekSin: Double = 0.0,
-    var dayOfWeekCos: Double = 0.0,
-    var state: String = "NONE",
+import java.util.*
+
+data class MeasuredSensorValues(
+    var currentTime: Date? = null,
+    var longitude: Double = 0.0,
+    var latitude: Double = 0.0,
+    var currentState: String = "UNKNOWN",
     var lightSensorValue: Float = 0.0f,
     var deviceLying: Float = 0.0f,
     var BTDeviceConnected: Float = 0.0f,
@@ -19,9 +20,5 @@ data class ConvertedData(
     var proximity: Float = 0.0f,
     var humidity: Float = 0.0f,
     var heartBeat: Float = 0.0f,
-    var heartRate: Float = 0.0f,
-    var locationCluster: Int = -1,
-    var xCoord: Double = 0.0,
-    var yCoord: Double = 0.0,
-    var zCoord: Double = 0.0
+    var heartRate: Float = 0.0f
 )

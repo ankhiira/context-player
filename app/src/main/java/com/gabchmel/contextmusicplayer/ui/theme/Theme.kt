@@ -2,9 +2,8 @@ package com.gabchmel.contextmusicplayer.ui.theme
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.CompositionLocalProvider
 
 private val DarkColors = darkColors(
     primary = Pink500,
@@ -19,9 +18,12 @@ private val DarkColors = darkColors(
 fun JetnewsTheme(
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colors = DarkColors,
-        content = content,
-        typography = MyTypography
-    )
+
+    CompositionLocalProvider(LocalSpacing provides Spacing()) {
+        MaterialTheme(
+            colors = DarkColors,
+            content = content,
+            typography = MyTypography
+        )
+    }
 }

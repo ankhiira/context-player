@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui.playlistScreen
+package com.gabchmel.contextmusicplayer.ui.screens.playlistScreen
 
 import android.Manifest
 import android.content.Intent
@@ -43,11 +43,12 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.model.Song
+import com.gabchmel.contextmusicplayer.ui.theme.JetnewsTheme
+import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
+import com.gabchmel.contextmusicplayer.ui.theme.spacing
 import com.gabchmel.contextmusicplayer.utils.getAlbumArt
 import com.gabchmel.contextmusicplayer.utils.getArtist
 import com.gabchmel.contextmusicplayer.utils.getTitle
-import com.gabchmel.contextmusicplayer.ui.theme.JetnewsTheme
-import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
 import com.google.accompanist.glide.rememberGlidePainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -59,8 +60,6 @@ class SongListFragment : Fragment() {
     private val viewModel: SongListViewModel by viewModels()
     private var _isPermGranted = MutableStateFlow(false)
     private var isPermGranted: StateFlow<Boolean> = _isPermGranted
-    private var _uriSelected = MutableStateFlow<Uri?>(null)
-    private var uriSelected: StateFlow<Uri?> = _uriSelected
 
     // permissions callback
     private val requestPermissionLauncher =
@@ -89,7 +88,6 @@ class SongListFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
-                    val onPrimary = MaterialTheme.colors.onPrimary
                     val songs by viewModel.songs.collectAsState()
                     Scaffold(
                         topBar = {
@@ -110,17 +108,16 @@ class SongListFragment : Fragment() {
                                             imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
                                             contentDescription = "Settings",
                                             modifier = Modifier.fillMaxHeight(0.4f),
-                                            tint = onPrimary
+                                            tint = MaterialTheme.colors.onPrimary
                                         )
                                     }
                                 },
                                 elevation = 0.dp,
                             )
                         },
-                        content = {
+                        content = { padding ->
                             // Component to grant the permissions
                             val granted by isPermGranted.collectAsState()
-                            val selUri by uriSelected.collectAsState()
 
                             if ((ActivityCompat.checkSelfPermission(
                                     requireContext(),
@@ -129,20 +126,18 @@ class SongListFragment : Fragment() {
                             ) {
                                 Column(
                                     modifier = Modifier
-                                        .padding(16.dp)
-                                        .fillMaxSize()
+                                        .padding(padding)
                                         .padding(vertical = 16.dp)
+                                        .fillMaxSize()
                                 ) {
                                     Text(
                                         text = "The permission to access external storage needed.",
                                         textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(8.dp)
+                                        modifier = Modifier.padding(MaterialTheme.spacing.small)
                                     )
                                     Column(
                                         horizontalAlignment = CenterHorizontally,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Button({
 //                                            openDirectory()
@@ -165,14 +160,17 @@ class SongListFragment : Fragment() {
                                         state = rememberSwipeRefreshState(isRefreshing),
                                         onRefresh = { viewModel.refresh() },
                                     ) {
-                                        if (songs != null)
+                                        songs?.let { songs ->
                                             LazyColumn(
-                                                modifier = Modifier.padding(16.dp)
+                                                modifier = Modifier.padding(
+                                                    MaterialTheme.spacing.medium
+                                                )
                                             ) {
-                                                items(songs!!, key = { it.URI }) { song ->
+                                                items(songs, key = { it.URI }) { song ->
                                                     SongRow(song)
                                                 }
                                             }
+                                        }
                                     }
                                 }
                             }
@@ -181,7 +179,6 @@ class SongListFragment : Fragment() {
                             val musicState by viewModel.musicState.collectAsState()
                             val musicMetadata by viewModel.musicMetadata.collectAsState()
                             val connected by viewModel.connected.collectAsState()
-                            val fontColor = MaterialTheme.colors.onPrimary
 
                             if (connected) {
                                 BottomAppBar {
@@ -216,11 +213,11 @@ class SongListFragment : Fragment() {
                                             ) {
                                                 Text(
                                                     text = musicMetadata?.getTitle() ?: "Loading",
-                                                    color = fontColor
+                                                    color = MaterialTheme.colors.onPrimary
                                                 )
                                                 Text(
                                                     text = musicMetadata?.getArtist() ?: "Loading",
-                                                    color = fontColor,
+                                                    color = MaterialTheme.colors.onPrimary,
                                                     modifier = Modifier.alpha(0.54f)
                                                 )
                                             }
@@ -264,19 +261,17 @@ class SongListFragment : Fragment() {
         Row(
             Modifier
                 .clickable(onClick = {
-                    val play = true
                     findNavController().navigate(
                         SongListFragmentDirections.actionSongListFragmentToHomeFragment(
-                            song.URI,
-                            play
+                            uri = song.URI,
+                            play = true
                         )
                     )
                 })
         ) {
             // Album art
             Image(
-                painter =
-                song.albumArt?.let {
+                painter = song.albumArt?.let {
                     rememberGlidePainter(it)
                 }
                     ?: rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_album_cover_vector3)),
@@ -289,14 +284,14 @@ class SongListFragment : Fragment() {
             )
             Column(
                 Modifier
-                    .padding(vertical = 8.dp, horizontal = 8.dp)
+                    .padding(MaterialTheme.spacing.small)
                     .fillMaxWidth()
             ) {
                 Text(
                     text = "${song.title}",
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.W400,
-                    color = fontColor,
-                    fontSize = 16.sp
+                    color = fontColor
                 )
                 Text(
                     text = "${song.author}",
@@ -311,8 +306,8 @@ class SongListFragment : Fragment() {
 
     // Function to play song from a bottom bar
     private fun playSong() {
-        val pbState = viewModel.musicState.value?.state ?: return
-        if (pbState == PlaybackStateCompat.STATE_PLAYING) {
+        val playbackState = viewModel.musicState.value?.state ?: return
+        if (playbackState == PlaybackStateCompat.STATE_PLAYING) {
             viewModel.pause()
             // Preemptively set icon
             // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
@@ -320,7 +315,6 @@ class SongListFragment : Fragment() {
             viewModel.play()
             // Preemptively set icon
             // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
-
         }
     }
 

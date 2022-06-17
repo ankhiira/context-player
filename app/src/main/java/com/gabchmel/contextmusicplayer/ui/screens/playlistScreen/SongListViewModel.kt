@@ -1,11 +1,10 @@
-package com.gabchmel.contextmusicplayer.ui.playlistScreen
+package com.gabchmel.contextmusicplayer.ui.screens.playlistScreen
 
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.net.Uri
 import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -37,8 +36,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     private val _connected = MutableStateFlow(false)
     val connected: StateFlow<Boolean> = _connected
 
-    var uri: Uri? = null
-
     inner class BoundService(
         private val context: Context,
         val name: ComponentName?,
@@ -50,42 +47,68 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
-        override fun onConnected() {
+    init {
+        val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
+            override fun onConnected() {
+                mediaBrowser.sessionToken.also { token ->
+                    // Create MediaControllerCompat
+                    mediaController = MediaControllerCompat(
+                        app,
+                        token
+                    )
+                }
 
-            mediaBrowser.sessionToken.also { token ->
-                // Create MediaControllerCompat
-                mediaController = MediaControllerCompat(
-                    app,
-                    token
-                )
+                // Display initial state
+                _musicMetadata.value = mediaController.metadata
+                _musicState.value = mediaController.playbackState
+
+                // Media Controller callback to detect data or state change
+                val controllerCallback = object : MediaControllerCompat.Callback() {
+                    // on Metadata change save the new value
+                    override fun onMetadataChanged(metadata: MediaMetadataCompat) {
+                        _musicMetadata.value = metadata
+                        _connected.value = true
+                    }
+
+                    // on PlaybackState change save the new value
+                    override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
+                        _musicState.value = state
+                    }
+                }
+
+                // Register a media controller callback
+                mediaController.registerCallback(controllerCallback)
             }
+        }
 
-            // Display initial state
-            val metadata = mediaController.metadata
-            val pbstate = mediaController.playbackState
-
-            _musicMetadata.value = metadata
-            _musicState.value = pbstate
-
-            // Register a media controller callback
-            mediaController.registerCallback(controllerCallback)
+        // Setting MediaBrowser for connecting to the MediaBrowserService
+        mediaBrowser = MediaBrowserCompat(
+            app,
+            ComponentName(app, MediaPlaybackService::class.java),
+            connectionCallbacks,
+            null
+        ).apply {
+            // Connects to the MediaBrowseService
+            connect()
         }
     }
 
-    // Media Controller callback to detect data or state change
-    private var controllerCallback = object : MediaControllerCompat.Callback() {
-        // on Metadata change save the new value
-        override fun onMetadataChanged(metadata: MediaMetadataCompat) {
-            _musicMetadata.value = metadata
-            _connected.value = true
-        }
-
-        // on PlaybackState change save the new value
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-            _musicState.value = state
-        }
+    private val boundService = viewModelScope.async {
+        val intent = Intent(app, MediaPlaybackService::class.java)
+            .putExtra("is_binding", true)
+        bindService(app, intent, Context.BIND_AUTO_CREATE)
     }
+
+    // List of songs as a State Flow to get always current data
+    var songs = flow {
+        val service = boundService.await().service
+        emitAll(service.songs)
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    // Detect if the list refresh was triggered
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean>
+        get() = _isRefreshing.asStateFlow()
 
     // Binds to service and waits for onServiceConnected
     private suspend fun bindService(context: Context, intent: Intent, flags: Int) =
@@ -112,36 +135,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
             context.bindService(intent, connection, flags)
         }
 
-    private val boundService = viewModelScope.async {
-        val intent = Intent(app, MediaPlaybackService::class.java)
-        intent.putExtra("is_binding", true)
-        bindService(app, intent, Context.BIND_AUTO_CREATE)
-    }
-
-    init {
-        // Setting MediaBrowser for connecting to the MediaBrowserService
-        mediaBrowser = MediaBrowserCompat(
-            app,
-            ComponentName(app, MediaPlaybackService::class.java),
-            connectionCallbacks,
-            null
-        )
-
-        // Connects to the MediaBrowseService
-        mediaBrowser.connect()
-    }
-
-    // List of songs as a State Flow to get always current data
-    var songs = flow {
-        val service = boundService.await().service
-        emitAll(service.songs)
-    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
-
-    // Detect if the list refresh was triggered
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean>
-        get() = _isRefreshing.asStateFlow()
-
     // Function to refresh list of song on pull down
     fun refresh() {
         // This doesn't handle multiple 'refreshing' tasks, don't use this
@@ -153,12 +146,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // To play for the first time
-    fun play(uri: Uri) {
-        mediaController.transportControls.playFromUri(uri, null)
-    }
-
-    // To play any other time
     fun play() {
         mediaController.transportControls.play()
     }
@@ -167,15 +154,16 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         mediaController.transportControls.pause()
     }
 
-    @ExperimentalCoroutinesApi
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun loadSongs() {
         try {
             boundService.getCompleted().service.loadSongs()
         } catch (e: Exception) {
+            println(e)
         }
     }
 
-    @ExperimentalCoroutinesApi
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onCleared() {
         boundService.getCompleted().unbind()
         super.onCleared()

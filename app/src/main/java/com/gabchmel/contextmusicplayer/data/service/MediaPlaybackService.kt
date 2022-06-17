@@ -8,7 +8,9 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.*
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -19,12 +21,13 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.gabchmel.common.data.LocalBinder
-import com.gabchmel.contextmusicplayer.ui.NotificationManager
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.local.LocalSongsRetriever
 import com.gabchmel.contextmusicplayer.data.model.Song
+import com.gabchmel.contextmusicplayer.ui.utils.NotificationManager
 import com.gabchmel.contextmusicplayer.utils.*
 import com.gabchmel.sensorprocessor.data.service.SensorProcessService
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -35,24 +38,6 @@ import kotlin.coroutines.suspendCoroutine
 
 class MediaPlaybackService : MediaBrowserServiceCompat() {
 
-    companion object {
-        private const val MY_MEDIA_ROOT_ID = "/"
-
-        suspend fun getInstance(context: Context) = suspendCoroutine<MediaPlaybackService> { cont ->
-            val intent = Intent(context, MediaPlaybackService::class.java)
-            intent.putExtra("is_binding", true)
-
-            context.bindService(intent, object : ServiceConnection {
-                override fun onServiceConnected(name: ComponentName?, service: IBinder) {
-                    cont.resumeWith(kotlin.Result.success((service as LocalBinder<MediaPlaybackService>).getService()))
-                }
-
-                override fun onServiceDisconnected(name: ComponentName?) {
-                }
-            }, Context.BIND_AUTO_CREATE)
-        }
-    }
-
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var stateBuilder: PlaybackStateCompat.Builder
     private lateinit var metadataBuilder: MediaMetadataCompat.Builder
@@ -62,10 +47,12 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private lateinit var timer: Timer
     private lateinit var headsetPlugReceiver: BroadcastReceiver
 
+    var audioFocusGranted = 0
+
     // To check if the noisy receiver is registered
     private var isRegistered = false
     private var isPredicted = false
-    var isBinded = false
+    var isBound = false
     var isPlaying = false
 
     // Update metadata
@@ -85,19 +72,19 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
             val binder = service as LocalBinder<SensorProcessService>
             sensorProcessService.value = binder.getService()
-            isBinded = true
+            isBound = true
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
-            isBinded = false
+            isBound = false
         }
 
         override fun onBindingDied(name: ComponentName?) {
-            isBinded = false
+            isBound = false
         }
 
         override fun onNullBinding(name: ComponentName?) {
-            isBinded = false
+            isBound = false
         }
     }
 
@@ -120,17 +107,21 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     val currentSongUri = MutableStateFlow<Uri?>(null)
 
     // retrieve index of currently played song
+    @OptIn(DelicateCoroutinesApi::class)
     private val currSongIndex = currentSongUri.filterNotNull().map { uri ->
         songs.value.indexOfFirst { song ->
             song.URI == uri
         }
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
+    @OptIn(DelicateCoroutinesApi::class)
     private val currentSong = currSongIndex.filterNotNull().map { index ->
         songs.value.getOrNull(index)
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
+    @OptIn(DelicateCoroutinesApi::class)
     val nextSong = currSongIndex.filterNotNull().map { index ->
         songs.value.getOrNull(index + 1)
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
+    @OptIn(DelicateCoroutinesApi::class)
     val prevSong = currSongIndex.filterNotNull().map { index ->
         songs.value.getOrNull(index - 1)
     }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
@@ -216,7 +207,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             // Set the mediaSession callback
             val mediaSessionCallback = object : MediaSessionCompat.Callback() {
 
-                val am =
+                val audioManager =
                     applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
                 override fun onPlayFromUri(uri: Uri, extras: Bundle?) {
@@ -234,12 +225,12 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                     isPlaying = true
 
-                    val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    audioFocusGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         // Request audio focus so only on app is playing audio at a time
-                        am.requestAudioFocus(audioFocusRequest)
+                        audioManager.requestAudioFocus(audioFocusRequest)
                     } else {
                         // Request audio focus for playback
-                        am.requestAudioFocus(
+                        audioManager.requestAudioFocus(
                             afChangeListener,
                             // Use the music stream.
                             AudioManager.STREAM_MUSIC,
@@ -248,7 +239,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         )
                     }
 
-                    if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    if (audioFocusGranted == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                         startService(
                             Intent(
                                 applicationContext,
@@ -282,15 +273,14 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
 
                 override fun onStop() {
-
                     isPlaying = false
 
                     // Check if the audio focus was requested
-                    if (AudioManager.AUDIOFOCUS_REQUEST_GRANTED == 1) {
+                    if (AudioManager.AUDIOFOCUS_REQUEST_GRANTED == audioFocusGranted) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            am.abandonAudioFocusRequest(audioFocusRequest)
+                            audioManager.abandonAudioFocusRequest(audioFocusRequest)
                         } else {
-                            am.abandonAudioFocus(afChangeListener)
+                            audioManager.abandonAudioFocus(afChangeListener)
                         }
                     }
 
@@ -338,9 +328,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                 override fun onCustomAction(action: String?, extras: Bundle?) {
                     if (action.equals("skip")) {
-                        if (extras != null) {
-                            setMetadata(extras.get("songUri") as Uri)
-                        }
+                        extras?.let { setMetadata(extras.get("songUri") as Uri) }
                         onSkipToNext()
                     }
                 }
@@ -358,7 +346,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             updateState()
         }
 
-        // Every 10 second write to file sensor measurements with the song ID
+        // Every 10 seconds write to file sensor measurements with the song ID
         fixedRateTimer(period = 10000) {
             if (isPlaying)
                 currentSong.value?.title?.let { title ->
@@ -470,7 +458,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     }
 
     override fun onDestroy() {
-
         // unregister BECOME_NOISY and headphones plugged in BroadcastReceiver
         if (isRegistered)
             unregisterReceiver(myNoisyAudioStreamReceiver)
@@ -480,7 +467,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         player.seekTo(0)
         player.stop()
 
-        if (isBinded) {
+        if (isBound) {
             try {
                 this.applicationContext.unbindService(connection)
             } catch (e: Exception) {
@@ -503,6 +490,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     }
 
     // Load songs from local storage
+    @OptIn(DelicateCoroutinesApi::class)
     fun loadSongs() {
         if (ActivityCompat.checkSelfPermission(
                 baseContext,
@@ -519,11 +507,31 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     fun preparePlayer(uri: Uri) {
         val songUri = Uri.parse(uri.toString())
 
-        player.reset()
-        player.setDataSource(baseContext, songUri)
-        player.prepare()
+        with(player) {
+            reset()
+            setDataSource(baseContext, songUri)
+            prepare()
+        }
 
         // Set source to current song to retrieve metadata
         metadataRetriever.setDataSource(applicationContext, songUri)
+    }
+
+    companion object {
+        private const val MY_MEDIA_ROOT_ID = "/"
+
+        suspend fun getInstance(context: Context) = suspendCoroutine<MediaPlaybackService> { cont ->
+            val intent = Intent(context, MediaPlaybackService::class.java)
+            intent.putExtra("is_binding", true)
+
+            context.bindService(intent, object : ServiceConnection {
+                override fun onServiceConnected(name: ComponentName?, service: IBinder) {
+                    cont.resumeWith(kotlin.Result.success((service as LocalBinder<MediaPlaybackService>).getService()))
+                }
+
+                override fun onServiceDisconnected(name: ComponentName?) {
+                }
+            }, Context.BIND_AUTO_CREATE)
+        }
     }
 }

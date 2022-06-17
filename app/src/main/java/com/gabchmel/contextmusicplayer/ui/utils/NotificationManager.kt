@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui
+package com.gabchmel.contextmusicplayer.ui.utils
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
 import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.ui.MainActivity
 
 object NotificationManager {
 
@@ -51,7 +52,8 @@ object NotificationManager {
         }
 
         // Definition of the intent execution that execute the according activity
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+        val pendingIntent: PendingIntent =
+            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         // Definition of notification layout
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)

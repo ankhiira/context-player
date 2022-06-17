@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui.settingsScreen
+package com.gabchmel.contextmusicplayer.ui.screens.settingsScreen
 
 import android.content.Intent
 import android.net.Uri
@@ -30,8 +30,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.BuildConfig
-import com.gabchmel.contextmusicplayer.data.service.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.data.service.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.ui.theme.JetnewsTheme
 import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
 import java.io.File
@@ -75,12 +75,12 @@ class SettingsFragment : Fragment() {
                                 backgroundColor = Color.Transparent
                             )
                         },
-                        content = {
+                        content = { padding ->
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(28.dp),
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(18.dp)
+                                    .padding(padding)
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -138,7 +138,7 @@ class SettingsFragment : Fragment() {
                                         contentDescription = "Settings",
                                     )
                                 }
-                                Row() {
+                                Row {
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -278,7 +278,7 @@ class SettingsFragment : Fragment() {
                                                         ".csv",
                                                         origFilePrediction
                                                     )
-                                                val pathResultDataOrigo =
+                                                val pathResultDataOriginal =
                                                     convertFileForSend(
                                                         "data",
                                                         ".csv",
@@ -287,7 +287,7 @@ class SettingsFragment : Fragment() {
                                                 arrayList.add(pathResultData)
                                                 arrayList.add(pathResultArff)
                                                 arrayList.add(pathResultPrediction)
-                                                arrayList.add(pathResultDataOrigo)
+                                                arrayList.add(pathResultDataOriginal)
 
                                                 val emailIntent =
                                                     Intent(Intent.ACTION_SEND_MULTIPLE)
@@ -302,7 +302,7 @@ class SettingsFragment : Fragment() {
                                                 emailIntent.putParcelableArrayListExtra(
                                                     Intent.EXTRA_STREAM,
                                                     arrayList
-                                                );
+                                                )
                                                 // the mail subject
                                                 emailIntent.putExtra(
                                                     Intent.EXTRA_SUBJECT,

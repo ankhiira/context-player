@@ -17,7 +17,7 @@ class LocationClusteringAlg {
     // It is possible to define different distance functions for different data classes
     // It is also possible to define different distance functions for the same data class
     // For example, we could define full blown 'geodesic' distance for locations
-    // I tried to reproduce something like 'Typeclass' pattern which I would use in Scala/Haskell
+    // I tried to reproduce something like 'TypeClass' pattern which I would use in Scala/Haskell
     val euclideanDistance = object : Distance<Point> {
         override fun Point.distance(to: Point): Double {
             return sqrt((x - to.x).pow(2) + (y - to.y).pow(2))
@@ -26,13 +26,13 @@ class LocationClusteringAlg {
 
     val haversineDistance = object : Distance<Location> {
         override fun Location.distance(to: Location): Double {
-            val R = 6371000.0
+            val constR = 6371000.0
             val lat1 = Math.toRadians(lat)
             val lat2 = Math.toRadians(to.lat)
             val lon1 = Math.toRadians(lon)
             val lon2 = Math.toRadians(to.lon)
 
-            return 2 * R * asin(
+            return 2 * constR * asin(
                 sqrt(
                     ((lat1 - lat2) / 2).pow(2) + cos(lat1) * cos(lat2) * sin((lon1 - lon2) / 2).pow(
                         2
@@ -53,7 +53,7 @@ class LocationClusteringAlg {
     // Now we can try to define what types can be 'clustered'
     // 'We know how to compute a distance between 2 objects of a type' => 'We can cluster a list of such objects'
     interface ClusteringAlgorithm<T, D> {
-        fun <D : Distance<T>> fit_transform(xs: List<T>, dist: D): List<Cluster>
+        fun <D : Distance<T>> fitTransform(xs: List<T>, dist: D): List<Cluster>
     }
 
     // I first implemented a minimalistic version of a Matrix to hold pairwise distances,
@@ -66,7 +66,7 @@ class LocationClusteringAlg {
         fun bitMask(f: (item: T) -> Boolean): DummyMatrix<Boolean>
     }
 
-    open class DummySquareMatrix<T>(val entries: List<T>, val dim: Int) : DummyMatrix<T> {
+    open class DummySquareMatrix<T>(private val entries: List<T>, private val dim: Int) : DummyMatrix<T> {
         override fun get(i: Int, j: Int): T {
             return entries[i * dim + j]
         }
@@ -97,9 +97,9 @@ class LocationClusteringAlg {
 
     // Simplified implementation of DBSCAN
     // It doesn't take into account edge points
-    class DBSCAN(val eps: Double, val minPts: Int) :
+    class DBSCAN(private val eps: Double, private val minPts: Int) :
         ClusteringAlgorithm<Location, Distance<Location>> {
-        override fun <D : Distance<Location>> fit_transform(
+        override fun <D : Distance<Location>> fitTransform(
             xs: List<Location>,
             dist: D
         ): List<Cluster> {

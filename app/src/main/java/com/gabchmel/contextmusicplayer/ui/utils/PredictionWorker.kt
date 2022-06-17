@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui
+package com.gabchmel.contextmusicplayer.ui.utils
 
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -10,13 +10,10 @@ import java.io.File
 
 
 class PredictionWorker(private val appContext: Context, workerParams: WorkerParameters) :
-    CoroutineWorker(
-        appContext, workerParams
-    ) {
+    CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         withContext(Dispatchers.IO) {
-
             // Run prediction only if there are input data
             val inputFile = File(appContext.filesDir, "data.csv")
             if (inputFile.exists()) {

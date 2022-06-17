@@ -22,7 +22,6 @@ object LocalSongsRetriever {
     @RequiresPermission(READ_EXTERNAL_STORAGE)
     suspend fun loadSongs(context: Context): List<Song> =
         withContext(Dispatchers.Default) {
-
             val songList = mutableListOf<Song>()
 
             // Show only audio files that are at least 1 minute in duration. Requires api Q.

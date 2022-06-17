@@ -6,7 +6,6 @@ import weka.classifiers.Evaluation
 import weka.classifiers.trees.RandomForest
 import weka.core.Attribute
 import weka.core.DenseInstance
-import weka.core.FastVector
 import weka.core.Instances
 import weka.core.converters.ArffLoader
 import weka.core.converters.ArffSaver
@@ -23,7 +22,7 @@ class PredictionModelBuiltIn(val context: Context) {
 
     // Name of the input arff file
     val file = "arffData_converted.arff"
-    val fileTest = "arffData_convertedTest.arff"
+    val testFile = "arffData_convertedTest.arff"
     private val csvConvertedFile = "convertedData.csv"
     private var wifiList = arrayListOf<UInt>()
 
@@ -49,6 +48,7 @@ class PredictionModelBuiltIn(val context: Context) {
         removePercentage.setInputFormat(dataSet)
         removePercentage.percentage = 20.0
         val train: Instances = Filter.useFilter(dataSet, removePercentage)
+
         // Remove train percentage from data to get the test set
         removePercentage = RemovePercentage()
         removePercentage.setInputFormat(dataSet)
@@ -71,7 +71,7 @@ class PredictionModelBuiltIn(val context: Context) {
             return false
         }
 
-        convertCSVtoarrf(context, classNames, wifiList)
+        convertCsvToArrf(context, classNames, wifiList)
 
         if (File(context.filesDir, file).exists()) {
 
@@ -125,22 +125,22 @@ class PredictionModelBuiltIn(val context: Context) {
             }
         }
 
-        val stateVector = FastVector<String>(5)
+        val stateVector = ArrayList<String>(5)
         stateVector.addAll(stateList)
 
-        val connectionVector = FastVector<String>(4)
+        val connectionVector = ArrayList<String>(4)
         connectionVector.addAll(connectionList)
 
-        val batteryStatVector = FastVector<String>(3)
+        val batteryStatVector = ArrayList<String>(3)
         batteryStatVector.addAll(batteryStatusList)
 
-        val chargingTypeVector = FastVector<String>(4)
+        val chargingTypeVector = ArrayList<String>(4)
         chargingTypeVector.addAll(chargingTypeList)
 
-        val boolVec = FastVector<String>(2)
+        val boolVec = ArrayList<String>(2)
         boolVec.addAll(listOf("0", "1"))
 
-        val wifiListVec = FastVector<String>(2)
+        val wifiListVec = ArrayList<String>(2)
         wifiListVec.addAll(wifiNamesList)
 
         // Names of the attributes used in input
@@ -151,7 +151,7 @@ class PredictionModelBuiltIn(val context: Context) {
         val state = Attribute("state", stateVector)
         val light = Attribute("light")
         val orientation = Attribute("orientation", boolVec)
-        val BTconnected = Attribute("BTconnected", boolVec)
+        val btConnected = Attribute("btConnected", boolVec)
         val headphonesPlugged = Attribute("headphonesPlugged", boolVec)
         val pressure = Attribute("pressure")
         val temperature = Attribute("temperature")
@@ -180,7 +180,7 @@ class PredictionModelBuiltIn(val context: Context) {
                 add(state)
                 add(light)
                 add(orientation)
-                add(BTconnected)
+                add(btConnected)
                 add(headphonesPlugged)
                 add(pressure)
                 add(temperature)
@@ -202,7 +202,8 @@ class PredictionModelBuiltIn(val context: Context) {
         // unpredicted data sets (reference to sample structure for new instances)
         val dataUnpredicted = Instances(
             "TestInstances",
-            attributeList, 1
+            attributeList,
+            1
         )
 
         // First feature will be the target variable
@@ -216,20 +217,20 @@ class PredictionModelBuiltIn(val context: Context) {
                 setValue(dayOfWeekSin, input.dayOfWeekSin)
                 setValue(dayOfWeekCos, input.dayOfWeekCos)
                 setValue(state, input.state)
-                setValue(light, input.lightSensorValue!!.toDouble())
-                setValue(orientation, input.deviceLying!!.toInt().toString())
-                setValue(BTconnected, input.BTdeviceConnected!!.toInt().toString())
-                setValue(headphonesPlugged, input.headphonesPluggedIn!!.toInt().toString())
-                setValue(pressure, input.pressure!!.toDouble())
-                setValue(temperature, input.temperature!!.toDouble())
+                setValue(light, input.lightSensorValue.toDouble())
+                setValue(orientation, input.deviceLying.toInt().toString())
+                setValue(btConnected, input.BTDeviceConnected.toInt().toString())
+                setValue(headphonesPlugged, input.headphonesPluggedIn.toInt().toString())
+                setValue(pressure, input.pressure.toDouble())
+                setValue(temperature, input.temperature.toDouble())
                 setValue(wifi, input.wifi.toString())
                 setValue(connection, input.connection)
                 setValue(batteryStatus, input.batteryStatus)
                 setValue(chargingType, input.chargingType)
-                setValue(proximity, input.proximity!!.toDouble())
-                setValue(humidity, input.humidity!!.toDouble())
-                setValue(heartRate, input.heartRate!!.toDouble())
-                setValue(heartBeat, input.heartBeat!!.toDouble())
+                setValue(proximity, input.proximity.toDouble())
+                setValue(humidity, input.humidity.toDouble())
+                setValue(heartRate, input.heartRate.toDouble())
+                setValue(heartBeat, input.heartBeat.toDouble())
                 setValue(location, input.locationCluster.toDouble())
                 setValue(xCoord, input.xCoord)
                 setValue(yCoord, input.yCoord)
@@ -259,8 +260,9 @@ class PredictionModelBuiltIn(val context: Context) {
     }
 
     // Function to convert CSV file to arff file representation
-    private fun convertCSVtoarrf(
-        context: Context, classNames: ArrayList<String>,
+    private fun convertCsvToArrf(
+        context: Context,
+        classNames: ArrayList<String>,
         wifiList: ArrayList<UInt>
     ) {
 
@@ -298,22 +300,22 @@ class PredictionModelBuiltIn(val context: Context) {
             )
 
             text = text.replace(
-                "@attribute state \\{.*\\}".toRegex(), "@attribute state {" +
+                "@attribute state \\{.*}".toRegex(), "@attribute state {" +
                         "IN_VEHICLE,STILL,WALKING,RUNNING,ON_BICYCLE,UNKNOWN}"
             )
 
             text = text.replace(
-                "@attribute connection \\{.*\\}".toRegex(), "@attribute connection {" +
+                "@attribute connection \\{.*}".toRegex(), "@attribute connection {" +
                         "NONE,TRANSPORT_CELLULAR,TRANSPORT_WIFI,TRANSPORT_ETHERNET}"
             )
 
             text = text.replace(
-                "@attribute batteryStatus \\{.*\\}".toRegex(), "@attribute batteryStatus {" +
+                "@attribute batteryStatus \\{.*}".toRegex(), "@attribute batteryStatus {" +
                         "NONE,CHARGING,NOT_CHARGING}"
             )
 
             text = text.replace(
-                "@attribute chargingType \\{.*\\}".toRegex(), "@attribute chargingType {" +
+                "@attribute chargingType \\{.*}".toRegex(), "@attribute chargingType {" +
                         "NONE,USB,AC,WIRELESS}"
             )
 
@@ -322,7 +324,7 @@ class PredictionModelBuiltIn(val context: Context) {
                         "0,1}"
             )
             text = text.replace(
-                "@attribute BTconnected numeric", "@attribute BTconnected {" +
+                "@attribute btConnected numeric", "@attribute btConnected {" +
                         "0,1}"
             )
             text = text.replace(

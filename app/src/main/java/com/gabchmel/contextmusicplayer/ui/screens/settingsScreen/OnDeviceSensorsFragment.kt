@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui.settingsScreen
+package com.gabchmel.contextmusicplayer.ui.screens.settingsScreen
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,22 +19,24 @@ import androidx.navigation.fragment.findNavController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.ui.theme.JetnewsTheme
 import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
-import com.gabchmel.sensorprocessor.utils.SensorListDisplay
+import com.gabchmel.contextmusicplayer.ui.theme.spacing
+import com.gabchmel.sensorprocessor.utils.OnDeviceSensors
 
 class OnDeviceSensorsFragment : Fragment() {
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Compose view of the On-device sensors screen
         return ComposeView(requireContext()).apply {
             setContent {
                 JetnewsTheme {
-                    val sensorReader = SensorListDisplay(context)
-                    val materialYel400 = MaterialTheme.colors.onPrimary
+                    val sensorReader = OnDeviceSensors(context)
+                    val materialColorPrimary = MaterialTheme.colors.onPrimary
                     val scaffoldState =
                         rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
+
                     Scaffold(
                         scaffoldState = scaffoldState,
                         modifier = Modifier
@@ -50,10 +52,11 @@ class OnDeviceSensorsFragment : Fragment() {
                                 navigationIcon = {
                                     IconButton(onClick = { findNavController().navigateUp() }) {
                                         Icon(
-                                            imageVector = ImageVector.vectorResource(R.drawable.ic_back),
+                                            imageVector =
+                                            ImageVector.vectorResource(R.drawable.ic_back),
                                             contentDescription = "Back",
                                             modifier = Modifier.fillMaxHeight(0.4f),
-                                            tint = materialYel400
+                                            tint = materialColorPrimary
                                         )
                                     }
                                 },
@@ -63,14 +66,16 @@ class OnDeviceSensorsFragment : Fragment() {
                         },
                         content = {
                             LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(horizontal = 16.dp),
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                verticalArrangement =
+                                Arrangement.spacedBy(MaterialTheme.spacing.medium),
+                                contentPadding =
+                                PaddingValues(horizontal = MaterialTheme.spacing.large),
+                                modifier = Modifier.padding(vertical = MaterialTheme.spacing.medium)
                             ) {
-                                items(sensorReader.deviceSensors) { sensor ->
+                                items(sensorReader.onDeviceSensors) { sensor ->
                                     Text(
                                         text = sensor.name,
-                                        color = materialYel400,
+                                        color = materialColorPrimary
                                     )
                                 }
                             }

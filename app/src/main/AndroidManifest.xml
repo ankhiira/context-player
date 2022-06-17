@@ -4,20 +4,23 @@
     package="com.gabchmel.contextmusicplayer">
 
     <!-- Permission to control media on lock screen -->
-    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL"
+        tools:ignore="ReservedSystemPermission" />
 
     <!-- Permission to read local song files -->
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <!-- Permission to start foreground service (music playback service) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <!-- Permission to get location updates -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-    <!-- Permission to start foreground service (music playback service) -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- Permission to detect mobile user activity-->
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
@@ -29,16 +32,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileProvider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
-        </provider>
 
         <activity android:name=".ui.MainActivity" />
 
@@ -93,6 +86,14 @@
 
         <receiver android:name=".data.service.MediaBrowserConnector$ActionReceiver" />
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
     </application>
-
 </manifest>

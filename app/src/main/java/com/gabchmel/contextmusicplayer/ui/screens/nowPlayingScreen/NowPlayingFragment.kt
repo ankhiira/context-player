@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui.nowPlayingScreen
+package com.gabchmel.contextmusicplayer.ui.screens.nowPlayingScreen
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -29,12 +29,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.ui.theme.JetnewsTheme
+import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
 import com.gabchmel.contextmusicplayer.utils.getAlbumArt
 import com.gabchmel.contextmusicplayer.utils.getArtist
 import com.gabchmel.contextmusicplayer.utils.getDuration
 import com.gabchmel.contextmusicplayer.utils.getTitle
-import com.gabchmel.contextmusicplayer.ui.theme.JetnewsTheme
-import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
 import com.google.accompanist.glide.rememberGlidePainter
 
 class NowPlayingFragment : Fragment() {
@@ -44,7 +44,8 @@ class NowPlayingFragment : Fragment() {
 
     @SuppressLint("RestrictedApi")
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         viewModel.args = args
@@ -124,15 +125,14 @@ class NowPlayingFragment : Fragment() {
                         backgroundColor = Color.Transparent
                     )
                 },
-                content = {
+                content = { padding ->
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(8.dp),
+                            .padding(padding),
                         verticalArrangement = Arrangement.SpaceAround,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-
                         // Album art
                         Image(
                             painter = musicMetadata?.getAlbumArt()?.let {
@@ -165,8 +165,7 @@ class NowPlayingFragment : Fragment() {
                                 text = musicMetadata?.getArtist() ?: "Loading",
                                 fontSize = 18.sp,
                                 color = materialGrey400,
-                                modifier = Modifier
-                                    .absolutePadding(bottom = 16.dp)
+                                modifier = Modifier.absolutePadding(bottom = 16.dp)
                             )
                         }
 
@@ -194,8 +193,7 @@ class NowPlayingFragment : Fragment() {
                                     viewModel.setMusicProgress(it)
                                 },
                                 valueRange = 0f..songLength,
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp)
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
 
                             Row(

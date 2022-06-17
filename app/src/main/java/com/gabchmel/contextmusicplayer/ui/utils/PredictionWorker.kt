@@ -24,16 +24,15 @@ class PredictionWorker(private val appContext: Context, workerParams: WorkerPara
             // Enqueue this unique work again so it achieves periodicity
             val tenMinutesRequest = OneTimeWorkRequestBuilder<PredictionWorker>()
                 .setInitialDelay(1, java.util.concurrent.TimeUnit.MINUTES)
-                .addTag("WIFIJOB1")
+                .addTag("WIFI_JOB1")
                 .build()
+
             WorkManager.getInstance(appContext)
                 .enqueueUniqueWork(
                     "work2",
                     ExistingWorkPolicy.REPLACE,
                     tenMinutesRequest
                 )
-
-            // Log.d("Work", "Done Work")
         }
         // Indicate whether the work finished successfully with the Result
         return Result.success()

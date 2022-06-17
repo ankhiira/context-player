@@ -1,6 +1,7 @@
 package com.gabchmel.contextmusicplayer.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioManager
@@ -44,40 +45,10 @@ class MainActivity : AppCompatActivity() {
         // Save the current sensor values to shared preferences
         lifecycleScope.launch {
             val service = this@MainActivity.bindService(SensorProcessService::class.java)
-            service.saveSensorData()
+            service.saveSensorValuesToSharedPrefs()
         }
 
-        val workRequest = OneTimeWorkRequestBuilder<PredictionWorker>()
-            // Set Work to start on device charging
-            .setConstraints(
-                Constraints.Builder()
-                    .build()
-            )
-            .setInputData(
-                Data.Builder()
-                    .build()
-            )
-            .addTag("WIFIJOB2")
-            .build()
-
-        // Create on-demand initialization of WorkManager
-        val workManager = WorkManager
-            .getInstance(this@MainActivity)
-
-        // To monitor the Work state
-        val status = workManager.getWorkInfoByIdLiveData(workRequest.id)
-        status.observe(this) { workInfo ->
-            workInfo?.let {
-                Log.d("Progress", "State: state:${workInfo.state}")
-            }
-        }
-
-        // Enqueue the first Work
-        workManager.enqueueUniqueWork(
-            "work",
-            ExistingWorkPolicy.REPLACE,
-            workRequest
-        )
+        enqueueNewWork(this@MainActivity)
     }
 
     override fun onResume() {
@@ -97,18 +68,14 @@ class MainActivity : AppCompatActivity() {
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 // If the permission is not enabled, save that option to shared preferences file
-                val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
-                editor.putBoolean("locationPermission", false)
-                editor.apply()
+                saveValueToSharedPrefs("locationPermission", false)
             } else {
                 // If the permission is now enabled, register location listener
                 val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
                 val wasGranted = prefs.getBoolean("locationPermission", true)
 
                 // Save the current permission state
-                val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
-                editor.putBoolean("locationPermission", true)
-                editor.apply()
+                saveValueToSharedPrefs("locationPermission", true)
 
                 if (!wasGranted) {
                     lifecycleScope.launch {
@@ -121,6 +88,54 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("Error", e.toString())
         }
+    }
+
+    private fun saveValueToSharedPrefs(name: String, value: Any) {
+        getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
+            .edit()
+            .apply {
+                when (value) {
+                    is Boolean -> putBoolean(name, value)
+                    is String -> putString(name, value)
+                    is Float -> putFloat(name, value)
+                    is Int -> putInt(name, value)
+                    is Long -> putLong(name, value)
+                }
+                apply()
+            }
+    }
+
+    private fun enqueueNewWork(context: Context) {
+        val workRequest = OneTimeWorkRequestBuilder<PredictionWorker>()
+            // Set Work to start on device charging
+            .setConstraints(
+                Constraints.Builder()
+                    .build()
+            )
+            .setInputData(
+                Data.Builder()
+                    .build()
+            )
+            .addTag("WIFI_JOB2")
+            .build()
+
+        // Create on-demand initialization of WorkManager
+        val workManager = WorkManager.getInstance(context)
+
+        // To monitor the Work state
+        val status = workManager.getWorkInfoByIdLiveData(workRequest.id)
+        status.observe(this) { workInfo ->
+            workInfo?.let {
+                Log.d("Progress", "State: state:${workInfo.state}")
+            }
+        }
+
+        // Enqueue the first Work
+        workManager.enqueueUniqueWork(
+            "work",
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
     }
 }
 

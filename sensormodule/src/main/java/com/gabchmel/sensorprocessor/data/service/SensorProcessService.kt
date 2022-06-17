@@ -262,7 +262,7 @@ class SensorProcessService : Service() {
     }
 
     // Function to save current context values to shared preferences for later comparison
-    fun saveSensorData() {
+    fun saveSensorValuesToSharedPrefs() {
         val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
         editor.putString("state", measuredSensorValues.value.currentState)
         editor.putFloat("deviceLying", measuredSensorValues.value.deviceLying)

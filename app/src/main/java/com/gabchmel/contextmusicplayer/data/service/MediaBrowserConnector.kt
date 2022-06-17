@@ -175,7 +175,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 //                }
 
                 // Save current sensor values to later detect if the context changed
-                sensorProcessService.saveSensorData()
+                sensorProcessService.saveSensorValuesToSharedPrefs()
             }
         }
     }

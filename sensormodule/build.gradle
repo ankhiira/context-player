@@ -58,6 +58,9 @@ dependencies {
 
     implementation 'com.github.chrfrantz:DBSCAN:v0.1'
 
+    // Preferences DataStore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
     implementation files('libs/cluster-gvm-1.0.jar')
 }
 repositories {

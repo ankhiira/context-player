@@ -27,11 +27,10 @@ import com.gabchmel.contextmusicplayer.data.model.Song
 import com.gabchmel.contextmusicplayer.ui.utils.NotificationManager
 import com.gabchmel.contextmusicplayer.utils.*
 import com.gabchmel.sensorprocessor.data.service.SensorProcessService
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.util.*
 import kotlin.concurrent.fixedRateTimer
 import kotlin.coroutines.suspendCoroutine
 
@@ -39,19 +38,16 @@ import kotlin.coroutines.suspendCoroutine
 class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     private lateinit var mediaSession: MediaSessionCompat
-    private lateinit var stateBuilder: PlaybackStateCompat.Builder
-    private lateinit var metadataBuilder: MediaMetadataCompat.Builder
     private lateinit var audioFocusRequest: AudioFocusRequest
-    private var player = MediaPlayer()
     private lateinit var notification: Notification
-    private lateinit var timer: Timer
     private lateinit var headsetPlugReceiver: BroadcastReceiver
+
+    private var player = MediaPlayer()
 
     var audioFocusGranted = 0
 
-    // To check if the noisy receiver is registered
-    private var isRegistered = false
-    private var isPredicted = false
+    private var isBecomingNoisyRegistered = false
+    private var isSongPredicted = false
     var isBound = false
     var isPlaying = false
 
@@ -107,24 +103,20 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     val currentSongUri = MutableStateFlow<Uri?>(null)
 
     // retrieve index of currently played song
-    @OptIn(DelicateCoroutinesApi::class)
     private val currSongIndex = currentSongUri.filterNotNull().map { uri ->
         songs.value.indexOfFirst { song ->
             song.URI == uri
         }
-    }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
-    @OptIn(DelicateCoroutinesApi::class)
+    }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, null)
     private val currentSong = currSongIndex.filterNotNull().map { index ->
         songs.value.getOrNull(index)
-    }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
-    @OptIn(DelicateCoroutinesApi::class)
+    }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, null)
     val nextSong = currSongIndex.filterNotNull().map { index ->
         songs.value.getOrNull(index + 1)
-    }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
-    @OptIn(DelicateCoroutinesApi::class)
+    }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, null)
     val prevSong = currSongIndex.filterNotNull().map { index ->
         songs.value.getOrNull(index - 1)
-    }.stateIn(GlobalScope, SharingStarted.Eagerly, null)
+    }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, null)
 
     // On Service bind
     override fun onBind(intent: Intent): IBinder? {
@@ -153,7 +145,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         )
 
-        isRegistered = true
+        isBecomingNoisyRegistered = true
 
         val afChangeListener: AudioManager.OnAudioFocusChangeListener =
             AudioManager.OnAudioFocusChangeListener { }
@@ -193,7 +185,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
         // Setup the mediaSession
         with(mediaSession) {
-            stateBuilder = PlaybackStateCompat.Builder()
+            val stateBuilder: PlaybackStateCompat.Builder = PlaybackStateCompat.Builder()
                 .setActions(
                     PlaybackStateCompat.ACTION_PLAY_PAUSE or
                             PlaybackStateCompat.ACTION_PLAY
@@ -219,7 +211,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                 override fun onPlay() {
 
-                    if (isPredicted) {
+                    if (isSongPredicted) {
                         currentSongUri.value?.let { preparePlayer(it) }
                     }
 
@@ -269,7 +261,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
                     )
 
-                    isRegistered = true
+                    isBecomingNoisyRegistered = true
                 }
 
                 override fun onStop() {
@@ -287,9 +279,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     stopForeground(true)
 
                     // unregister BECOME_NOISY BroadcastReceiver if it was registered
-                    if (isRegistered)
+                    if (isBecomingNoisyRegistered)
                         unregisterReceiver(myNoisyAudioStreamReceiver)
-                    isRegistered = false
+                    isBecomingNoisyRegistered = false
 
                     isActive = false
                 }
@@ -342,7 +334,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         }
 
         // Every second update state of the playback
-        timer = fixedRateTimer(period = 1000) {
+        fixedRateTimer(period = 1000) {
             updateState()
         }
 
@@ -377,7 +369,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // Function to set metadata of the song
     fun updateMetadata() {
         // provide metadata
-        metadataBuilder = MediaMetadataCompat.Builder()
+        val metadataBuilder: MediaMetadataCompat.Builder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadataRetriever.getTitle())
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, metadataRetriever.getArtist())
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, metadataRetriever.getAlbum())
@@ -417,7 +409,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         currentSongUri.value = songUri
         updateMetadata()
 
-        isPredicted = true
+        isSongPredicted = true
 
         return metadataRetriever
     }
@@ -442,9 +434,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     @SuppressLint("ServiceCast")
     override fun onTaskRemoved(rootIntent: Intent?) {
-        if (isRegistered)
+        if (isBecomingNoisyRegistered)
             unregisterReceiver(headsetPlugReceiver)
-        isRegistered = false
+        isBecomingNoisyRegistered = false
 
         val notificationManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManagerCompat
@@ -458,13 +450,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         // unregister BECOME_NOISY and headphones plugged in BroadcastReceiver
-        if (isRegistered)
+        if (isBecomingNoisyRegistered)
             unregisterReceiver(myNoisyAudioStreamReceiver)
         unregisterReceiver(headsetPlugReceiver)
-        isRegistered = false
+        isBecomingNoisyRegistered = false
 
-        player.seekTo(0)
-        player.stop()
+        player.run {
+            seekTo(0)
+            stop()
+        }
 
         if (isBound) {
             try {
@@ -489,7 +483,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     }
 
     // Load songs from local storage
-    @OptIn(DelicateCoroutinesApi::class)
     fun loadSongs() {
         if (ActivityCompat.checkSelfPermission(
                 baseContext,
@@ -497,7 +490,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             ) != PackageManager.PERMISSION_GRANTED
         ) return
 
-        GlobalScope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             songs.value = LocalSongsRetriever.loadSongs(baseContext)
         }
     }
@@ -506,7 +499,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     fun preparePlayer(uri: Uri) {
         val songUri = Uri.parse(uri.toString())
 
-        with(player) {
+        player.run {
             reset()
             setDataSource(baseContext, songUri)
             prepare()

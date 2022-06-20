@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 object LocalSongsRetriever {
 
     @RequiresPermission(READ_EXTERNAL_STORAGE)
-    suspend fun loadSongs(context: Context): List<Song> =
+    suspend fun loadSongs(context: Context)=
         withContext(Dispatchers.Default) {
             val songList = mutableListOf<Song>()
 

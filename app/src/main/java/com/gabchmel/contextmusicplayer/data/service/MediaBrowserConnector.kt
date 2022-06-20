@@ -19,6 +19,7 @@ import androidx.lifecycle.whenCreated
 import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.common.utils.bindService
+import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.model.Song
 import com.gabchmel.contextmusicplayer.ui.MainActivity
@@ -58,6 +59,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
     }
 
     // Broadcast Receiver listening to action performed by click on prediction notification buttons
+    @Suppress("DEPRECATION")
     class ActionReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.getStringExtra("action")
@@ -150,29 +152,43 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.whenCreated {
-
                 lifecycleOwnerNew = lifecycleOwner
 
                 // Register receiver of the notification button action
                 context.registerReceiver(ActionReceiver(), IntentFilter("action"))
 
-                // Detect if the context changed so we should predict song
                 val sensorProcessService = sensorProcessService.await()
-//                val hasContextChanged = sensorProcessService.detectContextChange()
 
-//                if (hasContextChanged) {
-                // Setting MediaBrowser for connecting to the MediaBrowserService
-                mediaBrowser = MediaBrowserCompat(
-                    context,
-                    ComponentName(context, MediaPlaybackService::class.java),
-                    connectionCallbacks,
-                    null
-                )
+                if (!BuildConfig.IS_DEBUG) {
+                    // Detect if the context changed so we should predict song
+                    val hasContextChanged = sensorProcessService.detectContextChange()
 
-                // Connects to the MediaBrowseService
-                mediaBrowser.connect()
-                setNotification()
-//                }
+                    if (hasContextChanged) {
+                        // Setting MediaBrowser for connecting to the MediaBrowserService
+                        mediaBrowser = MediaBrowserCompat(
+                            context,
+                            ComponentName(context, MediaPlaybackService::class.java),
+                            connectionCallbacks,
+                            null
+                        )
+
+                        // Connects to the MediaBrowseService
+                        mediaBrowser.connect()
+                        setNotification()
+                    }
+                } else {
+                    // Setting MediaBrowser for connecting to the MediaBrowserService
+                    mediaBrowser = MediaBrowserCompat(
+                        context,
+                        ComponentName(context, MediaPlaybackService::class.java),
+                        connectionCallbacks,
+                        null
+                    )
+
+                    // Connects to the MediaBrowseService
+                    mediaBrowser.connect()
+                    setNotification()
+                }
 
                 // Save current sensor values to later detect if the context changed
                 sensorProcessService.saveSensorValuesToSharedPrefs()
@@ -180,7 +196,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }
     }
 
-    // Binds to service and waits for onServiceConnected
     // Bind to service function inspired by: https://stackoverflow.com/questions/48381902/wait-for-service-to-be-bound-using-coroutines
     @Suppress("UNCHECKED_CAST")
     suspend fun bindServiceAndWait(context: Context, intent: Intent, flags: Int) =
@@ -190,19 +205,11 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                     val binder = service as LocalBinder<MediaPlaybackService>
                     val serviceVal = binder.getService()
                     continuation.resume(
-                        BoundService(
-                            context,
-                            name,
-                            serviceVal,
-                            this,
-                            true
-                        )
+                        BoundService(context, name, serviceVal, this, true )
                     )
-
                 }
 
-                override fun onServiceDisconnected(name: ComponentName?) {
-                }
+                override fun onServiceDisconnected(name: ComponentName?) { }
             }
             context.bindService(intent, conn, flags)
         }
@@ -275,11 +282,11 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         // Definition of the intent execution that execute the according activity
         val pendingIntent =
             PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
         val intentPlay = Intent(context, ActionReceiver::class.java).apply {
             this.putExtra("action", "actionPlay")
@@ -305,26 +312,26 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                 PendingIntent.FLAG_IMMUTABLE
             )
 
-        // Definition of notification layout
-        val notificationBuilder = NotificationCompat.Builder(context, NotificationManager.CHANNEL_ID)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setSilent(true)
-            .setSmallIcon(R.drawable.ic_baseline_headset_24)
-            .setContentTitle("Play this song?")
-            .setContentText(song.title + " - " + song.author)
-            .addAction(
-                R.drawable.ic_play_arrow_black_24dp,
-                "Play",
-                pendingIntentPlay
-            )
-            .addAction(
-                R.drawable.ic_skip_next_black_24dp,
-                "Skip for now",
-                pendingIntentSkip
-            )
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
+        val notificationBuilder =
+            NotificationCompat.Builder(context, NotificationManager.CHANNEL_ID)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSilent(true)
+                .setSmallIcon(R.drawable.ic_baseline_headset_24)
+                .setContentTitle("Play this song?")
+                .setContentText(song.title + " - " + song.author)
+                .addAction(
+                    R.drawable.ic_play_arrow_black_24dp,
+                    "Play",
+                    pendingIntentPlay
+                )
+                .addAction(
+                    R.drawable.ic_skip_next_black_24dp,
+                    "Skip for now",
+                    pendingIntentSkip
+                )
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
 
         NotificationManagerCompat.from(context).run {
             notify(678, notificationBuilder.build())

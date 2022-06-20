@@ -12,12 +12,19 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
+import com.gabchmel.common.data.GlobalPreferences
+import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.databinding.ActivityMainBinding
 import com.gabchmel.contextmusicplayer.ui.utils.PredictionWorker
 import com.gabchmel.sensorprocessor.data.service.SensorProcessService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 
@@ -25,6 +32,10 @@ class MainActivity : AppCompatActivity() {
 
     // View binding for activity_main.xml file
     private lateinit var binding: ActivityMainBinding
+
+    private object PreferencesKeys {
+        val LOCATION_GRANTED = booleanPreferencesKey("location_permitted")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,42 +78,39 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.ACTIVITY_RECOGNITION
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // If the permission is not enabled, save that option to shared preferences file
-                saveValueToSharedPrefs("locationPermission", false)
+                CoroutineScope(Dispatchers.IO).launch {
+                    dataStore.edit { preferences ->
+                        preferences[PreferencesKeys.LOCATION_GRANTED] = false
+                    }
+                }
             } else {
                 // If the permission is now enabled, register location listener
-                val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
-                val wasGranted = prefs.getBoolean("locationPermission", true)
+                val savedGlobalPreferences = dataStore.data
+                    .map { preferences ->
+                        val isLocationGranted =
+                            preferences[PreferencesKeys.LOCATION_GRANTED] ?: false
+                        GlobalPreferences(isLocationGranted)
+                    }
 
-                // Save the current permission state
-                saveValueToSharedPrefs("locationPermission", true)
+                CoroutineScope(Dispatchers.IO).launch {
+                    savedGlobalPreferences.collect { preference ->
+                        if (!preference.locationGranted) {
+                            lifecycleScope.launch {
+                                val service =
+                                    this@MainActivity.bindService(SensorProcessService::class.java)
+                                service.registerLocationListener()
+                            }
 
-                if (!wasGranted) {
-                    lifecycleScope.launch {
-                        val service =
-                            this@MainActivity.bindService(SensorProcessService::class.java)
-                        service.registerLocationListener()
+                            dataStore.edit { preferences ->
+                                preferences[PreferencesKeys.LOCATION_GRANTED] = true
+                            }
+                        }
                     }
                 }
             }
         } catch (e: Exception) {
             Log.e("Error", e.toString())
         }
-    }
-
-    private fun saveValueToSharedPrefs(name: String, value: Any) {
-        getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
-            .edit()
-            .apply {
-                when (value) {
-                    is Boolean -> putBoolean(name, value)
-                    is String -> putString(name, value)
-                    is Float -> putFloat(name, value)
-                    is Int -> putInt(name, value)
-                    is Long -> putLong(name, value)
-                }
-                apply()
-            }
     }
 
     private fun enqueueNewWork(context: Context) {

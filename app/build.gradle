@@ -54,6 +54,23 @@ android {
         }
     }
 
+    flavorDimensions "mode"
+    productFlavors {
+        debugVariant {
+            dimension "mode"
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            buildConfigField 'boolean', 'IS_DEBUG', 'true'
+        }
+
+        fullVariant {
+            dimension "mode"
+            applicationIdSuffix ".full"
+            versionNameSuffix "-full"
+            buildConfigField 'boolean', 'IS_DEBUG', 'false'
+        }
+    }
+
     android {
         testOptions {
             unitTests.includeAndroidResources = true
@@ -136,4 +153,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect"
 
     implementation "androidx.room:room-runtime:2.4.2"
+
+    // Preferences DataStore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 }

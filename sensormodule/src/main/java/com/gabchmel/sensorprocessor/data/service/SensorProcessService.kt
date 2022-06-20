@@ -25,8 +25,14 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.data.LocalBinder
+import com.gabchmel.common.data.SensorDataPreferences
+import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.data.model.MeasuredSensorValues
 import com.gabchmel.sensorprocessor.data.model.ProcessedCsvValues
@@ -41,6 +47,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
@@ -74,6 +81,17 @@ class SensorProcessService : Service() {
     }
 
     private var processedCsvValues: ProcessedCsvValues = ProcessedCsvValues()
+
+    private object PreferencesKeys {
+        val STATE = stringPreferencesKey("state")
+        val IS_DEVICE_LYING = floatPreferencesKey("isDeviceLying")
+        val IS_BT_DEVICE_CONNECTED = floatPreferencesKey("isBluetoothDeviceConnected")
+        val ARE_HEADPHONES_CONNECTED = floatPreferencesKey("areHeadphonesConnected")
+        val CONNECTED_WIFI_SSID = intPreferencesKey("connectedWifiSsid")
+        val CURRENT_NETWORK_CONNECTION = stringPreferencesKey("currentNetworkConnection")
+        val BATTERY_STATUS = stringPreferencesKey("batteryState")
+        val CHARGING_METHOD = stringPreferencesKey("chargingMethod")
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -243,54 +261,72 @@ class SensorProcessService : Service() {
 
     // TODO release version of code
     // Function to compare measured values with saved to determine change in context
-    fun detectContextChange(): Boolean {
-        val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
-        val state = prefs.getString("state", "UNDEFINED")
-        val deviceLying = prefs.getFloat("deviceLying", -1.0f)
-        val bluetooth = prefs.getFloat("bluetooth", -1.0f)
-        val headphones = prefs.getFloat("headphones", -1.0f)
-        val wifi = prefs.getInt("wifi", -1)
-        val connection = prefs.getString("connection", "UNDEFINED")
-        val batteryStat = prefs.getString("batteryStat", "UNDEFINED")
-        val chargingType = prefs.getString("chargingType", "UNDEFINED")
-        when {
-            (measuredSensorValues.value.currentState != state && state != "UNDEFINED") ->
-                return true
-            (measuredSensorValues.value.deviceLying != deviceLying && deviceLying != -1.0f) ->
-                return true
-            (measuredSensorValues.value.BTDeviceConnected != bluetooth && bluetooth != -1.0f) ->
-                return true
-            (measuredSensorValues.value.headphonesPluggedIn != headphones && headphones != -1.0f) ->
-                return true
-            (measuredSensorValues.value.wifi != wifi.toUInt() && wifi != -1) ->
-                return true
-            (measuredSensorValues.value.connection != connection && connection != "UNDEFINED") ->
-                return true
-            (measuredSensorValues.value.batteryStatus != batteryStat && batteryStat != "UNDEFINED") ->
-                return true
-            (measuredSensorValues.value.chargingType != chargingType && chargingType != "UNDEFINED") ->
-                return true
+    suspend fun detectContextChange(): Boolean {
+        val savedGlobalPreferences = dataStore.data
+            .map { preferences ->
+                SensorDataPreferences(
+                    state =
+                    preferences[PreferencesKeys.STATE] ?: "",
+                    isDeviceLying =
+                    preferences[PreferencesKeys.IS_DEVICE_LYING] ?: -1.0f,
+                    isBluetoothDeviceConnected =
+                    preferences[PreferencesKeys.IS_BT_DEVICE_CONNECTED] ?: -1.0f,
+                    areHeadphonesConnected =
+                    preferences[PreferencesKeys.ARE_HEADPHONES_CONNECTED] ?: -1.0f,
+                    connectedWifiSsid =
+                    preferences[PreferencesKeys.CONNECTED_WIFI_SSID] ?: -1,
+                    currentNetworkConnection =
+                    preferences[PreferencesKeys.CURRENT_NETWORK_CONNECTION] ?: "UNDEFINED",
+                    batteryState =
+                    preferences[PreferencesKeys.BATTERY_STATUS] ?: "UNDEFINED",
+                    chargingMethod =
+                    preferences[PreferencesKeys.CHARGING_METHOD] ?: "UNDEFINED"
+                )
+            }
+
+        var result = false
+
+        savedGlobalPreferences.collect { prefs ->
+            result = when {
+                (measuredSensorValues.value.currentState != prefs.state
+                        && prefs.state != "UNDEFINED") -> true
+                (measuredSensorValues.value.deviceLying != prefs.isDeviceLying
+                        && prefs.isDeviceLying != -1.0f) -> true
+                (measuredSensorValues.value.BTDeviceConnected != prefs.isBluetoothDeviceConnected
+                        && prefs.isBluetoothDeviceConnected != -1.0f) -> true
+                (measuredSensorValues.value.headphonesPluggedIn != prefs.areHeadphonesConnected
+                        && prefs.areHeadphonesConnected != -1.0f) -> true
+                (measuredSensorValues.value.wifi != prefs.connectedWifiSsid.toUInt()
+                        && prefs.connectedWifiSsid != -1) -> true
+                (measuredSensorValues.value.connection != prefs.currentNetworkConnection
+                        && prefs.currentNetworkConnection != "UNDEFINED") -> true
+                (measuredSensorValues.value.batteryStatus != prefs.batteryState
+                        && prefs.batteryState != "UNDEFINED") -> true
+                (measuredSensorValues.value.chargingType != prefs.chargingMethod
+                        && prefs.chargingMethod != "UNDEFINED") -> true
+                else -> false
+            }
         }
-        return false
+
+        return result
     }
 
     // Function to save current context values to shared preferences for later comparison
-    fun saveSensorValuesToSharedPrefs() {
-        val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
-        editor.putString("state", measuredSensorValues.value.currentState)
-        editor.putFloat("deviceLying", measuredSensorValues.value.deviceLying)
-        editor.putFloat("bluetooth", measuredSensorValues.value.BTDeviceConnected)
-        editor.putFloat("headphones", measuredSensorValues.value.headphonesPluggedIn)
-        editor.putInt("wifi", measuredSensorValues.value.wifi.toInt())
-        editor.putString("connection", measuredSensorValues.value.connection)
-        editor.putString("batteryStat", measuredSensorValues.value.batteryStatus)
-        editor.putString("chargingType", measuredSensorValues.value.chargingType)
-        editor.apply()
+    suspend fun saveSensorValuesToSharedPrefs() {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.STATE] = _measuredSensorValues.value.currentState
+            preferences[PreferencesKeys.IS_DEVICE_LYING] = _measuredSensorValues.value.deviceLying
+            preferences[PreferencesKeys.IS_BT_DEVICE_CONNECTED] = measuredSensorValues.value.BTDeviceConnected
+            preferences[PreferencesKeys.ARE_HEADPHONES_CONNECTED] = measuredSensorValues.value.headphonesPluggedIn
+            preferences[PreferencesKeys.CONNECTED_WIFI_SSID] = measuredSensorValues.value.wifi.toInt()
+            preferences[PreferencesKeys.CURRENT_NETWORK_CONNECTION] = measuredSensorValues.value.connection
+            preferences[PreferencesKeys.BATTERY_STATUS] = measuredSensorValues.value.batteryStatus
+            preferences[PreferencesKeys.CHARGING_METHOD] = measuredSensorValues.value.chargingType
+        }
     }
 
     // Function to detect current activity
     private fun registerActivityDetectionListener() {
-
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACTIVITY_RECOGNITION

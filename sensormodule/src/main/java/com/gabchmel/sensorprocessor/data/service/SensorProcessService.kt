@@ -14,7 +14,11 @@ import android.hardware.Sensor
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
@@ -91,37 +95,46 @@ class SensorProcessService : Service() {
             SensorReader.registerSensorReader(
                 baseContext, Sensor.TYPE_LIGHT,
             ).collect { value: Collection<Float> ->
-                measuredSensorValues.value.lightSensorValue = value.first() }
+                measuredSensorValues.value.lightSensorValue = value.first()
+            }
 
             SensorReader.registerSensorReader(
                 baseContext, Sensor.TYPE_PRESSURE,
             ).collect { value: Collection<Float> ->
-                measuredSensorValues.value.pressure = value.first() }
+                measuredSensorValues.value.pressure = value.first()
+            }
 
             SensorReader.registerSensorReader(
                 baseContext, Sensor.TYPE_AMBIENT_TEMPERATURE,
             ).collect { value: Collection<Float> ->
-                measuredSensorValues.value.temperature = value.first() }
+                measuredSensorValues.value.temperature = value.first()
+            }
 
             SensorReader.registerSensorReader(
                 baseContext, Sensor.TYPE_PROXIMITY,
             ).collect { value: Collection<Float> ->
-                measuredSensorValues.value.proximity = value.first() }
+                measuredSensorValues.value.proximity = value.first()
+            }
 
             SensorReader.registerSensorReader(
                 baseContext, Sensor.TYPE_RELATIVE_HUMIDITY,
             ).collect { value: Collection<Float> ->
-                measuredSensorValues.value.humidity = value.first() }
+                measuredSensorValues.value.humidity = value.first()
+            }
 
-            SensorReader.registerSensorReader(
-                baseContext, Sensor.TYPE_HEART_BEAT,
-            ).collect { value: Collection<Float> ->
-                measuredSensorValues.value.heartBeat = value.first() }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                SensorReader.registerSensorReader(
+                    baseContext, Sensor.TYPE_HEART_BEAT,
+                ).collect { value: Collection<Float> ->
+                    measuredSensorValues.value.heartBeat = value.first()
+                }
+            }
 
             SensorReader.registerSensorReader(
                 baseContext, Sensor.TYPE_HEART_RATE,
             ).collect { value: Collection<Float> ->
-                measuredSensorValues.value.heartRate = value.first() }
+                measuredSensorValues.value.heartRate = value.first()
+            }
         }
 
         headphonesPluggedInDetection()
@@ -287,26 +300,27 @@ class SensorProcessService : Service() {
             return
         }
 
-        val request = ActivityTransitionRequest(TransitionList.getTransitions())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val request = ActivityTransitionRequest(TransitionList.getTransitions())
+            val intent = Intent(this, ActivityTransitionReceiver::class.java)
+            val pendingIntent =
+                PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        val intent = Intent(this, ActivityTransitionReceiver::class.java)
-        val pendingIntent =
-            PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            // pendingIntent is the instance of PendingIntent where the app receives callbacks.
+            val task = ActivityRecognition.getClient(this)
+                .requestActivityTransitionUpdates(request, pendingIntent)
 
-        // pendingIntent is the instance of PendingIntent where the app receives callbacks.
-        val task = ActivityRecognition.getClient(this)
-            .requestActivityTransitionUpdates(request, pendingIntent)
+            // implemented from: https://heartbeat.fritz.ai/detect-users-activity-in-android-using-activity-transition-api-f718c844efb2
+            task.addOnSuccessListener {
+            }
 
-        // implemented from: https://heartbeat.fritz.ai/detect-users-activity-in-android-using-activity-transition-api-f718c844efb2
-        task.addOnSuccessListener {
-        }
-
-        task.addOnFailureListener { e: Exception ->
-            // Handle error
-            Log.e(
-                "ActivityRecognition",
-                "Transitions Api could NOT be registered ${e.localizedMessage}"
-            )
+            task.addOnFailureListener { e: Exception ->
+                // Handle error
+                Log.e(
+                    "ActivityRecognition",
+                    "Transitions Api could NOT be registered ${e.localizedMessage}"
+                )
+            }
         }
     }
 
@@ -389,25 +403,34 @@ class SensorProcessService : Service() {
 
     // Function for connected wifi name detection
     private fun saveConnectedWiFiSSID() {
-//        val request: NetworkRequest = NetworkRequest.Builder()
-//                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-//                .build()
-//        val connectivityManager: ConnectivityManager =
-//            applicationContext.getSystemService(ConnectivityManager::class.java)
-//
-////        val networkCallback: ConnectivityManager.NetworkCallback =
-////                ConnectivityManager.NetworkCallback() {
-////                    val wifiInfo: WifiInfo = networkCapabilities.getTransportInfo()
-////                }
-////                }
-//        connectivityManager.requestNetwork(request, networkCallback); // For request
-//        connectivityManager.registerNetworkCallback(request, networkCallback); // For listen
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val request = NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .build()
+            val connectivityManager =
+                applicationContext.getSystemService(ConnectivityManager::class.java)
 
-        val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
-        val wifiInfo = wifiManager.connectionInfo
+            connectivityManager.registerNetworkCallback(request, object : NetworkCallback() {
+                override fun onAvailable(network: Network) {}
 
-        if (wifiInfo.ssid != "<unknown ssid>") {
-            _measuredSensorValues.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+                override fun onCapabilitiesChanged(
+                    network: Network,
+                    networkCapabilities: NetworkCapabilities
+                ) {
+                    val wifiInfo = networkCapabilities.transportInfo as WifiInfo
+
+                    if (wifiInfo.ssid != "<unknown ssid>") {
+                        _measuredSensorValues.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+                    }
+                }
+            })
+        } else {
+            val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
+            val wifiInfo = wifiManager.connectionInfo
+
+            if (wifiInfo.ssid != "<unknown ssid>") {
+                _measuredSensorValues.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+            }
         }
     }
 

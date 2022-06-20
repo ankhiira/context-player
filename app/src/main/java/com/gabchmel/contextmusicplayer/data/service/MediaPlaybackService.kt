@@ -305,8 +305,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     stopForeground(false)
                 }
 
-                override fun onSeekTo(pos: Long) {
-                    player.seekTo(pos.toInt())
+                override fun onSeekTo(position: Long) {
+                    player.seekTo(position.toInt())
                     updateState()
                 }
 
@@ -392,7 +392,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         mediaSession.setMetadata(metadataBuilder.build())
     }
 
-    // Function to update a notification
     fun updateNotification(isPlaying: Boolean) {
         // Recreate notification
         notification = NotificationManager.createNotification(

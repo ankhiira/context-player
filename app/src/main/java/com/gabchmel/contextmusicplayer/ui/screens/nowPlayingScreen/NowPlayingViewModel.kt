@@ -29,33 +29,39 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     lateinit var args: NowPlayingFragmentArgs
     var notPlayed = true
 
-    private val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
-        override fun onConnected() {
+    private val controllerCallback = object : MediaControllerCompat.Callback() {
+        override fun onMetadataChanged(metadata: MediaMetadataCompat) {
+            _musicMetadata.value = metadata
+        }
 
-            // Creation of the mediaBrowser
-            mediaBrowser.sessionToken.also { token ->
-                // Create MediaControllerCompat
-                mediaController = MediaControllerCompat(
-                    app,
-                    token
-                )
-            }
-
-            // Display initial state
-            _musicState.value = mediaController?.playbackState
-
-            // Register a callback to stay in sync
-            mediaController?.registerCallback(controllerCallback)
-
-            // Play after fragment is open
-            if (args.play && notPlayed) {
-                play(args.uri)
-                notPlayed = false
-            }
+        override fun onPlaybackStateChanged(playbackState: PlaybackStateCompat) {
+            _musicState.value = playbackState
         }
     }
 
     init {
+        val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
+            override fun onConnected() {
+
+                // Creation of the mediaBrowser
+                mediaBrowser.sessionToken.also { sessionToken ->
+                    mediaController = MediaControllerCompat(app, sessionToken)
+                }
+
+                // Display initial state
+                _musicState.value = mediaController?.playbackState
+
+                // Register a callback to stay in sync
+                mediaController?.registerCallback(controllerCallback)
+
+                // Play after fragment is open
+                if (args.play && notPlayed) {
+                    play(args.uri)
+                    notPlayed = false
+                }
+            }
+        }
+
         // Setting MediaBrowser for connecting to the MediaBrowserService
         mediaBrowser = MediaBrowserCompat(
             app,
@@ -72,16 +78,6 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
         mediaController?.unregisterCallback(controllerCallback)
         mediaBrowser.disconnect()
         super.onCleared()
-    }
-
-    private var controllerCallback = object : MediaControllerCompat.Callback() {
-        override fun onMetadataChanged(metadata: MediaMetadataCompat) {
-            _musicMetadata.value = metadata
-        }
-
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-            _musicState.value = state
-        }
     }
 
     // To play for the first time

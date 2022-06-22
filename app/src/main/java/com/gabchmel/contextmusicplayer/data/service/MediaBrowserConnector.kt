@@ -110,11 +110,11 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
         }
     }
 
-    private var prediction = flow {
+    private val prediction = flow {
         emitAll(sensorProcessService.await().prediction)
     }.filterNotNull()
 
-    private var songs = flow {
+    private val songs = flow {
         // Service awaits for complete call
         val service = boundService.await().service
         // Collects values from songs from services
@@ -159,11 +159,26 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
                 val sensorProcessService = sensorProcessService.await()
 
-                if (!BuildConfig.IS_DEBUG) {
-                    // Detect if the context changed so we should predict song
-                    val hasContextChanged = sensorProcessService.detectContextChange()
+                when {
+                    !BuildConfig.IS_DEBUG -> {
+                        // Detect if the context changed so we should predict song
+                        val hasContextChanged = sensorProcessService.detectContextChange()
 
-                    if (hasContextChanged) {
+                        if (hasContextChanged) {
+                            // Setting MediaBrowser for connecting to the MediaBrowserService
+                            mediaBrowser = MediaBrowserCompat(
+                                context,
+                                ComponentName(context, MediaPlaybackService::class.java),
+                                connectionCallbacks,
+                                null
+                            )
+
+                            // Connects to the MediaBrowseService
+                            mediaBrowser.connect()
+                            setNotification()
+                        }
+                    }
+                    else -> {
                         // Setting MediaBrowser for connecting to the MediaBrowserService
                         mediaBrowser = MediaBrowserCompat(
                             context,
@@ -176,18 +191,6 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                         mediaBrowser.connect()
                         setNotification()
                     }
-                } else {
-                    // Setting MediaBrowser for connecting to the MediaBrowserService
-                    mediaBrowser = MediaBrowserCompat(
-                        context,
-                        ComponentName(context, MediaPlaybackService::class.java),
-                        connectionCallbacks,
-                        null
-                    )
-
-                    // Connects to the MediaBrowseService
-                    mediaBrowser.connect()
-                    setNotification()
                 }
 
                 // Save current sensor values to later detect if the context changed
@@ -205,11 +208,11 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                     val binder = service as LocalBinder<MediaPlaybackService>
                     val serviceVal = binder.getService()
                     continuation.resume(
-                        BoundService(context, name, serviceVal, this, true )
+                        BoundService(context, name, serviceVal, this, true)
                     )
                 }
 
-                override fun onServiceDisconnected(name: ComponentName?) { }
+                override fun onServiceDisconnected(name: ComponentName?) {}
             }
             context.bindService(intent, conn, flags)
         }
@@ -228,11 +231,10 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                         for (property in parameters) {
                             val propertyNew = input::class.members
                                 .first { it.name == property.name } as KProperty1<Any, *>
-                            predictionString +=
-                                if (property.name == "wifi")
-                                    "${input.wifi},"
-                                else
-                                    "${propertyNew.get(input)},"
+                            predictionString += when (property.name) {
+                                "wifi" -> "${input.wifi},"
+                                else -> "${propertyNew.get(input)},"
+                            }
                         }
                     }
 

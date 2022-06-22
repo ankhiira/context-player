@@ -58,8 +58,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 class SongListFragment : Fragment() {
     private val viewModel: SongListViewModel by viewModels()
-    private var _isPermGranted = MutableStateFlow(false)
-    private var isPermGranted: StateFlow<Boolean> = _isPermGranted
+    private val _isPermGranted = MutableStateFlow(false)
+    private val isPermGranted: StateFlow<Boolean> = _isPermGranted
 
     // permissions callback
     private val requestPermissionLauncher =
@@ -119,55 +119,56 @@ class SongListFragment : Fragment() {
                             // Component to grant the permissions
                             val granted by isPermGranted.collectAsState()
 
-                            if ((ActivityCompat.checkSelfPermission(
+                            when {
+                                (ActivityCompat.checkSelfPermission(
                                     requireContext(),
                                     Manifest.permission.READ_EXTERNAL_STORAGE
-                                ) != PackageManager.PERMISSION_GRANTED) && !granted
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .padding(padding)
-                                        .padding(vertical = 16.dp)
-                                        .fillMaxSize()
-                                ) {
-                                    Text(
-                                        text = "The permission to access external storage needed.",
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(MaterialTheme.spacing.small)
-                                    )
+                                ) != PackageManager.PERMISSION_GRANTED) && !granted -> {
                                     Column(
-                                        horizontalAlignment = CenterHorizontally,
-                                        modifier = Modifier.fillMaxWidth()
+                                        modifier = Modifier
+                                            .padding(padding)
+                                            .padding(vertical = 16.dp)
+                                            .fillMaxSize()
                                     ) {
-                                        Button({
+                                        Text(
+                                            text = "The permission to access external storage needed.",
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(MaterialTheme.spacing.small)
+                                        )
+                                        Column(
+                                            horizontalAlignment = CenterHorizontally,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Button({
 //                                            openDirectory()
-                                            requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-                                        }) {
-                                            Text("Grant permission")
+                                                requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                                            }) {
+                                                Text("Grant permission")
+                                            }
                                         }
                                     }
                                 }
-                            } else if (granted || (ActivityCompat.checkSelfPermission(
+                                granted || (ActivityCompat.checkSelfPermission(
                                     requireContext(),
                                     Manifest.permission.READ_EXTERNAL_STORAGE
-                                ) == PackageManager.PERMISSION_GRANTED)
-                            ) {
-                                Column {
-                                    val isRefreshing by viewModel.isRefreshing.collectAsState()
-                                    viewModel.loadSongs()
+                                ) == PackageManager.PERMISSION_GRANTED) -> {
+                                    Column {
+                                        val isRefreshing by viewModel.isRefreshing.collectAsState()
+                                        viewModel.loadSongs()
 
-                                    SwipeRefresh(
-                                        state = rememberSwipeRefreshState(isRefreshing),
-                                        onRefresh = { viewModel.refresh() },
-                                    ) {
-                                        songs?.let { songs ->
-                                            LazyColumn(
-                                                modifier = Modifier.padding(
-                                                    MaterialTheme.spacing.medium
-                                                )
-                                            ) {
-                                                items(songs, key = { it.URI }) { song ->
-                                                    SongRow(song)
+                                        SwipeRefresh(
+                                            state = rememberSwipeRefreshState(isRefreshing),
+                                            onRefresh = { viewModel.refresh() },
+                                        ) {
+                                            songs?.let { songs ->
+                                                LazyColumn(
+                                                    modifier = Modifier.padding(
+                                                        MaterialTheme.spacing.medium
+                                                    )
+                                                ) {
+                                                    items(songs, key = { it.URI }) { song ->
+                                                        SongRow(song)
+                                                    }
                                                 }
                                             }
                                         }
@@ -234,10 +235,12 @@ class SongListFragment : Fragment() {
                                             Icon(
                                                 painter = rememberVectorPainter(
                                                     ImageVector.vectorResource(
-                                                        if (musicState?.state == PlaybackStateCompat.STATE_PLAYING)
-                                                            R.drawable.ic_pause_new
-                                                        else
-                                                            R.drawable.ic_play_button_arrowhead
+                                                        when (musicState?.state) {
+                                                            PlaybackStateCompat.STATE_PLAYING ->
+                                                                R.drawable.ic_pause_new
+                                                            else ->
+                                                                R.drawable.ic_play_button_arrowhead
+                                                        }
                                                     )
                                                 ),
                                                 contentDescription = "Play",
@@ -307,14 +310,17 @@ class SongListFragment : Fragment() {
     // Function to play song from a bottom bar
     private fun playSong() {
         val playbackState = viewModel.musicState.value?.state ?: return
-        if (playbackState == PlaybackStateCompat.STATE_PLAYING) {
-            viewModel.pause()
-            // Preemptively set icon
-            // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
-        } else {
-            viewModel.play()
-            // Preemptively set icon
-            // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+        when (playbackState) {
+            PlaybackStateCompat.STATE_PLAYING -> {
+                viewModel.pause()
+                // Preemptively set icon
+                // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+            }
+            else -> {
+                viewModel.play()
+                // Preemptively set icon
+                // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+            }
         }
     }
 

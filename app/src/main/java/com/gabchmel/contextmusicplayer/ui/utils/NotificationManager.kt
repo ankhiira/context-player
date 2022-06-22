@@ -40,7 +40,7 @@ object NotificationManager {
                     description = descriptionText
                 }
 
-            val notificationManager: NotificationManager =
+            val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             notificationManager.createNotificationChannel(notificationChannel)
@@ -106,12 +106,9 @@ object NotificationManager {
         return builder.build()
     }
 
-    // Function to display the notification
     fun displayNotification(context: Context, notification: Notification) {
-        // Creates notification object with set parameters
-        with(NotificationManagerCompat.from(context)) {
+        NotificationManagerCompat.from(context).run {
             notify(notificationID, notification)
         }
     }
-
 }

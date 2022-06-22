@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
@@ -64,12 +67,11 @@ class OnDeviceSensorsFragment : Fragment() {
                                 backgroundColor = Color.Transparent
                             )
                         },
-                        content = {
+                        content = { padding ->
                             LazyColumn(
                                 verticalArrangement =
                                 Arrangement.spacedBy(MaterialTheme.spacing.medium),
-                                contentPadding =
-                                PaddingValues(horizontal = MaterialTheme.spacing.large),
+                                contentPadding = padding,
                                 modifier = Modifier.padding(vertical = MaterialTheme.spacing.medium)
                             ) {
                                 items(sensorReader.onDeviceSensors) { sensor ->

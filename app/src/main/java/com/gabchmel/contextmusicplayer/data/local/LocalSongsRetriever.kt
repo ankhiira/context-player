@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit
 object LocalSongsRetriever {
 
     @RequiresPermission(READ_EXTERNAL_STORAGE)
-    suspend fun loadSongs(context: Context)=
+    suspend fun loadLocalStorageSongs(context: Context)=
         withContext(Dispatchers.Default) {
-            val songList = mutableListOf<Song>()
+            val songs = mutableListOf<Song>()
 
             // Show only audio files that are at least 1 minute in duration. Requires api Q.
             val selection = "${MediaStore.Audio.Media.DURATION} >= ?"
@@ -47,12 +47,11 @@ object LocalSongsRetriever {
                     val songID = cursor.getLong(idColumn)
                     val title = cursor.getStringOrNull(titleColumn)
                     val author = cursor.getStringOrNull(authorColumn)
-                    val uri: Uri = ContentUris.withAppendedId(
+                    val uri = ContentUris.withAppendedId(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         songID
                     )
 
-                    // Retrieve the album art
                     val metadataRetriever = MediaMetadataRetriever()
                     metadataRetriever.setDataSource(
                         context,
@@ -68,12 +67,9 @@ object LocalSongsRetriever {
                             null
                         }
 
-                    // Save the retrieved song data to Song class
-                    val song = Song(title, author, albumArt, uri)
-                    // Add it to the list of songs
-                    songList.add(song)
+                    songs.add(Song(title, author, albumArt, uri))
                 }
             }
-            return@withContext songList
+            return@withContext songs
         }
 }

@@ -363,30 +363,30 @@ class SensorProcessService : Service() {
     // Function for detection if the device is lying
     private fun processCurrentOrientation() {
         // Inspired by: https://stackoverflow.com/questions/30948131/how-to-know-if-android-device-is-flat-on-table
-        if (coords.size == 3) {
-            val norm = sqrt(
-                (coords[0] * coords[0]
-                        + coords[1] * coords[1]
-                        + coords[2] * coords[2])
-                    .toDouble()
-            )
+        when (coords.size) {
+            3 -> {
+                val norm = sqrt(
+                    (coords[0] * coords[0]
+                            + coords[1] * coords[1]
+                            + coords[2] * coords[2])
+                        .toDouble()
+                )
 
-            // Normalize the accelerometer vector
-            coords[0] = (coords[0] / norm).toFloat()
-            coords[1] = (coords[1] / norm).toFloat()
-            coords[2] = (coords[2] / norm).toFloat()
+                // Normalize the accelerometer vector
+                coords[0] = (coords[0] / norm).toFloat()
+                coords[1] = (coords[1] / norm).toFloat()
+                coords[2] = (coords[2] / norm).toFloat()
 
-            val inclination = Math.toDegrees(acos(coords[2]).toDouble()).roundToInt()
+                val inclination = Math.toDegrees(acos(coords[2]).toDouble()).roundToInt()
 
-            // Device detected as lying is with inclination in range < 25 or > 155 degrees
-            _measuredSensorValues.value.deviceLying =
-                if (inclination < 25 || inclination > 155) 1.0f else 0.0f
-        } else {
-            _measuredSensorValues.value.deviceLying = 0.0f
+                // Device detected as lying is with inclination in range < 25 or > 155 degrees
+                _measuredSensorValues.value.deviceLying =
+                    if (inclination < 25 || inclination > 155) 1.0f else 0.0f
+            }
+            else -> _measuredSensorValues.value.deviceLying = 0.0f
         }
     }
 
-    // Function to detect connection of the bluetooth headset
     private fun detectBluetoothDevicesConnection(context: Context) {
         // Check if the device supports bluetooth
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {

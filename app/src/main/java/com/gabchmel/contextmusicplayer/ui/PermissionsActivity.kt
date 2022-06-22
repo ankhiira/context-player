@@ -32,8 +32,6 @@ class PermissionsActivity : AppCompatActivity() {
     @Composable
     fun PermissionsScreen(requestMultiplePermissions : ActivityResultLauncher<Array<String>>) {
         // Request the permissions on application start
-
-
         var permissionsToRequest = arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,

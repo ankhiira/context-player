@@ -35,6 +35,7 @@ import kotlin.concurrent.fixedRateTimer
 import kotlin.coroutines.suspendCoroutine
 
 
+@Suppress("DEPRECATION")
 class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     private lateinit var mediaSession: MediaSessionCompat
@@ -55,7 +56,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private val metadataRetriever = MediaMetadataRetriever()
     private val myNoisyAudioStreamReceiver = BecomingNoisyReceiver()
 
-    private var sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
+    private val sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
 
     private val binder = object : LocalBinder<MediaPlaybackService>() {
         override fun getService() = this@MediaPlaybackService
@@ -64,6 +65,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     /** Defines callbacks for service binding, passed to bindService()  */
     private val connection = object : ServiceConnection {
 
+        @Suppress("UNCHECKED_CAST")
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
             val binder = service as LocalBinder<SensorProcessService>
@@ -84,7 +86,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         }
     }
 
-    // class to detect BECOMING_NOISY broadcast
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
@@ -97,7 +98,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         }
     }
 
-    var songs = MutableStateFlow(emptyList<Song>())
+    val songs = MutableStateFlow(emptyList<Song>())
 
     // URI of current song played
     val currentSongUri = MutableStateFlow<Uri?>(null)
@@ -139,7 +140,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             Context.BIND_AUTO_CREATE
         )
 
-        // register BECOME_NOISY BroadcastReceiver
         registerReceiver(
             myNoisyAudioStreamReceiver,
             IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
@@ -180,7 +180,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         // Register receiver of the headphones plugged in
         registerReceiver(headsetPlugReceiver, IntentFilter(Intent.ACTION_HEADSET_PLUG))
 
-        // Create and initialize MediaSessionCompat
         mediaSession = MediaSessionCompat(baseContext, "MusicService")
 
         // Setup the mediaSession
@@ -210,25 +209,27 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
 
                 override fun onPlay() {
-
                     if (isSongPredicted) {
                         currentSongUri.value?.let { preparePlayer(it) }
                     }
 
                     isPlaying = true
 
-                    audioFocusGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        // Request audio focus so only on app is playing audio at a time
-                        audioManager.requestAudioFocus(audioFocusRequest)
-                    } else {
-                        // Request audio focus for playback
-                        audioManager.requestAudioFocus(
-                            afChangeListener,
-                            // Use the music stream.
-                            AudioManager.STREAM_MUSIC,
-                            // Request permanent focus.
-                            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
-                        )
+                    audioFocusGranted = when {
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                            // Request audio focus so only on app is playing audio at a time
+                            audioManager.requestAudioFocus(audioFocusRequest)
+                        }
+                        else -> {
+                            // Request audio focus for playback
+                            audioManager.requestAudioFocus(
+                                afChangeListener,
+                                // Use the music stream.
+                                AudioManager.STREAM_MUSIC,
+                                // Request permanent focus.
+                                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+                            )
+                        }
                     }
 
                     if (audioFocusGranted == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
@@ -269,19 +270,21 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                     // Check if the audio focus was requested
                     if (AudioManager.AUDIOFOCUS_REQUEST_GRANTED == audioFocusGranted) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            audioManager.abandonAudioFocusRequest(audioFocusRequest)
-                        } else {
-                            audioManager.abandonAudioFocus(afChangeListener)
+                        when {
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ->
+                                audioManager.abandonAudioFocusRequest(audioFocusRequest)
+                            else ->
+                                audioManager.abandonAudioFocus(afChangeListener)
                         }
                     }
 
                     stopForeground(true)
 
                     // unregister BECOME_NOISY BroadcastReceiver if it was registered
-                    if (isBecomingNoisyRegistered)
+                    if (isBecomingNoisyRegistered) {
                         unregisterReceiver(myNoisyAudioStreamReceiver)
-                    isBecomingNoisyRegistered = false
+                        isBecomingNoisyRegistered = false
+                    }
 
                     isActive = false
                 }
@@ -491,7 +494,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         ) return
 
         CoroutineScope(Dispatchers.Default).launch {
-            songs.value = LocalSongsRetriever.loadSongs(baseContext)
+            songs.value = LocalSongsRetriever.loadLocalStorageSongs(baseContext)
         }
     }
 
@@ -516,6 +519,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             val intent = Intent(context, MediaPlaybackService::class.java)
             intent.putExtra("is_binding", true)
 
+            @Suppress("UNCHECKED_CAST")
             context.bindService(intent, object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder) {
                     cont.resumeWith(kotlin.Result.success((service as LocalBinder<MediaPlaybackService>).getService()))

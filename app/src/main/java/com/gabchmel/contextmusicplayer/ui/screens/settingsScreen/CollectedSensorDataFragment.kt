@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class CollectedSensorDataFragment : Fragment() {
 
-    private var sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
+    private val sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
 
     // Callbacks for service binding
     private val connection = object : ServiceConnection {

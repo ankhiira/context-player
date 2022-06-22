@@ -59,18 +59,20 @@ class NowPlayingFragment : Fragment() {
 
     private fun playSong() {
         val pbState = viewModel.musicState.value?.state ?: return
-        if (pbState == PlaybackStateCompat.STATE_PLAYING) {
-            viewModel.pause()
-            // Preemptively set icon
-            // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
-        } else {
-            if (viewModel.notPlayed) {
-                viewModel.play(args.uri)
-            } else {
-                viewModel.play()
+        when (pbState) {
+            PlaybackStateCompat.STATE_PLAYING -> {
+                viewModel.pause()
+                // Preemptively set icon
+                // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
             }
-            // Preemptively set icon
-            // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+            else -> {
+                when {
+                    viewModel.notPlayed -> viewModel.play(args.uri)
+                    else -> viewModel.play()
+                }
+                // Preemptively set icon
+                // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+            }
         }
     }
 
@@ -229,10 +231,12 @@ class NowPlayingFragment : Fragment() {
                                         painter =
                                         rememberVectorPainter(
                                             ImageVector.vectorResource(
-                                                if (musicState?.state == PlaybackStateCompat.STATE_PLAYING)
-                                                    R.drawable.ic_pause_filled
-                                                else
-                                                    R.drawable.ic_play_filled
+                                                when (musicState?.state) {
+                                                    PlaybackStateCompat.STATE_PLAYING ->
+                                                        R.drawable.ic_pause_filled
+                                                    else ->
+                                                        R.drawable.ic_play_filled
+                                                }
                                             )
                                         ),
                                         contentDescription = "Play",

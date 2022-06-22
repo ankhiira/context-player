@@ -259,9 +259,7 @@ class SensorProcessService : Service() {
         return input
     }
 
-    // TODO release version of code
-    // Function to compare measured values with saved to determine change in context
-    suspend fun detectContextChange(): Boolean {
+    suspend fun hasContextChanged(): Boolean {
         val savedGlobalPreferences = dataStore.data
             .map { preferences ->
                 SensorDataPreferences(

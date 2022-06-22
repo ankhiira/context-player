@@ -24,7 +24,7 @@ import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.local.LocalSongsRetriever
 import com.gabchmel.contextmusicplayer.data.model.Song
-import com.gabchmel.contextmusicplayer.ui.utils.NotificationManager
+import com.gabchmel.contextmusicplayer.ui.utils.notifications.PlaybackNotificationCreator
 import com.gabchmel.contextmusicplayer.utils.*
 import com.gabchmel.sensorprocessor.data.service.SensorProcessService
 import kotlinx.coroutines.CoroutineScope
@@ -254,7 +254,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     updateMetadata()
                     updateState()
                     updateNotification(isPlaying)
-                    startForeground(NotificationManager.notificationID, notification)
+                    startForeground(PlaybackNotificationCreator.playbackNotificationID, notification)
 
                     // register BECOME_NOISY BroadcastReceiver
                     registerReceiver(
@@ -378,30 +378,30 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, metadataRetriever.getAlbum())
             .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, metadataRetriever.getAlbumArt())
 
-        // set song duration
         metadataRetriever.getDuration()?.let { duration ->
             metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
         }
 
-        // Set metadata to the mediaSession
         mediaSession.setMetadata(metadataBuilder.build())
     }
 
     fun updateNotification(isPlaying: Boolean) {
-        // Recreate notification
-        notification = NotificationManager.createNotification(
+        notification = PlaybackNotificationCreator.createNotification(
             baseContext,
             null,
-            metadataRetriever.getTitle() ?: "unknown",
-            metadataRetriever.getArtist() ?: "unknown",
-            metadataRetriever.getAlbumArt() ?: BitmapFactory.decodeResource(
-                resources,
-                R.raw.album_cover_clipart
+            Song(
+                metadataRetriever.getTitle() ?: "unknown",
+                metadataRetriever.getArtist() ?: "unknown",
+                metadataRetriever.getAlbumArt() ?: BitmapFactory.decodeResource(
+                    resources,
+                    R.raw.album_cover_clipart
+                ),
+                Uri.EMPTY
             ),
             isPlaying
         )
 
-        NotificationManager.displayNotification(baseContext, notification)
+        PlaybackNotificationCreator.displayNotification(baseContext, notification)
     }
 
     // Function to set the metadata for a current song from URI

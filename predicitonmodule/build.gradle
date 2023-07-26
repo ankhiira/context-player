@@ -31,6 +31,7 @@ android {
     buildFeatures {
         mlModelBinding true
     }
+    namespace 'com.gabchmel.predicitonmodule'
 }
 
 dependencies {

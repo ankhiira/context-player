@@ -12,3 +12,5 @@
 /captures
 .externalNativeBuild
 .cxx
+/.idea/kotlinc.xml
+/.idea/migrations.xml

@@ -25,15 +25,14 @@ android {
         dataBinding true
     }
 
-    // Set both the Java and Kotlin compilers to target Java 8.
-
+    // Set both the Java and Kotlin compilers to target Java 17.
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
         freeCompilerArgs += [
                 "-P",
                 "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true",
@@ -42,7 +41,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.2.0-beta03'
+        kotlinCompilerExtensionVersion '1.5.1'
     }
 
     buildTypes {

@@ -15,7 +15,11 @@ import androidx.core.app.ActivityCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.lifecycleScope
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.gabchmel.common.data.GlobalPreferences
 import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.utils.bindService
@@ -84,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } else {
-                // If the permission is now enabled, register location listener
+                // If the permission is granted, register location listener
                 val savedGlobalPreferences = dataStore.data
                     .map { preferences ->
                         val isLocationGranted =
@@ -93,16 +97,16 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    savedGlobalPreferences.collect { preference ->
-                        if (!preference.locationGranted) {
+                    savedGlobalPreferences.collect { preferences ->
+                        if (!preferences.isLocationGranted) {
                             lifecycleScope.launch {
                                 val service =
                                     this@MainActivity.bindService(SensorProcessService::class.java)
                                 service.registerLocationListener()
                             }
 
-                            dataStore.edit { preferences ->
-                                preferences[PreferencesKeys.LOCATION_GRANTED] = true
+                            dataStore.edit { preferencesOther ->
+                                preferencesOther[PreferencesKeys.LOCATION_GRANTED] = true
                             }
                         }
                     }

@@ -485,11 +485,17 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         return super.onStartCommand(intent, flags, startId)
     }
 
+    private val permission =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            Manifest.permission.READ_MEDIA_AUDIO
+        else
+            Manifest.permission.READ_EXTERNAL_STORAGE
+
     // Load songs from local storage
     fun loadSongs() {
         if (ActivityCompat.checkSelfPermission(
                 baseContext,
-                Manifest.permission.READ_EXTERNAL_STORAGE
+                permission
             ) != PackageManager.PERMISSION_GRANTED
         ) return
 

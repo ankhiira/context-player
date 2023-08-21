@@ -1,6 +1,7 @@
 package com.gabchmel.contextmusicplayer.data.local
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.READ_MEDIA_AUDIO
 import android.content.ContentUris
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit
 // Song retriever from local storage
 object LocalSongsRetriever {
 
-    @RequiresPermission(READ_EXTERNAL_STORAGE)
+    @RequiresPermission(anyOf = [READ_EXTERNAL_STORAGE, READ_MEDIA_AUDIO])
     suspend fun loadLocalStorageSongs(context: Context)=
         withContext(Dispatchers.Default) {
             val songs = mutableListOf<Song>()

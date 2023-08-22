@@ -64,7 +64,7 @@ android {
 
         fullVariant {
             dimension "mode"
-            applicationIdSuffix ".full"
+            applicationIdSuffix ".release"
             versionNameSuffix "-full"
             buildConfigField 'boolean', 'IS_DEBUG', 'false'
         }

@@ -220,6 +220,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                             // Request audio focus so only on app is playing audio at a time
                             audioManager.requestAudioFocus(audioFocusRequest)
                         }
+
                         else -> {
                             // Request audio focus for playback
                             audioManager.requestAudioFocus(
@@ -254,7 +255,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     updateMetadata()
                     updateState()
                     updateNotification(isPlaying)
-                    startForeground(PlaybackNotificationCreator.playbackNotificationID, notification)
+                    startForeground(
+                        PlaybackNotificationCreator.playbackNotificationID,
+                        notification
+                    )
 
                     // register BECOME_NOISY BroadcastReceiver
                     registerReceiver(
@@ -273,6 +277,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                         when {
                             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ->
                                 audioManager.abandonAudioFocusRequest(audioFocusRequest)
+
                             else ->
                                 audioManager.abandonAudioFocus(afChangeListener)
                         }
@@ -353,6 +358,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
         }
     }
+
 
     // Function to update playback state of the service
     fun updateState() {

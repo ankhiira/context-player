@@ -7,6 +7,8 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresPermission
@@ -21,7 +23,7 @@ import java.util.concurrent.TimeUnit
 object LocalSongsRetriever {
 
     @RequiresPermission(anyOf = [READ_EXTERNAL_STORAGE, READ_MEDIA_AUDIO])
-    suspend fun loadLocalStorageSongs(context: Context)=
+    suspend fun loadLocalStorageSongs(context: Context) =
         withContext(Dispatchers.Default) {
             val songs = mutableListOf<Song>()
 
@@ -31,9 +33,18 @@ object LocalSongsRetriever {
                 TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES).toString()
             )
 
+            val collection =
+                if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+                    MediaStore.Audio.Media.getContentUri(
+                        MediaStore.VOLUME_EXTERNAL
+                    )
+                } else {
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                }
+
             // Query the local media folder
             context.contentResolver.query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                collection,
                 null,
                 selection,
                 selectionArgs,

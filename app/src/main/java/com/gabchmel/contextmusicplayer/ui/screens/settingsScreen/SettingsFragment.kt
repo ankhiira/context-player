@@ -7,12 +7,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -136,6 +151,43 @@ class SettingsFragment : Fragment() {
                                     Icon(
                                         imageVector = Icons.Filled.NavigateNext,
                                         contentDescription = "Settings",
+                                    )
+                                }
+                                Column {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable(onClick = {
+                                                findNavController().navigate(
+                                                    SettingsFragmentDirections
+                                                        .actionSettingsFragmentToSensorValuesFragment()
+                                                )
+                                            }),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row {
+                                            Icon(
+                                                imageVector = Icons.Filled.Note,
+                                                contentDescription = "Privacy policy icon",
+                                            )
+                                            Text(
+                                                text = "Privacy policy",
+                                                color = materialYel400,
+                                                fontSize = 18.sp,
+                                                modifier = Modifier.padding(horizontal = 8.dp)
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = Icons.Filled.NavigateNext,
+                                            contentDescription = "Navigation icon",
+                                        )
+                                    }
+                                    val uriHandler = LocalUriHandler.current
+                                    Text(
+                                        modifier = Modifier.clickable {
+                                            uriHandler.openUri("https://github.com/ankhiira/context-player/blob/dev/privacyPolicy/Privacy%20Policy.txt")
+                                        },
+                                        text = "privacy policy"
                                     )
                                 }
                                 Row {
@@ -255,7 +307,7 @@ class SettingsFragment : Fragment() {
                                                     )
                                                 val origFilePrediction =
                                                     File(context.filesDir, "predictions.csv")
-                                                val origFileData=
+                                                val origFileData =
                                                     File(context.filesDir, "data.csv")
 
                                                 val arrayList = ArrayList<Uri>()

@@ -22,7 +22,7 @@ import androidx.work.WorkManager
 import com.gabchmel.common.data.GlobalPreferences
 import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.utils.bindService
-import com.gabchmel.contextmusicplayer.checkPermissionLocal
+import com.gabchmel.contextmusicplayer.isPermissionNotGranted
 import com.gabchmel.contextmusicplayer.ui.utils.PredictionWorker
 import com.gabchmel.sensorprocessor.data.service.SensorProcessService
 import kotlinx.coroutines.CoroutineScope
@@ -68,9 +68,9 @@ class MainActivity : AppCompatActivity() {
 
         try {
             // When the activity is opened again, check if the permissions state didn't change
-            if (checkPermissionLocal(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                || checkPermissionLocal(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                || checkPermissionLocal(this, Manifest.permission.ACTIVITY_RECOGNITION)
+            if (isPermissionNotGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                || isPermissionNotGranted(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                || isPermissionNotGranted(this, Manifest.permission.ACTIVITY_RECOGNITION)
             ) {
                 CoroutineScope(Dispatchers.IO).launch {
                     dataStore.edit { preferences ->

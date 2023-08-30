@@ -2,7 +2,6 @@ package com.gabchmel.contextmusicplayer.ui.screens.playlistScreen
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.support.v4.media.session.PlaybackStateCompat
@@ -32,6 +31,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -47,10 +48,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.model.Song
+import com.gabchmel.contextmusicplayer.isPermissionNotGranted
 import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
 import com.gabchmel.contextmusicplayer.utils.getAlbumArt
@@ -59,15 +60,12 @@ import com.gabchmel.contextmusicplayer.utils.getTitle
 import com.google.accompanist.glide.rememberGlidePainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongListScreen() {
     val viewModel: SongListViewModel = viewModel()
-    val _isPermGranted = MutableStateFlow(false)
-    val isPermissionGranted: StateFlow<Boolean> = _isPermGranted
+    val isPermissionGranted by remember { mutableStateOf(false) }
     val songs by viewModel.songs.collectAsState()
     val context = LocalContext.current
 
@@ -119,8 +117,6 @@ fun SongListScreen() {
         },
         content = { padding ->
             // Component to grant the permissions
-            val granted by isPermissionGranted.collectAsState()
-
             val permission =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                     Manifest.permission.READ_MEDIA_AUDIO
@@ -128,10 +124,7 @@ fun SongListScreen() {
                     Manifest.permission.READ_EXTERNAL_STORAGE
 
             when {
-                (ActivityCompat.checkSelfPermission(
-                    context,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED) && !granted -> {
+                isPermissionNotGranted(context, permission) && !isPermissionGranted -> {
                     Column(
                         modifier = Modifier
                             .padding(padding)
@@ -157,10 +150,7 @@ fun SongListScreen() {
                     }
                 }
 
-                granted || (ActivityCompat.checkSelfPermission(
-                    context,
-                    permission
-                ) == PackageManager.PERMISSION_GRANTED) -> {
+                isPermissionGranted || !isPermissionNotGranted(context, permission) -> {
                     Column {
                         val isRefreshing by viewModel.isRefreshing.collectAsState()
                         viewModel.loadSongs()

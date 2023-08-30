@@ -101,10 +101,10 @@ class SettingsScreen : Fragment() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable(onClick = {
-                                            findNavController().navigate(
-                                                SettingsFragmentDirections
-                                                    .actionSettingsFragmentToSensorScreen()
-                                            )
+//                                            findNavController().navigate(
+//                                                SettingsFragmentDirections
+//                                                    .actionSettingsFragmentToSensorScreen()
+//                                            )
                                         }),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
@@ -129,10 +129,10 @@ class SettingsScreen : Fragment() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable(onClick = {
-                                            findNavController().navigate(
-                                                SettingsFragmentDirections
-                                                    .actionSettingsFragmentToSensorValuesFragment()
-                                            )
+//                                            findNavController().navigate(
+//                                                SettingsFragmentDirections
+//                                                    .actionSettingsFragmentToSensorValuesFragment()
+//                                            )
                                         }),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
@@ -158,10 +158,10 @@ class SettingsScreen : Fragment() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable(onClick = {
-                                                findNavController().navigate(
-                                                    SettingsFragmentDirections
-                                                        .actionSettingsFragmentToSensorValuesFragment()
-                                                )
+//                                                findNavController().navigate(
+//                                                    SettingsFragmentDirections
+//                                                        .actionSettingsFragmentToSensorValuesFragment()
+//                                                )
                                             }),
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {

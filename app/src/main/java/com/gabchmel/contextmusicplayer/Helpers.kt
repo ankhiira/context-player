@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 
-fun checkPermissionLocal(
+fun isPermissionNotGranted(
     context: Context,
     permission: String
 ): Boolean {

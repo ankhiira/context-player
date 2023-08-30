@@ -7,11 +7,13 @@ import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
+import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.lifecycleScope
@@ -44,10 +46,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        setContent {
+            ContextPlayerApp()
+        }
+
         // Bind the layout with object
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+//        binding = ActivityMainBinding.inflate(layoutInflater)
+//        val view = binding.root
+//        setContentView(view)
 
         // Adjust music volume with volume controls - volume controls adjust right stream
         volumeControlStream = AudioManager.STREAM_MUSIC

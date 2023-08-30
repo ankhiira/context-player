@@ -10,7 +10,7 @@ android {
         applicationId "com.gabchmel.contextmusicplayer"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 13
+        versionCode 15
         versionName "1.3.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

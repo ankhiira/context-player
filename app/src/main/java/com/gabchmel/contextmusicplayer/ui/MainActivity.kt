@@ -3,7 +3,6 @@ package com.gabchmel.contextmusicplayer.ui
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
@@ -12,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -25,7 +23,7 @@ import androidx.work.WorkManager
 import com.gabchmel.common.data.GlobalPreferences
 import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.utils.bindService
-import com.gabchmel.contextmusicplayer.databinding.ActivityMainBinding
+import com.gabchmel.contextmusicplayer.checkPermissionLocal
 import com.gabchmel.contextmusicplayer.ui.utils.PredictionWorker
 import com.gabchmel.sensorprocessor.data.service.SensorProcessService
 import kotlinx.coroutines.CoroutineScope
@@ -35,9 +33,6 @@ import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
-
-    // View binding for activity_main.xml file
-    private lateinit var binding: ActivityMainBinding
 
     private object PreferencesKeys {
         val LOCATION_GRANTED = booleanPreferencesKey("location_permitted")
@@ -51,11 +46,6 @@ class MainActivity : AppCompatActivity() {
         setContent {
             ContextPlayerApp()
         }
-
-        // Bind the layout with object
-//        binding = ActivityMainBinding.inflate(layoutInflater)
-//        val view = binding.root
-//        setContentView(view)
 
         // Adjust music volume with volume controls - volume controls adjust right stream
         volumeControlStream = AudioManager.STREAM_MUSIC
@@ -78,17 +68,10 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         try {
-            // When the activity is opened again, check if the permission didn't change
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACTIVITY_RECOGNITION
-                ) != PackageManager.PERMISSION_GRANTED
+            // When the activity is opened again, check if the permissions state didn't change
+            if (checkPermissionLocal(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                || checkPermissionLocal(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                || checkPermissionLocal(this, Manifest.permission.ACTIVITY_RECOGNITION)
             ) {
                 CoroutineScope(Dispatchers.IO).launch {
                     dataStore.edit { preferences ->

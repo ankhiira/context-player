@@ -54,7 +54,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 
 
-class SettingsFragment : Fragment() {
+class SettingsScreen : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

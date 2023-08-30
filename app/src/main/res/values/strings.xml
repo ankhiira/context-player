@@ -3,4 +3,6 @@
     <string name="album_art">Album Art</string>
     <string name="playlists">Playlists</string>
     <string name="home">Home</string>
+    <string name="general_unknown">Unknown</string>
+    <string name="playlist_topbar_title">Playlist</string>
 </resources>

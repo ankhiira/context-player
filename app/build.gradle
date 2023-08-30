@@ -4,7 +4,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.gabchmel.contextmusicplayer"
@@ -34,15 +34,10 @@ android {
 
     kotlinOptions {
         jvmTarget = '17'
-        freeCompilerArgs += [
-                "-P",
-                "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true",
-                "-opt-in=kotlin.RequiresOptIn"
-        ]
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.5.1'
+        kotlinCompilerExtensionVersion '1.5.3'
     }
 
     buildTypes {
@@ -109,23 +104,27 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     // Compose
-    implementation 'androidx.compose.ui:ui:1.2.0-beta03'
+    def compose_version = "1.5.0"
+    implementation "androidx.compose.ui:ui:$compose_version"
     // Tooling support (Previews, etc.)
-    implementation 'androidx.compose.ui:ui-tooling:1.2.0-beta03'
+    implementation "androidx.compose.ui:ui-tooling:$compose_version"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation 'androidx.compose.foundation:foundation:1.2.0-beta03'
+    implementation "androidx.compose.foundation:foundation:$compose_version"
+
+    implementation("androidx.compose.material3:material3:1.1.1")
     // Material Design
-    implementation 'androidx.compose.material:material:1.2.0-beta03'
+    implementation "androidx.compose.material:material:$compose_version"
     // Material design icons
     implementation 'androidx.compose.material:material-icons-core:1.2.0-beta03'
     implementation 'androidx.compose.material:material-icons-extended:1.2.0-beta03'
+    // Integration with observables
+    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
+    implementation "androidx.compose.runtime:runtime-rxjava2:$compose_version"
+
     // Integration with activities
     implementation 'androidx.activity:activity-compose:1.5.0-rc01'
     // Integration with ViewModels
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.0-rc01'
-    // Integration with observables
-    implementation 'androidx.compose.runtime:runtime-livedata:1.2.0-beta03'
-    implementation 'androidx.compose.runtime:runtime-rxjava2:1.2.0-beta03'
     // Navigation
     implementation "androidx.navigation:navigation-compose:2.5.0-rc01"
 

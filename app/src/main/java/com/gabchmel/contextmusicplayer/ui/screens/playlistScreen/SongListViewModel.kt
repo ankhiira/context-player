@@ -17,7 +17,13 @@ import com.gabchmel.contextmusicplayer.data.service.MediaPlaybackService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -160,6 +166,24 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
             boundService.getCompleted().service.loadSongs()
         } catch (e: Exception) {
             println(e)
+        }
+    }
+
+    // Function to play song from a bottom bar
+    fun playSong() {
+        val playbackState = this.musicState.value?.state ?: return
+        when (playbackState) {
+            PlaybackStateCompat.STATE_PLAYING -> {
+                this.pause()
+                // Preemptively set icon
+                // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+            }
+
+            else -> {
+                this.play()
+                // Preemptively set icon
+                // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+            }
         }
     }
 

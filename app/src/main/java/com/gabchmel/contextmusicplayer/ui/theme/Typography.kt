@@ -13,6 +13,7 @@ val appFontFamily = FontFamily(
 )
 
 private val defaultTypography = Typography()
+
 val MyTypography = Typography(
     h1 = defaultTypography.h1.copy(fontFamily = appFontFamily),
     body1 = defaultTypography.body1.copy(fontFamily = appFontFamily)

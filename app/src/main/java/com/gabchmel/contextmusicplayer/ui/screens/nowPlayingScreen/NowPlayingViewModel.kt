@@ -26,7 +26,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     private val _musicMetadata = MutableStateFlow<MediaMetadataCompat?>(null)
     val musicMetadata: StateFlow<MediaMetadataCompat?> = _musicMetadata
 
-    lateinit var args: NowPlayingFragmentArgs
+    //    lateinit var args: NowPlayingFragmentArgs
     var notPlayed = true
 
     private val controllerCallback = object : MediaControllerCompat.Callback() {
@@ -55,10 +55,10 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
                 mediaController?.registerCallback(controllerCallback)
 
                 // Play after fragment is open
-                if (args.play && notPlayed) {
-                    play(args.uri)
-                    notPlayed = false
-                }
+//                if (args.play && notPlayed) {
+//                    play(args.uri)
+//                    notPlayed = false
+//                }
             }
         }
 
@@ -86,11 +86,11 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     // To play any other time
-    fun play() {
+    private fun play() {
         mediaController?.transportControls?.play()
     }
 
-    fun pause() {
+    private fun pause() {
         mediaController?.transportControls?.pause()
     }
 
@@ -104,5 +104,25 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
     fun setMusicProgress(progress: Float) {
         mediaController?.transportControls?.seekTo(progress.toLong())
+    }
+
+    fun playSong() {
+        val pbState = this.musicState.value?.state ?: return
+        when (pbState) {
+            PlaybackStateCompat.STATE_PLAYING -> {
+                this.pause()
+                // Preemptively set icon
+                // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
+            }
+
+            else -> {
+                when {
+//                    this.notPlayed -> this.play(args.uri)
+                    else -> this.play()
+                }
+                // Preemptively set icon
+                // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+            }
+        }
     }
 }

@@ -173,12 +173,9 @@ fun SongListScreen(navController: NavHostController) {
                                         SongItem(
                                             song,
                                             onItemSelected = {
-//                                                                findNavController().navigate(
-//                                                                    SongListFragmentDirections.actionSongListFragmentToHomeFragment(
-//                                                                        uri = song.URI,
+                                                navController.navigate("now_playing")
+//                                                uri = song.URI,
 //                                                                        play = true
-//                                                                    )
-//                                                                )
                                             }
                                         )
                                     }

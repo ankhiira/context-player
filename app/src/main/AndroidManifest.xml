@@ -60,7 +60,7 @@
         </service>
 
         <service
-            android:name="com.gabchmel.sensorprocessor.data.service.SensorProcessService"
+            android:name="com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService"
             android:exported="true">
    <!--         android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>

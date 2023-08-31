@@ -162,10 +162,10 @@ fun SettingsScreen(navController: NavHostController) {
                         },
                         dismissButton = {
                             Button(
-
                                 onClick = {
                                     openDialog.value = false
-                                }) {
+                                }
+                            ) {
                                 Text("NO")
                             }
                         }
@@ -175,7 +175,7 @@ fun SettingsScreen(navController: NavHostController) {
                     textRes = R.string.settings_button_item_send_data,
                     buttonRes = R.string.settings_item_button_send_data,
                     onClick = {
-                        halo(context)
+                        sendEmail(context)
                     }
                 )
             }
@@ -183,7 +183,7 @@ fun SettingsScreen(navController: NavHostController) {
     )
 }
 
-private fun halo(context: Context) {
+private fun sendEmail(context: Context) {
     val locationNewFile =
         File(context.filesDir, "convertedData.csv")
     val origFileArff =
@@ -196,7 +196,7 @@ private fun halo(context: Context) {
     val origFileData =
         File(context.filesDir, "data.csv")
 
-    val arrayList = ArrayList<Uri>()
+    val data = ArrayList<Uri>()
 
     val pathResultData =
         convertFileForSend(
@@ -226,36 +226,22 @@ private fun halo(context: Context) {
             ".csv",
             origFileData
         )
-    arrayList.add(pathResultData)
-    arrayList.add(pathResultArff)
-    arrayList.add(pathResultPrediction)
-    arrayList.add(pathResultDataOriginal)
+    data.add(pathResultData)
+    data.add(pathResultArff)
+    data.add(pathResultPrediction)
+    data.add(pathResultDataOriginal)
 
-    val emailIntent =
-        Intent(Intent.ACTION_SEND_MULTIPLE)
-    // Email type
-    emailIntent.type = "text/csv"
-    // The email recipient
-    emailIntent.putExtra(
-        Intent.EXTRA_EMAIL,
-        arrayOf("chmelarova.gabik@gmail.com")
-    )
-    // the attachment
-    emailIntent.putParcelableArrayListExtra(
-        Intent.EXTRA_STREAM,
-        arrayList
-    )
-    // the mail subject
-    emailIntent.putExtra(
-        Intent.EXTRA_SUBJECT,
-        "Data from "
-    )
-    emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    val emailIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+        // Email type
+        type = "text/csv"
+        // Recipient
+        putExtra(Intent.EXTRA_EMAIL, arrayOf("chmelarova.gabik@gmail.com"))
+        // Attachment
+        putParcelableArrayListExtra(Intent.EXTRA_STREAM, data)
+        // Subject
+        putExtra(Intent.EXTRA_SUBJECT, R.string.email_data_from)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
 
-//                                startActivityForResult(
-//                                    Intent.createChooser(
-//                                        emailIntent,
-//                                        "Send email..."
-//                                    ), 1234
-//                                )
+    context.startActivity(emailIntent)
 }

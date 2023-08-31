@@ -24,7 +24,7 @@ import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.isPermissionNotGranted
 import com.gabchmel.contextmusicplayer.ui.utils.PredictionWorker
-import com.gabchmel.sensorprocessor.data.service.SensorProcessService
+import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
@@ -50,13 +50,13 @@ class MainActivity : AppCompatActivity() {
         volumeControlStream = AudioManager.STREAM_MUSIC
 
         // Start SensorProcessService to collect sensor values
-        Intent(this, SensorProcessService::class.java).also { intent ->
+        Intent(this, SensorDataProcessingService::class.java).also { intent ->
             startService(intent)
         }
 
         // Save the current sensor values to shared preferences
         lifecycleScope.launch {
-            val service = this@MainActivity.bindService(SensorProcessService::class.java)
+            val service = this@MainActivity.bindService(SensorDataProcessingService::class.java)
             service.saveSensorValuesToSharedPrefs()
         }
 
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
                         if (!preferences.isLocationGranted) {
                             lifecycleScope.launch {
                                 val service =
-                                    this@MainActivity.bindService(SensorProcessService::class.java)
+                                    this@MainActivity.bindService(SensorDataProcessingService::class.java)
                                 service.registerLocationListener()
                             }
 

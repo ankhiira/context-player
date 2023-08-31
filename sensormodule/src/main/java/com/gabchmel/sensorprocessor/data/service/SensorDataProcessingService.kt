@@ -58,7 +58,7 @@ import kotlin.math.sqrt
 import kotlin.reflect.full.memberProperties
 
 
-class SensorProcessService : Service() {
+class SensorDataProcessingService : Service() {
 
     // Structure to store sensor values
     private val _measuredSensorValues = MutableStateFlow(MeasuredSensorValues())
@@ -76,8 +76,8 @@ class SensorProcessService : Service() {
     val prediction: StateFlow<String?> = _prediction
 
     // Service binder given to clients
-    private val binder = object : LocalBinder<SensorProcessService>() {
-        override fun getService() = this@SensorProcessService
+    private val binder = object : LocalBinder<SensorDataProcessingService>() {
+        override fun getService() = this@SensorDataProcessingService
     }
 
     private var processedCsvValues: ProcessedCsvValues = ProcessedCsvValues()

@@ -23,7 +23,7 @@ import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.data.model.Song
 import com.gabchmel.contextmusicplayer.ui.utils.notifications.PredictionNotificationCreator
-import com.gabchmel.sensorprocessor.data.service.SensorProcessService
+import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
@@ -105,7 +105,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
 
     private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
         lifecycleOwner.whenCreated {
-            val service = context.bindService(SensorProcessService::class.java)
+            val service = context.bindService(SensorDataProcessingService::class.java)
             if (service.createModel()) {
                 contextData = service.triggerPrediction()
 //                CollectedSensorDataScreen.updateUI(contextData)

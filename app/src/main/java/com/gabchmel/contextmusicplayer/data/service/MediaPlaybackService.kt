@@ -26,7 +26,7 @@ import com.gabchmel.contextmusicplayer.data.local.LocalSongsRetriever
 import com.gabchmel.contextmusicplayer.data.model.Song
 import com.gabchmel.contextmusicplayer.ui.utils.notifications.PlaybackNotificationCreator
 import com.gabchmel.contextmusicplayer.utils.*
-import com.gabchmel.sensorprocessor.data.service.SensorProcessService
+import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -56,7 +56,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private val metadataRetriever = MediaMetadataRetriever()
     private val myNoisyAudioStreamReceiver = BecomingNoisyReceiver()
 
-    private val sensorProcessService = MutableStateFlow<SensorProcessService?>(null)
+    private val sensorDataProcessingService = MutableStateFlow<SensorDataProcessingService?>(null)
 
     private val binder = object : LocalBinder<MediaPlaybackService>() {
         override fun getService() = this@MediaPlaybackService
@@ -68,8 +68,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         @Suppress("UNCHECKED_CAST")
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to SensorProcessService, cast the IBinder and get SensorProcessService instance
-            val binder = service as LocalBinder<SensorProcessService>
-            sensorProcessService.value = binder.getService()
+            val binder = service as LocalBinder<SensorDataProcessingService>
+            sensorDataProcessingService.value = binder.getService()
             isBound = true
         }
 
@@ -135,7 +135,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
         // Bind to SensorProcessService to later write to the file
         this.bindService(
-            Intent(this, SensorProcessService::class.java),
+            Intent(this, SensorDataProcessingService::class.java),
             connection,
             Context.BIND_AUTO_CREATE
         )
@@ -353,7 +353,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     currentSong.value?.author?.let { author ->
                         // Create a hashCode to use it as ID of the song
                         val titleAuthor = "$title,$author".hashCode().toUInt()
-                        sensorProcessService.value?.writeToFile(titleAuthor.toString())
+                        sensorDataProcessingService.value?.writeToFile(titleAuthor.toString())
                     }
                 }
         }

@@ -5,4 +5,13 @@
     <string name="home">Home</string>
     <string name="general_unknown">Unknown</string>
     <string name="playlist_topbar_title">Playlist</string>
+    <string name="settings_item_sensors">On device sensors</string>
+    <string name="settings_item_data">Collected sensor data</string>
+    <string name="settings_item_privacy_policy">Privacy policy icon</string>
+    <string name="settings_button_item_recreate_model">Clicking on this causes recreation of the model and triggers new song prediction</string>
+    <string name="settings_item_button_recreate_model">Recreate model</string>
+    <string name="settings_button_item_delete_data">Clicking on this deletes all collected sensor data used for song prediction</string>
+    <string name="settings_item_button_delete_data">Delete saved data</string>
+    <string name="settings_button_item_send_data">Clicking on this sends all data collected for song prediction</string>
+    <string name="settings_item_button_send_data">Send collected data</string>
 </resources>

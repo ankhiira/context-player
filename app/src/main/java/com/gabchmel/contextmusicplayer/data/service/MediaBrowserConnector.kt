@@ -1,6 +1,11 @@
 package com.gabchmel.contextmusicplayer.data.service
 
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.net.Uri
 import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
@@ -17,12 +22,17 @@ import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.data.model.Song
-import com.gabchmel.contextmusicplayer.ui.screens.settingsScreen.CollectedSensorDataFragment
 import com.gabchmel.contextmusicplayer.ui.utils.notifications.PredictionNotificationCreator
 import com.gabchmel.sensorprocessor.data.service.SensorProcessService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.coroutines.resume
@@ -98,7 +108,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
             val service = context.bindService(SensorProcessService::class.java)
             if (service.createModel()) {
                 contextData = service.triggerPrediction()
-                CollectedSensorDataFragment.updateUI(contextData)
+//                CollectedSensorDataScreen.updateUI(contextData)
             }
             service
         }

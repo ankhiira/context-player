@@ -48,7 +48,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.model.Song
 import com.gabchmel.contextmusicplayer.isPermissionNotGranted
@@ -63,7 +65,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SongListScreen() {
+fun SongListScreen(navController: NavHostController) {
     val viewModel: SongListViewModel = viewModel()
     val isPermissionGranted by remember { mutableStateOf(false) }
     val songs by viewModel.songs.collectAsState()
@@ -93,19 +95,21 @@ fun SongListScreen() {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        stringResource(id = R.string.playlist_topbar_title),
+                        text = stringResource(id = R.string.playlist_topbar_title),
+                        fontSize = 20.sp,
                         fontFamily = appFontFamily
                     )
                 },
                 actions = {
                     IconButton(
                         onClick = {
-//                                            findNavController().navigate(R.id.settingsFragment)
+                            navController.navigate("settings")
                         },
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
                             contentDescription = "Settings",
+                            modifier = Modifier.size(24.dp),
                             tint = MaterialTheme.colors.onPrimary
                         )
                     }

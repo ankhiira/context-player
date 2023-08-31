@@ -45,10 +45,10 @@
     </fragment>
     <fragment
         android:id="@+id/sensorScreen"
-        android:name="com.gabchmel.contextmusicplayer.ui.screens.settingsScreen.OnDeviceSensorsFragment"
+        android:name="com.gabchmel.contextmusicplayer.ui.screens.onDeviceSensors.OnDeviceSensorsScreen"
         android:label="SensorScreen" />
     <fragment
         android:id="@+id/sensorValuesFragment"
-        android:name="com.gabchmel.contextmusicplayer.ui.screens.settingsScreen.CollectedSensorDataFragment"
+        android:name="com.gabchmel.contextmusicplayer.ui.screens.collectedSensorData.CollectedSensorDataScreen"
         android:label="SensorValuesFragment" />
 </navigation>

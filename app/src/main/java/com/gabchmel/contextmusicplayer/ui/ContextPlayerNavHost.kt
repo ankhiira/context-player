@@ -4,7 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.gabchmel.contextmusicplayer.ui.screens.collectedSensorData.CollectedSensorDataScreen
+import com.gabchmel.contextmusicplayer.ui.screens.onDeviceSensors.OnDeviceSensorsScreen
 import com.gabchmel.contextmusicplayer.ui.screens.playlistScreen.SongListScreen
+import com.gabchmel.contextmusicplayer.ui.screens.settingsScreen.SettingsScreen
 
 @Composable
 fun ContextPlayerNavHost(
@@ -15,10 +18,24 @@ fun ContextPlayerNavHost(
         startDestination = "home"
     ) {
         composable("home") {
-            SongListScreen()
+            SongListScreen(
+                navController = navController
+            )
         }
         composable("settings") {
-
+            SettingsScreen(
+                navController = navController
+            )
+        }
+        composable("on_device_sensors") {
+            OnDeviceSensorsScreen(
+                navController = navController
+            )
+        }
+        composable("collected_sensor_data") {
+            CollectedSensorDataScreen(
+                navController = navController
+            )
         }
     }
 }

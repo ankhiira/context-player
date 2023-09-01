@@ -52,11 +52,12 @@ import com.google.accompanist.glide.rememberGlidePainter
 
 @SuppressLint("RestrictedApi")
 @Composable
-fun NowPlayingScreen(navController: NavHostController) {
-
+fun NowPlayingScreen(
+    navController: NavHostController
+) {
     val viewModel: NowPlayingViewModel = viewModel()
-    val musicState by viewModel.musicState.collectAsStateWithLifecycle()
-    val musicMetadata by viewModel.musicMetadata.collectAsStateWithLifecycle()
+    val playbackState by viewModel.musicState.collectAsStateWithLifecycle()
+    val songMetadata by viewModel.musicMetadata.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -107,7 +108,7 @@ fun NowPlayingScreen(navController: NavHostController) {
             ) {
                 // Album art
                 Image(
-                    painter = musicMetadata?.getAlbumArt()?.let {
+                    painter = songMetadata?.getAlbumArt()?.let {
                         rememberGlidePainter(it)
                     }
                         ?: rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_album_cover_vector)),
@@ -126,7 +127,7 @@ fun NowPlayingScreen(navController: NavHostController) {
                 ) {
                     // Title
                     Text(
-                        text = musicMetadata?.getTitle() ?: "Loading",
+                        text = songMetadata?.getTitle() ?: "Loading",
                         fontSize = 24.sp,
                         color = MaterialTheme.colors.onPrimary,
                         fontWeight = FontWeight.Bold,
@@ -134,7 +135,7 @@ fun NowPlayingScreen(navController: NavHostController) {
 
                     // Author
                     Text(
-                        text = musicMetadata?.getArtist() ?: "Loading",
+                        text = songMetadata?.getArtist() ?: "Loading",
                         fontSize = 18.sp,
                         color = MaterialTheme.colors.secondary,
                         modifier = Modifier.absolutePadding(bottom = 16.dp)
@@ -146,9 +147,9 @@ fun NowPlayingScreen(navController: NavHostController) {
                 ) {
                     // Slider
                     var sliderPosition by remember { mutableFloatStateOf(0f) }
-                    val songLength = musicMetadata?.getDuration()?.toFloat() ?: 0.0f
+                    val songLength = songMetadata?.getDuration()?.toFloat() ?: 0.0f
                     val songPosition =
-                        musicState?.getCurrentPosition(null)?.toFloat() ?: 0.0f
+                        playbackState?.getCurrentPosition(null)?.toFloat() ?: 0.0f
 
                     LaunchedEffect(songPosition) {
                         val pbState = viewModel.musicState.value?.state
@@ -201,7 +202,7 @@ fun NowPlayingScreen(navController: NavHostController) {
                                 painter =
                                 rememberVectorPainter(
                                     ImageVector.vectorResource(
-                                        when (musicState?.state) {
+                                        when (playbackState?.state) {
                                             PlaybackStateCompat.STATE_PLAYING ->
                                                 R.drawable.ic_pause_filled
 

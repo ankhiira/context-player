@@ -14,7 +14,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 
-class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
+class NowPlayingViewModel(
+    val app: Application,
+//    savedStateHandle: SavedStateHandle
+) : AndroidViewModel(app) {
+
+//    private val uri: String = checkNotNull(savedStateHandle["uri"])
+//    private val shouldPlay: Boolean = checkNotNull(savedStateHandle["play"])
 
     private lateinit var mediaBrowser: MediaBrowserCompat
     val service = CompletableDeferred<MediaPlaybackService>()
@@ -26,8 +32,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     private val _musicMetadata = MutableStateFlow<MediaMetadataCompat?>(null)
     val musicMetadata: StateFlow<MediaMetadataCompat?> = _musicMetadata
 
-    //    lateinit var args: NowPlayingFragmentArgs
-    var notPlayed = true
+    private var notPlayed = true
 
     private val controllerCallback = object : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat) {
@@ -36,6 +41,16 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
         override fun onPlaybackStateChanged(playbackState: PlaybackStateCompat) {
             _musicState.value = playbackState
+        }
+    }
+
+    fun conditionalPlay(
+        uri: Uri,
+        shouldPlay: Boolean
+    ) {
+        if (shouldPlay && notPlayed) {
+            play(uri)
+            notPlayed = false
         }
     }
 
@@ -55,10 +70,10 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
                 mediaController?.registerCallback(controllerCallback)
 
                 // Play after fragment is open
-//                if (args.play && notPlayed) {
-//                    play(args.uri)
-//                    notPlayed = false
-//                }
+//                conditionalPlay(
+//                    uri.toUri(),
+//                    shouldPlay
+//                )
             }
         }
 
@@ -81,7 +96,7 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     // To play for the first time
-    fun play(uri: Uri) {
+    private fun play(uri: Uri) {
         mediaController?.transportControls?.playFromUri(uri, null)
     }
 
@@ -117,11 +132,11 @@ class NowPlayingViewModel(val app: Application) : AndroidViewModel(app) {
 
             else -> {
                 when {
-//                    this.notPlayed -> this.play(args.uri)
+//                    this.notPlayed -> this.play(uri)
                     else -> this.play()
                 }
                 // Preemptively set icon
-                // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
+//                 binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
             }
         }
     }

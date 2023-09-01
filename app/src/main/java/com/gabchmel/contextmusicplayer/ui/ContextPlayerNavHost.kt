@@ -40,7 +40,7 @@ fun ContextPlayerNavHost(
                 collectedSensorData = ConvertedData()
             )
         }
-        composable("now_playing") {
+        composable("now_playing/{uri}/{play}") {backStackEntry ->
             NowPlayingScreen(
                 navController = navController
             )

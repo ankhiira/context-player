@@ -69,8 +69,8 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
             val action = intent.getStringExtra("action")
             lifecycleOwnerNew.lifecycleScope.launch {
                 when {
-                    action.equals("actionPlay") -> play(predictedSong.URI)
-                    action.equals("actionSkip") -> skip(predictedSong.URI)
+                    action.equals("actionPlay") -> play(predictedSong.uri)
+                    action.equals("actionSkip") -> skip(predictedSong.uri)
                 }
             }
 

@@ -8,5 +8,5 @@ data class Song(
     val title: String?,
     val author: String?,
     val albumArt: Bitmap?,
-    val URI: Uri
+    val uri: Uri
 )

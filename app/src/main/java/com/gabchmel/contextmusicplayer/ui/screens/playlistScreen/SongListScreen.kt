@@ -169,13 +169,11 @@ fun SongListScreen(navController: NavHostController) {
                                         MaterialTheme.spacing.medium
                                     )
                                 ) {
-                                    items(songs, key = { it.URI }) { song ->
+                                    items(songs, key = { it.uri }) { song ->
                                         SongItem(
                                             song,
                                             onItemSelected = {
-                                                navController.navigate("now_playing")
-//                                                uri = song.URI,
-//                                                                        play = true
+                                                navController.navigate("now_playing/song.URI/true")
                                             }
                                         )
                                     }
@@ -270,7 +268,7 @@ fun SongListScreen(navController: NavHostController) {
 @Composable
 fun ExampleSongRow() {
     SongItem(
-        song = Song(title = "Title", author = "author", albumArt = null, URI = Uri.EMPTY),
+        song = Song(title = "Title", author = "author", albumArt = null, uri = Uri.EMPTY),
         onItemSelected = {}
     )
 }

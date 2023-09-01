@@ -106,7 +106,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // retrieve index of currently played song
     private val currSongIndex = currentSongUri.filterNotNull().map { uri ->
         songs.value.indexOfFirst { song ->
-            song.URI == uri
+            song.uri == uri
         }
     }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, null)
     private val currentSong = currSongIndex.filterNotNull().map { index ->
@@ -312,13 +312,13 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
                 override fun onSkipToNext() {
                     nextSong.value?.let { nextSong ->
-                        onPlayFromUri(nextSong.URI, null)
+                        onPlayFromUri(nextSong.uri, null)
                     }
                 }
 
                 override fun onSkipToPrevious() {
                     prevSong.value?.let { prevSong ->
-                        onPlayFromUri(prevSong.URI, null)
+                        onPlayFromUri(prevSong.uri, null)
                     }
                 }
 

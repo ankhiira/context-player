@@ -2,8 +2,10 @@ package com.gabchmel.contextmusicplayer.ui
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.contextmusicplayer.ui.screens.collectedSensorData.CollectedSensorDataScreen
 import com.gabchmel.contextmusicplayer.ui.screens.nowPlayingScreen.NowPlayingScreen
@@ -40,7 +42,13 @@ fun ContextPlayerNavHost(
                 collectedSensorData = ConvertedData()
             )
         }
-        composable("now_playing/{uri}/{play}") {backStackEntry ->
+        composable(
+            "now_playing/{uri}/{play}",
+            arguments = listOf(
+                navArgument("uri") { type = NavType.StringType },
+                navArgument("play") { type = NavType.BoolType }
+            )
+        ) { backStackEntry ->
             NowPlayingScreen(
                 navController = navController
             )

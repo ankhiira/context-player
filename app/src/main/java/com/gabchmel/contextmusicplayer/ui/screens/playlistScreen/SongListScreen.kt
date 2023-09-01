@@ -170,10 +170,11 @@ fun SongListScreen(navController: NavHostController) {
                                     )
                                 ) {
                                     items(songs, key = { it.uri }) { song ->
+                                        val songUri = Uri.encode(song.uri.toString())
                                         SongItem(
                                             song,
                                             onItemSelected = {
-                                                navController.navigate("now_playing/song.URI/true")
+                                                navController.navigate("now_playing/${songUri}/true")
                                             }
                                         )
                                     }

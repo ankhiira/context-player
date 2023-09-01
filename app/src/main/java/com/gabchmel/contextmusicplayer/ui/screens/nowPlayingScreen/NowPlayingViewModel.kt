@@ -7,7 +7,9 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import com.gabchmel.contextmusicplayer.data.service.MediaPlaybackService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,11 +18,11 @@ import kotlinx.coroutines.flow.StateFlow
 
 class NowPlayingViewModel(
     val app: Application,
-//    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(app) {
 
-//    private val uri: String = checkNotNull(savedStateHandle["uri"])
-//    private val shouldPlay: Boolean = checkNotNull(savedStateHandle["play"])
+    private val uri: String = checkNotNull(savedStateHandle["uri"])
+    private val shouldPlay: Boolean = checkNotNull(savedStateHandle["play"])
 
     private lateinit var mediaBrowser: MediaBrowserCompat
     val service = CompletableDeferred<MediaPlaybackService>()
@@ -70,10 +72,10 @@ class NowPlayingViewModel(
                 mediaController?.registerCallback(controllerCallback)
 
                 // Play after fragment is open
-//                conditionalPlay(
-//                    uri.toUri(),
-//                    shouldPlay
-//                )
+                conditionalPlay(
+                    uri.toUri(),
+                    shouldPlay
+                )
             }
         }
 

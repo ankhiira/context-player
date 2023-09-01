@@ -82,8 +82,8 @@ dependencies {
     implementation project(path: ':predicitonmodule')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     testImplementation 'junit:junit:4.13.2'
@@ -113,8 +113,8 @@ dependencies {
     // Material Design
     implementation "androidx.compose.material:material:$compose_version"
     // Material design icons
-    implementation 'androidx.compose.material:material-icons-core:1.2.0-beta03'
-    implementation 'androidx.compose.material:material-icons-extended:1.2.0-beta03'
+    implementation 'androidx.compose.material:material-icons-core:1.5.0'
+    implementation 'androidx.compose.material:material-icons-extended:1.5.0'
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation "androidx.compose.runtime:runtime-rxjava2:$compose_version"

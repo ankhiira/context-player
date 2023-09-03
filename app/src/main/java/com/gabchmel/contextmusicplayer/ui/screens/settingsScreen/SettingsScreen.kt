@@ -6,68 +6,71 @@ import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Sensors
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.convertFileForSend
 import com.gabchmel.contextmusicplayer.data.service.MediaBrowserConnector
-import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
 import java.io.File
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavHostController) {
+fun SettingsScreen(
+    navController: NavHostController
+) {
 
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Settings",
-                        fontFamily = appFontFamily
+                        text = stringResource(id = R.string.settings_title)
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        }
+                    ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_back),
                             contentDescription = "Back",
-                            modifier = Modifier.fillMaxHeight(0.4f),
-                            tint = MaterialTheme.colors.onPrimary
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
-                },
-                elevation = 0.dp,
-                backgroundColor = Color.Transparent
+                }
             )
         },
         content = { padding ->
@@ -106,14 +109,15 @@ fun SettingsScreen(navController: NavHostController) {
                     modifier = Modifier.clickable {
                         uriHandler.openUri("https://github.com/ankhiira/context-player/blob/dev/privacyPolicy/Privacy%20Policy.txt")
                     },
-                    text = "privacy policy"
+                    text = "privacy policy",
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 SettingsButtonItem(
                     textRes = R.string.settings_button_item_recreate_model,
                     buttonRes = R.string.settings_item_button_recreate_model,
                     onClick = {
                         MediaBrowserConnector(
-                            ProcessLifecycleOwner.get(),
+                            lifecycleOwner,
                             context
                         )
                     }
@@ -145,7 +149,6 @@ fun SettingsScreen(navController: NavHostController) {
                         },
                         confirmButton = {
                             Button(
-
                                 onClick = {
                                     openDialog.value = false
                                     val inputFile =

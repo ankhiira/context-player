@@ -6,29 +6,30 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
+import com.gabchmel.contextmusicplayer.ui.theme.bahnSchrift
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectedSensorDataScreen(
     navController: NavHostController,
@@ -42,7 +43,7 @@ fun CollectedSensorDataScreen(
                 title = {
                     Text(
                         "Collected sensor values",
-                        fontFamily = appFontFamily
+                        fontFamily = bahnSchrift
                     )
                 },
                 navigationIcon = {
@@ -55,12 +56,10 @@ fun CollectedSensorDataScreen(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_back),
                             contentDescription = "Back",
                             modifier = Modifier.fillMaxHeight(0.4f),
-                            tint = MaterialTheme.colors.onPrimary
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
-                },
-                elevation = 0.dp,
-                backgroundColor = Color.Transparent
+                }
             )
         },
         content = { padding ->

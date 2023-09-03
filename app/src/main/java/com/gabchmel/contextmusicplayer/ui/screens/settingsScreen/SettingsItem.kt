@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,17 +34,19 @@ fun SettingsItem(
             Icon(
                 imageVector = iconVector,
                 contentDescription = "Setting item icon",
+                tint = MaterialTheme.colorScheme.onPrimary
             )
             Text(
                 text = stringResource(id = textRes),
-                color = MaterialTheme.colors.onPrimary,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 18.sp,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
         }
         Icon(
             imageVector = Icons.Filled.NavigateNext,
-            contentDescription = "NavigateToNext"
+            contentDescription = "NavigateToNext",
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }

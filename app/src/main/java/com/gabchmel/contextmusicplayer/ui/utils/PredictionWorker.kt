@@ -2,14 +2,21 @@ package com.gabchmel.contextmusicplayer.ui.utils
 
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import com.gabchmel.contextmusicplayer.data.service.MediaBrowserConnector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
 
-class PredictionWorker(private val appContext: Context, workerParams: WorkerParameters) :
+class PredictionWorker(
+    private val appContext: Context,
+    workerParams: WorkerParameters
+) :
     CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {

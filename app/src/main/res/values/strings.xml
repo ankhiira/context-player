@@ -15,4 +15,5 @@
     <string name="settings_button_item_send_data">Clicking on this sends all data collected for song prediction</string>
     <string name="settings_item_button_send_data">Send collected data</string>
     <string name="email_data_from">"Data from "</string>
+    <string name="settings_title">Settings</string>
 </resources>

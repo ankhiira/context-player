@@ -1,8 +1,8 @@
 package com.gabchmel.contextmusicplayer.ui.screens.collectedSensorData
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
@@ -13,7 +13,7 @@ fun SensorRow(
     Row {
         Text(
             text = "$sensorName: ",
-            color = MaterialTheme.colors.onPrimary,
+            color = MaterialTheme.colorScheme.onPrimary,
         )
         Text(
             text = "$sensorValue",

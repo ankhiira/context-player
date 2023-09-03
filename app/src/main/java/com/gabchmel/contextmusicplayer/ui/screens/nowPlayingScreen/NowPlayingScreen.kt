@@ -14,13 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Slider
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -42,7 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.ui.theme.appFontFamily
+import com.gabchmel.contextmusicplayer.ui.theme.bahnSchrift
 import com.gabchmel.contextmusicplayer.utils.getAlbumArt
 import com.gabchmel.contextmusicplayer.utils.getArtist
 import com.gabchmel.contextmusicplayer.utils.getDuration
@@ -50,6 +50,7 @@ import com.gabchmel.contextmusicplayer.utils.getTitle
 import com.google.accompanist.glide.rememberGlidePainter
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("RestrictedApi")
 @Composable
 fun NowPlayingScreen(
@@ -65,7 +66,7 @@ fun NowPlayingScreen(
                 title = {
                     Text(
                         "Playing from library",
-                        fontFamily = appFontFamily
+                        fontFamily = bahnSchrift
                     )
                 },
                 navigationIcon = {
@@ -76,7 +77,7 @@ fun NowPlayingScreen(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_back),
                             contentDescription = "Back",
                             modifier = Modifier.fillMaxHeight(0.4f),
-                            tint = MaterialTheme.colors.onPrimary
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
@@ -84,18 +85,16 @@ fun NowPlayingScreen(
                     IconButton(
                         onClick = {
                             navController.navigate("settings")
-                        },
+                        }
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
                             contentDescription = "Settings",
                             modifier = Modifier.fillMaxHeight(0.4f),
-                            tint = MaterialTheme.colors.onPrimary
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
-                elevation = 0.dp,
-                backgroundColor = Color.Transparent
             )
         },
         content = { padding ->
@@ -129,7 +128,7 @@ fun NowPlayingScreen(
                     Text(
                         text = songMetadata?.getTitle() ?: "Loading",
                         fontSize = 24.sp,
-                        color = MaterialTheme.colors.onPrimary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold,
                     )
 
@@ -137,7 +136,7 @@ fun NowPlayingScreen(
                     Text(
                         text = songMetadata?.getArtist() ?: "Loading",
                         fontSize = 18.sp,
-                        color = MaterialTheme.colors.secondary,
+                        color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.absolutePadding(bottom = 16.dp)
                     )
                 }
@@ -175,7 +174,9 @@ fun NowPlayingScreen(
                             .fillMaxWidth()
                             .height(92.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.spacedBy(
+                            16.dp, Alignment.CenterHorizontally
+                        )
                     ) {
                         IconButton(
                             onClick = {
@@ -186,8 +187,8 @@ fun NowPlayingScreen(
                                 imageVector =
                                 ImageVector.vectorResource(R.drawable.ic_skip_prev),
                                 contentDescription = "Skip to previous",
-                                tint = MaterialTheme.colors.secondary,
-                                modifier = Modifier.fillMaxHeight(0.6f)
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.fillMaxHeight(0.4f)
                             )
                         }
                         IconButton(
@@ -221,8 +222,8 @@ fun NowPlayingScreen(
                                 imageVector =
                                 ImageVector.vectorResource(R.drawable.ic_skip_next),
                                 contentDescription = "Skip to next",
-                                tint = MaterialTheme.colors.secondary,
-                                modifier = Modifier.fillMaxHeight(0.6f)
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.fillMaxHeight(0.4f)
                             )
                         }
                     }

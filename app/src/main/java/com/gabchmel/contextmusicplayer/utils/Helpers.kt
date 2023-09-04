@@ -1,10 +1,11 @@
-package com.gabchmel.contextmusicplayer
+package com.gabchmel.contextmusicplayer.utils
 
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
+import com.gabchmel.contextmusicplayer.BuildConfig
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream

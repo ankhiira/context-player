@@ -1,7 +1,4 @@
-ext {
-    var = 'Gabrielawm123'
-    var1 = 'Gabrielawm123'
-}// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext.kotlin_version = '1.9.10'
     repositories {

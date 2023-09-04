@@ -24,7 +24,7 @@ import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.local.LocalSongsRetriever
 import com.gabchmel.contextmusicplayer.data.model.Song
-import com.gabchmel.contextmusicplayer.ui.utils.notifications.PlaybackNotificationCreator
+import com.gabchmel.contextmusicplayer.ui.notifications.PlaybackNotificationCreator
 import com.gabchmel.contextmusicplayer.utils.*
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.CoroutineScope

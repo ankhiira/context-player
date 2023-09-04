@@ -40,8 +40,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.model.Song
-import com.gabchmel.contextmusicplayer.isPermissionNotGranted
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
+import com.gabchmel.contextmusicplayer.utils.isPermissionNotGranted
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 

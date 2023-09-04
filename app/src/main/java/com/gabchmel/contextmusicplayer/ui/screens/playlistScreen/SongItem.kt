@@ -41,7 +41,6 @@ fun SongItem(
 
             })
     ) {
-        // Album art
         Image(
             painter = song.albumArt?.let {
                 rememberGlidePainter(it)

@@ -22,7 +22,7 @@ import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.data.model.Song
-import com.gabchmel.contextmusicplayer.ui.utils.notifications.PredictionNotificationCreator
+import com.gabchmel.contextmusicplayer.ui.notifications.PredictionNotificationCreator
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
@@ -40,8 +40,10 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.primaryConstructor
 
-class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Context) :
-    LifecycleObserver {
+class MediaBrowserConnector(
+    val lifecycleOwner: LifecycleOwner,
+    val context: Context
+) : LifecycleObserver {
 
     inner class BoundService(
         private val context: Context,
@@ -103,16 +105,17 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
     private val boundService = CompletableDeferred<BoundService>()
     private var contextData = ConvertedData()
 
-    private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
-        lifecycleOwner.whenCreated {
-            val service = context.bindService(SensorDataProcessingService::class.java)
-            if (service.createModel()) {
-                contextData = service.triggerPrediction()
+    private val sensorProcessService =
+        lifecycleOwner.lifecycleScope.async {
+            lifecycleOwner.whenCreated {
+                val service = context.bindService(SensorDataProcessingService::class.java)
+                if (service.createModel()) {
+                    contextData = service.triggerPrediction()
 //                CollectedSensorDataScreen.updateUI(contextData)
+                }
+                service
             }
-            service
         }
-    }
 
     private val prediction = flow {
         emitAll(sensorProcessService.await().prediction)
@@ -143,6 +146,7 @@ class MediaBrowserConnector(val lifecycleOwner: LifecycleOwner, val context: Con
                         // Save current sensor values to later detect if the context changed
                         sensorProcessService.saveSensorValuesToSharedPrefs()
                     }
+
                     else -> {
                         createMediaBrowser()
                         mediaBrowser.connect()

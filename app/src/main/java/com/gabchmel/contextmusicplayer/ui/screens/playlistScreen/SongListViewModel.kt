@@ -116,11 +116,13 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     val isRefreshing: StateFlow<Boolean>
         get() = _isRefreshing.asStateFlow()
 
-    // Binds to service and waits for onServiceConnected
-    private suspend fun bindService(context: Context, intent: Intent, flags: Int) =
-        suspendCoroutine<BoundService> { continuation ->
+    private suspend fun bindService(
+        context: Context,
+        intent: Intent,
+        flags: Int
+    ) =
+        suspendCoroutine { continuation ->
 
-            // Create a connection object
             val connection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     val binder = service as LocalBinder<MediaPlaybackService>
@@ -137,7 +139,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
                 }
             }
 
-            // Bind to a service using connection
             context.bindService(intent, connection, flags)
         }
 

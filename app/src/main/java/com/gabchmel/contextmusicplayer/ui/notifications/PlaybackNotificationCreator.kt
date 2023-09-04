@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui.utils.notifications
+package com.gabchmel.contextmusicplayer.ui.notifications
 
 import android.app.Notification
 import android.app.NotificationChannel

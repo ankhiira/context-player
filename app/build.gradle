@@ -114,13 +114,10 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
     implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.1"
 
-    // Pull to refresh Accompanist
-    implementation "com.google.accompanist:accompanist-swiperefresh:0.11.1"
+    // Accompanist
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.28.0"
     implementation("com.google.accompanist:accompanist-glide:0.11.1")
-    implementation "com.google.accompanist:accompanist-systemuicontroller:0.11.1"
-
-    // UI Tests
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.5.0'
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
 
     // Media notification
     implementation "androidx.media:media:1.6.0"
@@ -135,10 +132,11 @@ dependencies {
     // For iterating through class properties
     implementation "org.jetbrains.kotlin:kotlin-reflect"
 
-    implementation "androidx.room:room-runtime:2.4.2"
-
     // Preferences DataStore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.5.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.ui.utils
+package com.gabchmel.contextmusicplayer.worker
 
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner

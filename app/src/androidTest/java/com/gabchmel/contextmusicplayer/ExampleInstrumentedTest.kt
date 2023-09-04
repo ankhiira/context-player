@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.work.ListenableWorker
 import androidx.work.testing.TestListenableWorkerBuilder
-import com.gabchmel.contextmusicplayer.ui.utils.PredictionWorker
+import com.gabchmel.contextmusicplayer.worker.PredictionWorker
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.core.Is
 import org.junit.Assert.assertEquals

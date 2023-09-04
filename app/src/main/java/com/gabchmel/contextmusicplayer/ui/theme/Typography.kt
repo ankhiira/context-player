@@ -35,7 +35,13 @@ val typography = Typography(
     ),
     bodyMedium = TextStyle(
         fontWeight = FontWeight.Medium,
-        fontSize = 22.sp,
+        fontSize = 16.sp,
+        fontFamily = bahnSchrift,
+        color = Yel900
+    ),
+    bodySmall = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
         fontFamily = bahnSchrift,
         color = Yel900
     )

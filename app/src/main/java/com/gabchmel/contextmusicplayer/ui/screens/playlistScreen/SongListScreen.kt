@@ -5,13 +5,19 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,10 +28,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,17 +44,16 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.model.Song
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
 import com.gabchmel.contextmusicplayer.utils.isPermissionNotGranted
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun SongListScreen(navController: NavHostController) {
 
@@ -138,31 +145,43 @@ fun SongListScreen(navController: NavHostController) {
                 }
 
                 isPermissionGranted || !isPermissionNotGranted(context, permission) -> {
-                    Column {
-                        val isRefreshing by viewModel.isRefreshing.collectAsState()
-                        viewModel.loadSongs()
+                    val refreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+                    val pullRefreshState =
+                        rememberPullRefreshState(refreshing, { viewModel.refresh() })
 
-                        SwipeRefresh(
-                            state = rememberSwipeRefreshState(isRefreshing),
-                            onRefresh = { viewModel.refresh() },
-                        ) {
-                            songs?.let { songs ->
-                                LazyColumn(
-                                    modifier = Modifier.padding(
-                                        MaterialTheme.spacing.medium
+                    LaunchedEffect(Unit) {
+                        viewModel.loadSongs()
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .pullRefresh(pullRefreshState)
+                            .padding(padding)
+                    ) {
+                        songs?.let { songs ->
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp)
+                                    .padding(top = 16.dp),
+                                contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.small)
+                            ) {
+                                items(songs, key = { it.uri }) { song ->
+                                    val songUri = Uri.encode(song.uri.toString())
+                                    SongItem(
+                                        song,
+                                        onItemSelected = {
+                                            navController.navigate("now_playing/${songUri}/true")
+                                        }
                                     )
-                                ) {
-                                    items(songs, key = { it.uri }) { song ->
-                                        val songUri = Uri.encode(song.uri.toString())
-                                        SongItem(
-                                            song,
-                                            onItemSelected = {
-                                                navController.navigate("now_playing/${songUri}/true")
-                                            }
-                                        )
-                                    }
                                 }
                             }
+
+                            PullRefreshIndicator(
+                                refreshing,
+                                pullRefreshState,
+                                Modifier.align(Alignment.TopCenter)
+                            )
                         }
                     }
                 }

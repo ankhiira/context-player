@@ -5,11 +5,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.data.model.Song
-import com.gabchmel.contextmusicplayer.data.service.MediaBrowserConnector
+import com.gabchmel.contextmusicplayer.data.local.model.Song
+import com.gabchmel.contextmusicplayer.service.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.ui.MainActivity
 
 object PredictionNotificationCreator : NotificationBuilder() {
@@ -71,29 +68,29 @@ object PredictionNotificationCreator : NotificationBuilder() {
                 PendingIntent.FLAG_IMMUTABLE
             )
 
-        val notificationBuilder =
-            NotificationCompat.Builder(context, PlaybackNotificationCreator.CHANNEL_ID)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSilent(true)
-                .setSmallIcon(R.drawable.ic_baseline_headset_24)
-                .setContentTitle("Play this song?")
-                .setContentText(song.title + " - " + song.author)
-                .addAction(
-                    R.drawable.ic_play_arrow_black_24dp,
-                    "Play",
-                    pendingIntentPlay
-                )
-                .addAction(
-                    R.drawable.ic_skip_next_black_24dp,
-                    "Skip for now",
-                    pendingIntentSkip
-                )
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-
-        NotificationManagerCompat.from(context).run {
-            notify(678, notificationBuilder.build())
-        }
+//        val notificationBuilder =
+//            NotificationCompat.Builder(context, PlaybackNotificationCreator.CHANNEL_ID)
+//                .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+//                .setSilent(true)
+//                .setSmallIcon(R.drawable.ic_baseline_headset_24)
+//                .setContentTitle("Play this song?")
+//                .setContentText(song.title + " - " + song.author)
+//                .addAction(
+//                    R.drawable.ic_play_arrow_black_24dp,
+//                    "Play",
+//                    pendingIntentPlay
+//                )
+//                .addAction(
+//                    R.drawable.ic_skip_next_black_24dp,
+//                    "Skip for now",
+//                    pendingIntentSkip
+//                )
+//                .setContentIntent(pendingIntent)
+//                .setAutoCancel(true)
+//
+//        NotificationManagerCompat.from(context).run {
+//            notify(678, notificationBuilder.build())
+//        }
     }
 }

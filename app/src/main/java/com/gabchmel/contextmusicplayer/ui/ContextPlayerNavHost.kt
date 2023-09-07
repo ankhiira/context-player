@@ -43,12 +43,11 @@ fun ContextPlayerNavHost(
             )
         }
         composable(
-            "now_playing/{uri}/{play}",
+            "now_playing/{uri}",
             arguments = listOf(
-                navArgument("uri") { type = NavType.StringType },
-                navArgument("play") { type = NavType.BoolType }
+                navArgument("uri") { type = NavType.StringType }
             )
-        ) { backStackEntry ->
+        ) {
             NowPlayingScreen(
                 navController = navController
             )

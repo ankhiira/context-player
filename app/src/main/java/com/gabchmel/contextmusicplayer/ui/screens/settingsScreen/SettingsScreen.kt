@@ -35,7 +35,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.data.service.MediaBrowserConnector
+import com.gabchmel.contextmusicplayer.service.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.utils.convertFileForSend
 import java.io.File
 

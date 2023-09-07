@@ -48,7 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.data.model.Song
+import com.gabchmel.contextmusicplayer.data.local.model.Song
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
 import com.gabchmel.contextmusicplayer.utils.isPermissionNotGranted
 
@@ -171,7 +171,7 @@ fun SongListScreen(navController: NavHostController) {
                                     SongItem(
                                         song,
                                         onItemSelected = {
-                                            navController.navigate("now_playing/${songUri}/true")
+                                            navController.navigate("now_playing/${songUri}")
                                         }
                                     )
                                 }
@@ -188,14 +188,14 @@ fun SongListScreen(navController: NavHostController) {
             }
         },
         bottomBar = {
-            val musicState by viewModel.musicState.collectAsState()
-            val musicMetadata by viewModel.musicMetadata.collectAsState()
-            val connected by viewModel.connected.collectAsState()
+            val musicState by viewModel.musicState.collectAsStateWithLifecycle()
+            val musicMetadata by viewModel.musicMetadata.collectAsStateWithLifecycle()
+            val connected by viewModel.connected.collectAsStateWithLifecycle()
 
             if (connected) {
-                PlayingIndicator(
-                    musicMetadata = musicMetadata,
-                    musicState = musicState,
+                BottomPlayingIndicator(
+                    songMetadata = musicMetadata,
+                    playbackState = musicState,
                     onPlayClicked = {
                         viewModel.playSong()
                     }

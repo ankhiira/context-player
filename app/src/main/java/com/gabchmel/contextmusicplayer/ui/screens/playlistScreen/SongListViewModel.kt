@@ -1,29 +1,31 @@
 package com.gabchmel.contextmusicplayer.ui.screens.playlistScreen
 
+import android.Manifest
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabchmel.common.data.LocalBinder
-import com.gabchmel.contextmusicplayer.data.service.MediaPlaybackService
+import com.gabchmel.contextmusicplayer.data.local.MetaDataReaderImpl
+import com.gabchmel.contextmusicplayer.data.local.model.Song
+import com.gabchmel.contextmusicplayer.service.MusicService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -42,10 +44,12 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     private val _connected = MutableStateFlow(false)
     val connected: StateFlow<Boolean> = _connected
 
+    val songs = MutableStateFlow<List<Song>?>(null)
+
     inner class BoundService(
         private val context: Context,
         val name: ComponentName?,
-        val service: MediaPlaybackService,
+        val service: MusicService,
         private val conn: ServiceConnection
     ) {
         fun unbind() {
@@ -54,6 +58,38 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     init {
+        if (ActivityCompat.checkSelfPermission(
+                app,
+                Manifest.permission.READ_MEDIA_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                app,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+        }
+        viewModelScope.launch {
+            val permission =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    Manifest.permission.READ_MEDIA_AUDIO
+                else
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+
+            if (ActivityCompat.checkSelfPermission(
+                    app,
+                    permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) return@launch
+
+            songs.value = MetaDataReaderImpl(app).loadLocalStorageSongs()
+        }
+
         val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
             override fun onConnected() {
                 mediaBrowser.sessionToken.also { token ->
@@ -88,28 +124,29 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         }
 
         // Setting MediaBrowser for connecting to the MediaBrowserService
-        mediaBrowser = MediaBrowserCompat(
-            app,
-            ComponentName(app, MediaPlaybackService::class.java),
-            connectionCallbacks,
-            null
-        ).apply {
-            // Connects to the MediaBrowseService
-            connect()
-        }
+//        mediaBrowser = MediaBrowserCompat(
+//            app,
+//            ComponentName(app, MusicService::class.java),
+//            connectionCallbacks,
+//            null
+//        ).apply {
+//            // Connects to the MediaBrowseService
+//            connect()
+//        }
     }
 
     private val boundService = viewModelScope.async {
-        val intent = Intent(app, MediaPlaybackService::class.java)
+        val intent = Intent(app, MusicService::class.java)
             .putExtra("is_binding", true)
         bindService(app, intent, Context.BIND_AUTO_CREATE)
     }
 
-    // List of songs as a State Flow to get always current data
-    var songs = flow {
-        val service = boundService.await().service
-        emitAll(service.songs)
-    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+//    // List of songs as a State Flow to get always current data
+//    var songs = flow {
+//        val service = boundService.await().service
+//        emitAll(service.songs)
+//    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     // Detect if the list refresh was triggered
     private val _isRefreshing = MutableStateFlow(false)
@@ -125,7 +162,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
             val connection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                    val binder = service as LocalBinder<MediaPlaybackService>
+                    val binder = service as LocalBinder<MusicService>
                     val serviceVal = binder.getService()
                     continuation.resume(
                         BoundService(
@@ -147,7 +184,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         // This doesn't handle multiple 'refreshing' tasks, don't use this
         viewModelScope.launch {
             _isRefreshing.value = true
-            boundService.await().service.loadSongs()
+//            boundService.await().service.loadSongs()
             delay(1000)
             _isRefreshing.value = false
         }
@@ -164,7 +201,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun loadSongs() {
         try {
-            boundService.getCompleted().service.loadSongs()
+//            boundService.getCompleted().service.loadSongs()
         } catch (e: Exception) {
             println(e)
         }

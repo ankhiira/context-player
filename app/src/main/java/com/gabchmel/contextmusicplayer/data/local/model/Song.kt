@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.data.model
+package com.gabchmel.contextmusicplayer.data.local.model
 
 import android.graphics.Bitmap
 import android.net.Uri

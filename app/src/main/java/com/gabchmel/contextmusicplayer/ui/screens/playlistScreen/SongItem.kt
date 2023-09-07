@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.data.model.Song
+import com.gabchmel.contextmusicplayer.data.local.model.Song
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
 import com.google.accompanist.glide.rememberGlidePainter
 
@@ -33,10 +33,11 @@ fun SongItem(
 ) {
     Row(
         Modifier
-            .clickable(onClick = {
-                onItemSelected()
-
-            }),
+            .clickable(
+                onClick = {
+                    onItemSelected()
+                }
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(

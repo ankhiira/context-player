@@ -118,12 +118,18 @@ dependencies {
     implementation("com.google.accompanist:accompanist-glide:0.11.1")
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
 
+    def media3_version = "1.1.1"
+    implementation "androidx.media3:media3-session:$media3_version"
+    implementation("androidx.media3:media3-exoplayer:$media3_version")
+    implementation "androidx.media3:media3-common:$media3_version"
+
     // Media notification
     implementation "androidx.media:media:1.6.0"
 
     // WorkManager - Kotlin + coroutines
-    implementation "androidx.work:work-runtime-ktx:2.8.0-alpha02"
-    implementation 'androidx.work:work-testing:2.8.0-alpha02'
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.6.4")
 
     // For occurring error of duplicate library?
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'

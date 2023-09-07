@@ -2,19 +2,19 @@ package com.gabchmel.contextmusicplayer.ui.screens.nowPlayingScreen
 
 import android.app.Application
 import android.content.ComponentName
-import android.net.Uri
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import androidx.core.net.toUri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import com.gabchmel.contextmusicplayer.data.service.MediaPlaybackService
-import kotlinx.coroutines.CompletableDeferred
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.gabchmel.contextmusicplayer.service.MusicService
+import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-
 
 class NowPlayingViewModel(
     val app: Application,
@@ -22,124 +22,78 @@ class NowPlayingViewModel(
 ) : AndroidViewModel(app) {
 
     private val uri: String = checkNotNull(savedStateHandle["uri"])
-    private val shouldPlay: Boolean = checkNotNull(savedStateHandle["play"])
 
-    private lateinit var mediaBrowser: MediaBrowserCompat
-    val service = CompletableDeferred<MediaPlaybackService>()
-    var mediaController: MediaControllerCompat? = null
+    private var mediaController: MediaController? = null
+//    private lateinit var browserFuture: ListenableFuture<MediaBrowser>
+//    private lateinit var mediaBrowser: MediaBrowser
 
-    private val _musicState = MutableStateFlow<PlaybackStateCompat?>(null)
-    val musicState: StateFlow<PlaybackStateCompat?> = _musicState
+    private val sessionToken = SessionToken(app, ComponentName(app, MusicService::class.java))
+    private val mediaControllerFuture = MediaController.Builder(
+        app,
+        sessionToken
+    ).buildAsync()
 
-    private val _musicMetadata = MutableStateFlow<MediaMetadataCompat?>(null)
-    val musicMetadata: StateFlow<MediaMetadataCompat?> = _musicMetadata
-
-    private var notPlayed = true
-
-    private val controllerCallback = object : MediaControllerCompat.Callback() {
-        override fun onMetadataChanged(metadata: MediaMetadataCompat) {
-            _musicMetadata.value = metadata
-        }
-
-        override fun onPlaybackStateChanged(playbackState: PlaybackStateCompat) {
-            _musicState.value = playbackState
+    private val playerListener = object : Player.Listener {
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            println("event in MediaBrowser: reason=$reason")
+            super.onPlayWhenReadyChanged(playWhenReady, reason)
         }
     }
 
-    fun conditionalPlay(
-        uri: Uri,
-        shouldPlay: Boolean
-    ) {
-        if (shouldPlay && notPlayed) {
-            play(uri)
-            notPlayed = false
-        }
-    }
+    private val _songMetadata = MutableStateFlow<MediaMetadata?>(null)
+    val songMetadata: StateFlow<MediaMetadata?> = _songMetadata
+
+    val isPlaying = MutableStateFlow(false)
+    val playbackPosition = MutableStateFlow(0.0f)
+    val songDuration = MutableStateFlow(0.0f)
 
     init {
-        val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
-            override fun onConnected() {
+//        viewModelScope.launch {
+//            MediaBrowser.Builder(app, sessionToken)
+//                .buildAsync()
+//                .await()
+//                .addListener(playerListener)
+//        }
 
-                // Creation of the mediaBrowser
-                mediaBrowser.sessionToken.also { sessionToken ->
-                    mediaController = MediaControllerCompat(app, sessionToken)
-                }
-
-                // Display initial state
-                _musicState.value = mediaController?.playbackState
-
-                // Register a callback to stay in sync
-                mediaController?.registerCallback(controllerCallback)
-
-                // Play after fragment is open
-                conditionalPlay(
-                    uri.toUri(),
-                    shouldPlay
-                )
-            }
-        }
-
-        // Setting MediaBrowser for connecting to the MediaBrowserService
-        mediaBrowser = MediaBrowserCompat(
-            app,
-            ComponentName(app, MediaPlaybackService::class.java),
-            connectionCallbacks,
-            null
-        ).apply {
-            // Connects to the MediaBrowseService
-            connect()
-        }
+        mediaControllerFuture.addListener(
+            {
+                mediaController = mediaControllerFuture.get()
+                isPlaying.value = mediaController?.isPlaying == true
+                playbackPosition.value = mediaController?.currentPosition?.toFloat() ?: 0.0f
+                mediaController?.addMediaItem(MediaItem.fromUri(uri))
+                Log.d("MediaItem", mediaController?.currentMediaItem?.requestMetadata?.mediaUri.toString())
+                mediaController?.prepare()
+                songDuration.value = if (mediaController?.duration != C.TIME_UNSET)
+                    mediaController?.duration?.toFloat() ?: 0.0f else 0.0f
+                _songMetadata.value = mediaController?.mediaMetadata
+                Log.d("metadata", _songMetadata.value?.mediaType.toString())
+            },
+            MoreExecutors.directExecutor()
+        )
     }
 
-    override fun onCleared() {
-        mediaController?.unregisterCallback(controllerCallback)
-        mediaBrowser.disconnect()
-        super.onCleared()
-    }
-
-    // To play for the first time
-    private fun play(uri: Uri) {
-        mediaController?.transportControls?.playFromUri(uri, null)
-    }
-
-    // To play any other time
     private fun play() {
-        mediaController?.transportControls?.play()
+        mediaController?.play()
     }
 
     private fun pause() {
-        mediaController?.transportControls?.pause()
+        mediaController?.pause()
+    }
+
+    fun playOrPause() {
+        if (mediaController?.isPlaying == true) this.pause()
+        else this.play()
     }
 
     fun next() {
-        mediaController?.transportControls?.skipToNext()
+        mediaController?.seekToNext()
     }
 
     fun prev() {
-        mediaController?.transportControls?.skipToPrevious()
+        mediaController?.seekToPrevious()
     }
 
     fun setMusicProgress(progress: Float) {
-        mediaController?.transportControls?.seekTo(progress.toLong())
-    }
-
-    fun playSong() {
-        val pbState = this.musicState.value?.state ?: return
-        when (pbState) {
-            PlaybackStateCompat.STATE_PLAYING -> {
-                this.pause()
-                // Preemptively set icon
-                // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
-            }
-
-            else -> {
-                when {
-//                    this.notPlayed -> this.play(uri)
-                    else -> this.play()
-                }
-                // Preemptively set icon
-//                 binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
-            }
-        }
+        mediaController?.seekTo(progress.toLong())
     }
 }

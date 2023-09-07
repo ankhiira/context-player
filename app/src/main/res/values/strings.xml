@@ -16,4 +16,5 @@
     <string name="settings_item_button_send_data">Send collected data</string>
     <string name="email_data_from">"Data from "</string>
     <string name="settings_title">Settings</string>
+    <string name="now_playing_title">Playing from library</string>
 </resources>

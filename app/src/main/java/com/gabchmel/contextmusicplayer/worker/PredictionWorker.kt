@@ -7,7 +7,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.gabchmel.contextmusicplayer.data.service.MediaBrowserConnector
+import com.gabchmel.contextmusicplayer.service.MediaBrowserConnector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -16,8 +16,7 @@ import java.io.File
 class PredictionWorker(
     private val appContext: Context,
     workerParams: WorkerParameters
-) :
-    CoroutineWorker(appContext, workerParams) {
+) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         withContext(Dispatchers.IO) {

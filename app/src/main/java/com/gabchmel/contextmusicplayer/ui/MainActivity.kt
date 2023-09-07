@@ -22,8 +22,8 @@ import androidx.work.WorkManager
 import com.gabchmel.common.data.GlobalPreferences
 import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.utils.bindService
-import com.gabchmel.contextmusicplayer.worker.PredictionWorker
 import com.gabchmel.contextmusicplayer.utils.isPermissionNotGranted
+import com.gabchmel.contextmusicplayer.worker.PredictionWorker
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,9 +46,6 @@ class MainActivity : AppCompatActivity() {
             ContextPlayerApp()
         }
 
-        // Adjust music volume with volume controls - volume controls adjust right stream
-        volumeControlStream = AudioManager.STREAM_MUSIC
-
         // Start SensorProcessService to collect sensor values
         Intent(this, SensorDataProcessingService::class.java).also { intent ->
             startService(intent)
@@ -65,6 +62,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        // To adjust the right music stream volume (e.g. not ring volume)
+        volumeControlStream = AudioManager.STREAM_MUSIC
 
         try {
             // When the activity is opened again, check if the permissions state didn't change

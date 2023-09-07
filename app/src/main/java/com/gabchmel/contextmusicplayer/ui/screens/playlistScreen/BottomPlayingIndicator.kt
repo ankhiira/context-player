@@ -34,9 +34,9 @@ import com.gabchmel.contextmusicplayer.utils.getTitle
 import com.google.accompanist.glide.rememberGlidePainter
 
 @Composable
-fun PlayingIndicator(
-    musicMetadata: MediaMetadataCompat?,
-    musicState: PlaybackStateCompat?,
+fun BottomPlayingIndicator(
+    songMetadata: MediaMetadataCompat?,
+    playbackState: PlaybackStateCompat?,
     onPlayClicked: () -> Unit
 ) {
     BottomAppBar(
@@ -54,7 +54,7 @@ fun PlayingIndicator(
             ) {
                 // Album art
                 Image(
-                    painter = musicMetadata?.getAlbumArt()?.let {
+                    painter = songMetadata?.getAlbumArt()?.let {
                         rememberGlidePainter(it)
                     }
                         ?: rememberVectorPainter(
@@ -72,11 +72,11 @@ fun PlayingIndicator(
                     modifier = Modifier.padding(horizontal = 8.dp)
                 ) {
                     Text(
-                        text = musicMetadata?.getTitle() ?: "Loading",
+                        text = songMetadata?.getTitle() ?: "Loading",
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
-                        text = musicMetadata?.getArtist() ?: "Loading",
+                        text = songMetadata?.getArtist() ?: "Loading",
                         color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.alpha(0.54f)
                     )
@@ -91,7 +91,7 @@ fun PlayingIndicator(
                 Icon(
                     painter = rememberVectorPainter(
                         ImageVector.vectorResource(
-                            when (musicState?.state) {
+                            when (playbackState?.state) {
                                 PlaybackStateCompat.STATE_PLAYING ->
                                     R.drawable.ic_pause_new
 

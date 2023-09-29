@@ -54,11 +54,10 @@
         <service
             android:name=".service.MusicService"
             android:foregroundServiceType="mediaPlayback"
-            android:exported="false"
+            android:exported="true"
             android:stopWithTask="true">
             <intent-filter>
 <!--                <action android:name="android.intent.action.MEDIA_BUTTON" />-->
-<!--                <action android:name="android.media.AUDIO_BECOMING_NOISY" />-->
 
                 <action android:name="androidx.media3.session.MediaSessionService"/>
                 <!-- For backwards compatibility -->

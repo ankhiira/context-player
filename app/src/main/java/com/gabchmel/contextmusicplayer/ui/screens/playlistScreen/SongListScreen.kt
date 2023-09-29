@@ -1,10 +1,10 @@
 package com.gabchmel.contextmusicplayer.ui.screens.playlistScreen
 
 import android.Manifest
-import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -53,33 +54,28 @@ import com.gabchmel.contextmusicplayer.ui.theme.spacing
 import com.gabchmel.contextmusicplayer.utils.isPermissionNotGranted
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterialApi::class
+)
 @Composable
-fun SongListScreen(navController: NavHostController) {
+fun SongListScreen(
+    navController: NavHostController
+) {
 
-    val context = LocalContext.current
     val viewModel: SongListViewModel = viewModel()
     val songs by viewModel.songs.collectAsState()
-    val isPermissionGranted by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var isPermissionGranted by remember { mutableStateOf(false) }
 
-    // permissions callback
-//    val requestPermissionLauncher =
-//        registerForActivityResult(
-//            ActivityResultContracts.RequestPermission()
-//        ) { isGranted: Boolean ->
-//            if (isGranted) {
-//                // permission is granted
-//                _isPermGranted.value = true
-//            }
-//        }
-
-    BackHandler {
-        // This part handles the back button event
-        val action = Intent(Intent.ACTION_MAIN)
-        action.addCategory(Intent.CATEGORY_HOME)
-        action.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//        startActivity(action)
-    }
+    val requestPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                isPermissionGranted = true
+            }
+        }
 
     Scaffold(
         topBar = {
@@ -110,7 +106,6 @@ fun SongListScreen(navController: NavHostController) {
             )
         },
         content = { padding ->
-            // Component to grant the permissions
             val permission =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                     Manifest.permission.READ_MEDIA_AUDIO
@@ -135,8 +130,7 @@ fun SongListScreen(navController: NavHostController) {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Button({
-//                                            openDirectory()
-//                                requestPermissionLauncher.launch(permission)
+                                requestPermissionLauncher.launch(permission)
                             }) {
                                 Text("Grant permission")
                             }
@@ -205,12 +199,16 @@ fun SongListScreen(navController: NavHostController) {
     )
 }
 
-// Function for preview
 @Preview
 @Composable
 fun ExampleSongRow() {
     SongItem(
-        song = Song(title = "Title", author = "author", albumArt = null, uri = Uri.EMPTY),
+        song = Song(
+            title = "Title",
+            author = "author",
+            albumArt = null,
+            uri = Uri.EMPTY
+        ),
         onItemSelected = {}
     )
 }

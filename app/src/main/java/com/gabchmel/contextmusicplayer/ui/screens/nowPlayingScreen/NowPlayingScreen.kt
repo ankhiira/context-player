@@ -57,9 +57,9 @@ fun NowPlayingScreen(
     val songDuration by viewModel.songDuration.collectAsStateWithLifecycle()
     val songMetadata by viewModel.songMetadata.collectAsStateWithLifecycle()
 
-//    LaunchedEffect(key1 = Unit) {
-//        viewModel.playOrPause()
-//    }
+    LaunchedEffect(key1 = Unit) {
+        viewModel.playOrPause()
+    }
 
     Scaffold(
         topBar = {
@@ -75,7 +75,7 @@ fun NowPlayingScreen(
                         navController.popBackStack()
                     }) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_back),
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
                             contentDescription = "Back",
                             modifier = Modifier.size(24.dp),
                             tint = MaterialTheme.colorScheme.onPrimary

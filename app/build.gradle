@@ -81,11 +81,11 @@ dependencies {
     implementation project(path: ':predicitonmodule')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
 
     // Navigation
-    def nav_version = "2.7.1"
+    def nav_version = "2.7.3"
 
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-compose:$nav_version"
@@ -98,12 +98,12 @@ dependencies {
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation "androidx.compose.foundation:foundation:$compose_version"
 
-    implementation("androidx.compose.material3:material3:1.1.1")
+    implementation("androidx.compose.material3:material3:1.1.2")
     // Material Design
     implementation "androidx.compose.material:material:$compose_version"
     // Material design icons
-    implementation 'androidx.compose.material:material-icons-core:1.5.0'
-    implementation 'androidx.compose.material:material-icons-extended:1.5.0'
+    implementation 'androidx.compose.material:material-icons-core:1.5.1'
+    implementation 'androidx.compose.material:material-icons-extended:1.5.1'
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation "androidx.compose.runtime:runtime-rxjava2:$compose_version"
@@ -111,8 +111,8 @@ dependencies {
     // Integration with activities
     implementation 'androidx.activity:activity-compose:1.7.2'
     // Integration with ViewModels
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
-    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.1"
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2'
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.2"
 
     // Accompanist
     implementation("com.google.accompanist:accompanist-glide:0.11.1")
@@ -141,7 +141,7 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     // UI Tests
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.5.0'
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.5.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

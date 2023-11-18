@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
@@ -20,9 +19,6 @@ android {
     buildFeatures {
         // Enables Jetpack Compose for this module
         compose true
-
-        // Enables viewBinding and dataBinding
-        dataBinding true
     }
 
     // Set both the Java and Kotlin compilers to target Java 17.
@@ -85,13 +81,13 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
 
     // Navigation
-    def nav_version = "2.7.3"
+    def nav_version = "2.7.5"
 
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-compose:$nav_version"
 
     // Compose
-    def compose_version = "1.5.0"
+    def compose_version = "1.5.4"
     implementation "androidx.compose.ui:ui:$compose_version"
     // Tooling support (Previews, etc.)
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
@@ -102,23 +98,26 @@ dependencies {
     // Material Design
     implementation "androidx.compose.material:material:$compose_version"
     // Material design icons
-    implementation 'androidx.compose.material:material-icons-core:1.5.1'
-    implementation 'androidx.compose.material:material-icons-extended:1.5.1'
+    implementation "androidx.compose.material:material-icons-core:$compose_version"
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation "androidx.compose.runtime:runtime-rxjava2:$compose_version"
 
     // Integration with activities
-    implementation 'androidx.activity:activity-compose:1.7.2'
+    implementation 'androidx.activity:activity-compose:1.8.1'
     // Integration with ViewModels
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2'
     implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.2"
+
+    def lifecycle_version = "2.5.1"
+    implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
 
     // Accompanist
     implementation("com.google.accompanist:accompanist-glide:0.11.1")
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
 
-    def media3_version = "1.1.1"
+    def media3_version = "1.2.0"
     implementation "androidx.media3:media3-session:$media3_version"
     implementation("androidx.media3:media3-exoplayer:$media3_version")
     implementation "androidx.media3:media3-common:$media3_version"
@@ -141,7 +140,7 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     // UI Tests
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.5.1'
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.5.4'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

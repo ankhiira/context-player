@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionToken
 import com.gabchmel.contextmusicplayer.service.MusicService
@@ -36,15 +37,29 @@ class NowPlayingViewModel(
             MediaBrowser.Builder(app, sessionToken)
                 .buildAsync()
 
+        val mediaItem = MediaItem.Builder()
+            .setUri(uri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setArtist("one")
+                    .build()
+            )
+            .build()
+
         browserFuture.addListener({
             mediaBrowser = browserFuture.get()
-            mediaBrowser?.setMediaItem(MediaItem.fromUri(uri))
-            Log.d(
-                "MediaItem browserFuture",
-                mediaBrowser?.contentDuration.toString()
-            )
+            mediaBrowser?.setMediaItem(mediaItem)
             mediaBrowser?.prepare()
             mediaBrowser?.play()
+            mediaBrowser?.addListener(object : Player.Listener {
+                override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                    _songMetadata.value = mediaMetadata
+                }
+            })
+            Log.d(
+                "MediaItem metadata",
+                mediaBrowser?.mediaMetadata?.toString() ?: "fsdf"
+            )
         }, MoreExecutors.directExecutor())
     }
 

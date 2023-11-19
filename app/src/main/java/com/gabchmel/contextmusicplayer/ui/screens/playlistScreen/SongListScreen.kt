@@ -206,7 +206,7 @@ fun ExampleSongRow() {
         song = Song(
             title = "Title",
             artist = "author",
-            artworkUri = null,
+            metaData = null,
             uri = Uri.EMPTY
         ),
         onItemSelected = {}

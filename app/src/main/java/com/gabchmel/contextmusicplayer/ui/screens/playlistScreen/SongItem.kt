@@ -15,16 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.local.model.Song
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
-import com.google.accompanist.glide.rememberGlidePainter
+import com.gabchmel.contextmusicplayer.utils.getArtworkPainter
 
 @Composable
 fun SongItem(
@@ -41,10 +38,7 @@ fun SongItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = song.artworkUri?.let {
-                rememberGlidePainter(it)
-            }
-                ?: rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_album_cover_vector3)),
+            painter = song.metaData.getArtworkPainter(),
             contentDescription = "Album Art",
             contentScale = ContentScale.Fit,
             modifier = Modifier

@@ -41,7 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
-import com.google.accompanist.glide.rememberGlidePainter
+import com.gabchmel.contextmusicplayer.utils.getArtworkPainter
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,10 +121,7 @@ fun NowPlayingScreen(
             ) {
                 // Album art
                 Image(
-                    painter = songMetadata?.artworkUri?.let {
-                        rememberGlidePainter(it)
-                    }
-                        ?: rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_album_cover_vector)),
+                    painter = songMetadata.getArtworkPainter(),
                     contentDescription = "Album Art",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier

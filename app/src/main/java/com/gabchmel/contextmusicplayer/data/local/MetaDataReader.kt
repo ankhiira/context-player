@@ -97,7 +97,7 @@ class MetaDataReaderImpl(
                             uri = uri,
                             title = metadata?.title?.toString(),
                             artist = metadata?.artist?.toString(),
-                            artworkUri = metadata?.artworkUri
+                            metaData = metadata
                         )
                     )
                 }

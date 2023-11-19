@@ -51,7 +51,7 @@ fun NowPlayingScreen(
 ) {
     val viewModel: NowPlayingViewModel = viewModel()
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
-    var playbackPosition = viewModel.songProgress.collectAsStateWithLifecycle().value
+    val playbackPosition by viewModel.songProgress.collectAsStateWithLifecycle()
     val songDuration by viewModel.songDuration.collectAsStateWithLifecycle()
     val songMetadata by viewModel.songMetadata.collectAsStateWithLifecycle()
 
@@ -61,6 +61,10 @@ fun NowPlayingScreen(
 
     LaunchedEffect(key1 = Unit) {
         viewModel.playOrPause()
+    }
+
+    LaunchedEffect(key1 = playbackPosition) {
+        currentSongPosition = playbackPosition
     }
 
     LaunchedEffect(key1 = isPlaying) {

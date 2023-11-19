@@ -64,6 +64,8 @@ class NowPlayingViewModel(
                     songProgress.value =
                         if (player.duration != C.TIME_UNSET) player.currentPosition.toFloat()
                         else 0.0f
+
+                    isPlaying.value = player.isPlaying
                 }
             })
         }

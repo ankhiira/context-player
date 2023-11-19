@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-
 class PredictionWorker(
     private val appContext: Context,
     workerParams: WorkerParameters
@@ -27,7 +26,6 @@ class PredictionWorker(
                 MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
             }
 
-            // Enqueue this unique work again so it achieves periodicity
             val tenMinutesRequest = OneTimeWorkRequestBuilder<PredictionWorker>()
                 .setInitialDelay(1, java.util.concurrent.TimeUnit.MINUTES)
                 .addTag("WIFI_JOB1")
@@ -40,7 +38,7 @@ class PredictionWorker(
                     tenMinutesRequest
                 )
         }
-        // Indicate whether the work finished successfully with the Result
+
         return Result.success()
     }
 }

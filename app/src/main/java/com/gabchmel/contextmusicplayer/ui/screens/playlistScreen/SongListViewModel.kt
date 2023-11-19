@@ -141,7 +141,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         bindService(app, intent, Context.BIND_AUTO_CREATE)
     }
 
-
 //    // List of songs as a State Flow to get always current data
 //    var songs = flow {
 //        val service = boundService.await().service

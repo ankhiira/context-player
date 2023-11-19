@@ -1,11 +1,10 @@
 package com.gabchmel.contextmusicplayer.data.local.model
 
-import android.graphics.Bitmap
 import android.net.Uri
 
 data class Song(
+    val uri: Uri,
     val title: String?,
-    val author: String?,
-    val albumArt: Bitmap?,
-    val uri: Uri
+    val artist: String?,
+    val artworkUri: Uri?
 )

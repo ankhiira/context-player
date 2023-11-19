@@ -41,7 +41,7 @@ fun SongItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = song.albumArt?.let {
+            painter = song.artworkUri?.let {
                 rememberGlidePainter(it)
             }
                 ?: rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_album_cover_vector3)),
@@ -60,7 +60,7 @@ fun SongItem(
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = song.author ?: stringResource(id = R.string.general_unknown),
+                text = song.artist ?: stringResource(id = R.string.general_unknown),
                 modifier = Modifier.alpha(0.54f),
                 style = MaterialTheme.typography.bodySmall
             )

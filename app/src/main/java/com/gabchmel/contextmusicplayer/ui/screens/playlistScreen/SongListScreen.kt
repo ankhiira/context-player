@@ -205,8 +205,8 @@ fun ExampleSongRow() {
     SongItem(
         song = Song(
             title = "Title",
-            author = "author",
-            albumArt = null,
+            artist = "author",
+            artworkUri = null,
             uri = Uri.EMPTY
         ),
         onItemSelected = {}

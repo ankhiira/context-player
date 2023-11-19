@@ -2,7 +2,6 @@ package com.gabchmel.contextmusicplayer.ui.screens.nowPlayingScreen
 
 import android.app.Application
 import android.content.ComponentName
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.media3.common.MediaItem
@@ -39,11 +38,6 @@ class NowPlayingViewModel(
 
         val mediaItem = MediaItem.Builder()
             .setUri(uri)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setArtist("one")
-                    .build()
-            )
             .build()
 
         browserFuture.addListener({
@@ -56,10 +50,6 @@ class NowPlayingViewModel(
                     _songMetadata.value = mediaMetadata
                 }
             })
-            Log.d(
-                "MediaItem metadata",
-                mediaBrowser?.mediaMetadata?.toString() ?: "fsdf"
-            )
         }, MoreExecutors.directExecutor())
     }
 

@@ -4,22 +4,26 @@ import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.READ_MEDIA_AUDIO
 import android.app.Application
 import android.content.ContentUris
-import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.support.v4.media.MediaMetadataCompat
-import android.util.Log
+import androidx.annotation.OptIn
 import androidx.annotation.RequiresPermission
-import androidx.core.database.getStringOrNull
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.MetadataRetriever
+import androidx.media3.exoplayer.source.TrackGroupArray
 import com.gabchmel.contextmusicplayer.data.local.model.Song
 import com.gabchmel.contextmusicplayer.utils.getAlbum
 import com.gabchmel.contextmusicplayer.utils.getAlbumArt
 import com.gabchmel.contextmusicplayer.utils.getArtist
 import com.gabchmel.contextmusicplayer.utils.getDuration
 import com.gabchmel.contextmusicplayer.utils.getTitle
+import kotlinx.coroutines.guava.asDeferred
 import java.util.concurrent.TimeUnit
 
 interface MetaDataReader {
@@ -32,7 +36,7 @@ class MetaDataReaderImpl(
 
     private val metadataRetriever = MediaMetadataRetriever()
 
-    @RequiresPermission(anyOf = [READ_EXTERNAL_STORAGE, READ_MEDIA_AUDIO])
+    @OptIn(UnstableApi::class) @RequiresPermission(anyOf = [READ_EXTERNAL_STORAGE, READ_MEDIA_AUDIO])
     override suspend fun loadLocalStorageSongs(): List<Song>? {
 
         val contentUri =
@@ -65,14 +69,10 @@ class MetaDataReaderImpl(
                 null
             )?.use { cursor ->
                 val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-                val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
-                val authorColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
 
                 while (cursor.moveToNext()) {
                     // Get the song metadata
                     val songID = cursor.getLong(idColumn)
-                    val title = cursor.getStringOrNull(titleColumn)
-                    val author = cursor.getStringOrNull(authorColumn)
                     val uri = ContentUris.withAppendedId(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         songID
@@ -84,20 +84,40 @@ class MetaDataReaderImpl(
                         Uri.parse(uri.toString())
                     )
 
-                    val albumArt =
-                        try {
-                            metadataRetriever.embeddedPicture?.let { data ->
-                                BitmapFactory.decodeByteArray(data, 0, data.size)
-                            }
-                        } catch (e: Exception) {
-                            Log.e("Album Art:", e.toString())
-                            null
-                        }
+                    val mediaItem = MediaItem.fromUri(uri)
+                    val trackGroups = MetadataRetriever.retrieveMetadata(
+                        app.applicationContext,
+                        mediaItem
+                    ).asDeferred().await()
 
-                    songs.add(Song(title, author, albumArt, uri))
+                    val metadata = handleMetadata(trackGroups)
+
+                    songs.add(
+                        Song(
+                            uri = uri,
+                            title = metadata?.title?.toString(),
+                            artist = metadata?.artist?.toString(),
+                            artworkUri = metadata?.artworkUri
+                        )
+                    )
                 }
             }
         return songs
+    }
+
+    @OptIn(UnstableApi::class) private fun handleMetadata(trackGroups: TrackGroupArray): MediaMetadata? {
+        for (index in 0..trackGroups.length) {
+            val metadata = trackGroups[index].getFormat(0).metadata
+            return if (metadata != null) {
+                MediaMetadata.Builder()
+                    .populateFromMetadata(metadata)
+                    .build()
+            } else {
+                null
+            }
+        }
+
+        return null
     }
 
     // Function to set the metadata for a current song from URI
@@ -106,7 +126,7 @@ class MetaDataReaderImpl(
         metadataRetriever.setDataSource(app, songUri)
 
 //        currentSongUri.value = songUri
-        getMetaData()
+//        getMetaData()
 
 //        isSongPredicted = true
 
@@ -114,8 +134,7 @@ class MetaDataReaderImpl(
     }
 
     fun getMetaData() {
-        // provide metadata
-        val metadataBuilder: MediaMetadataCompat.Builder = MediaMetadataCompat.Builder()
+        val metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadataRetriever.getTitle())
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, metadataRetriever.getArtist())
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, metadataRetriever.getAlbum())

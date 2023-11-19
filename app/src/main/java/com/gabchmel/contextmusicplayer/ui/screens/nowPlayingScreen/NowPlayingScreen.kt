@@ -1,6 +1,5 @@
 package com.gabchmel.contextmusicplayer.ui.screens.nowPlayingScreen
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,9 +43,7 @@ import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.google.accompanist.glide.rememberGlidePainter
 
-
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("RestrictedApi")
 @Composable
 fun NowPlayingScreen(
     navController: NavHostController
@@ -124,13 +121,13 @@ fun NowPlayingScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = songMetadata?.displayTitle.toString() ?: "Loading",
+                        text = if (songMetadata != null) songMetadata?.displayTitle.toString() else "Loading",
                         fontSize = 24.sp,
                         color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = songMetadata?.artist.toString() ?: "Loading",
+                        text = if (songMetadata != null) songMetadata?.artist.toString() else "Loading",
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.absolutePadding(bottom = 16.dp)

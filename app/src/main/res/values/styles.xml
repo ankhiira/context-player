@@ -8,10 +8,13 @@
         <item name="android:fontFamily">@font/bahnschrift_14</item>
     </style>
 
-    <!-- The launcher theme. It sets the main window background to the launch_screen drawable -->
-    <style name="AppTheme.Launcher">
-    <item name="android:windowBackground">@drawable/splash_screen</item>
-    <!-- Optional, on Android 5+ you can modify the colorPrimaryDark color to match the windowBackground color for further branding-->
-    <!-- <item name="colorPrimaryDark">@android:color/white</item> -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background to black -->
+        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <!-- Use windowSplashScreenAnimatedIcon to add a drawable or an animated
+             drawable. -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_screen</item>
+        <!-- Set the theme of the Activity that follows your splash screen. -->
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
     </style>
 </resources>

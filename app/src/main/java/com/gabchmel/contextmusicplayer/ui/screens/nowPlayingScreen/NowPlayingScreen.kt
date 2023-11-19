@@ -42,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.google.accompanist.glide.rememberGlidePainter
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,12 +51,23 @@ fun NowPlayingScreen(
 ) {
     val viewModel: NowPlayingViewModel = viewModel()
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
-    val playbackPosition by viewModel.playbackPosition.collectAsStateWithLifecycle()
+    var playbackPosition = viewModel.songProgress.collectAsStateWithLifecycle().value
     val songDuration by viewModel.songDuration.collectAsStateWithLifecycle()
     val songMetadata by viewModel.songMetadata.collectAsStateWithLifecycle()
 
+    var currentSongPosition by remember {
+        mutableFloatStateOf(playbackPosition)
+    }
+
     LaunchedEffect(key1 = Unit) {
         viewModel.playOrPause()
+    }
+
+    LaunchedEffect(key1 = isPlaying) {
+        while (isPlaying) {
+            currentSongPosition += 1000.0f
+            delay(1000)
+        }
     }
 
     Scaffold(
@@ -121,7 +133,7 @@ fun NowPlayingScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = if (songMetadata != null) songMetadata?.displayTitle.toString() else "Loading",
+                        text = if (songMetadata != null) songMetadata?.title.toString() else "Loading",
                         fontSize = 24.sp,
                         color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold,
@@ -136,18 +148,9 @@ fun NowPlayingScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    var sliderPosition by remember { mutableFloatStateOf(0f) }
-
-                    LaunchedEffect(playbackPosition) {
-                        if (isPlaying) {
-                            sliderPosition = playbackPosition
-                        }
-                    }
-
                     Slider(
-                        value = sliderPosition,
+                        value = currentSongPosition,
                         onValueChange = {
-                            sliderPosition = it
                             viewModel.setMusicProgress(it)
                         },
                         modifier = Modifier.padding(horizontal = 16.dp),

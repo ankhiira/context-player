@@ -88,7 +88,7 @@ class MusicService : MediaLibraryService() {
         stopSelf()
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession =
         mediaLibrarySession
 
     override fun onDestroy() {

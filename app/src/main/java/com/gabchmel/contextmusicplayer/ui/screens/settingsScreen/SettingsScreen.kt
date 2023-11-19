@@ -3,15 +3,14 @@ package com.gabchmel.contextmusicplayer.ui.screens.settingsScreen
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DriveFileRenameOutline
-import androidx.compose.material.icons.filled.Note
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -39,22 +38,23 @@ import com.gabchmel.contextmusicplayer.service.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.utils.convertFileForSend
 import java.io.File
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavHostController
 ) {
-
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val uriHandler = LocalUriHandler.current
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(id = R.string.settings_title)
+                        text = stringResource(id = R.string.settings_title),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 navigationIcon = {
@@ -64,8 +64,8 @@ fun SettingsScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_back),
-                            contentDescription = "Back",
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
+                            contentDescription = "Back Navigation",
                             modifier = Modifier.size(24.dp),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
@@ -79,6 +79,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
+                    .padding(horizontal = 16.dp)
             ) {
                 SettingsItem(
                     iconVector = Icons.Filled.Sensors,
@@ -88,29 +89,18 @@ fun SettingsScreen(
                     }
                 )
                 SettingsItem(
-                    iconVector = Icons.Filled.DriveFileRenameOutline,
+                    iconVector = Icons.Filled.Analytics,
                     textRes = R.string.settings_item_data,
                     onClick = {
                         navController.navigate("collected_sensor_data")
                     }
                 )
                 SettingsItem(
-                    iconVector = Icons.Filled.Note,
+                    iconVector = Icons.Filled.Description,
                     textRes = R.string.settings_item_privacy_policy,
                     onClick = {
-//                                                findNavController().navigate(
-//                                                    SettingsFragmentDirections
-//                                                        .actionSettingsFragmentToSensorValuesFragment()
-//                                                )
-                    }
-                )
-                val uriHandler = LocalUriHandler.current
-                Text(
-                    modifier = Modifier.clickable {
                         uriHandler.openUri("https://github.com/ankhiira/context-player/blob/dev/privacyPolicy/Privacy%20Policy.txt")
-                    },
-                    text = "privacy policy",
-                    style = MaterialTheme.typography.bodyMedium
+                    }
                 )
                 SettingsButtonItem(
                     textRes = R.string.settings_button_item_recreate_model,

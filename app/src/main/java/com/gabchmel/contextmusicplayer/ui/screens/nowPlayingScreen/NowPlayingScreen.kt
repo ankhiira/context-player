@@ -125,9 +125,9 @@ fun NowPlayingScreen(
                     contentDescription = "Album Art",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .size(215.dp)
-                        .clip(RoundedCornerShape(percent = 10))
                         .padding(24.dp)
+                        .size(260.dp)
+                        .clip(RoundedCornerShape(percent = 18))
                 )
                 Column(
                     verticalArrangement = Arrangement.spacedBy(10.dp),

@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,11 +31,13 @@ fun SongItem(
 ) {
     Row(
         Modifier
+            .fillMaxWidth()
             .clickable(
                 onClick = {
                     onItemSelected()
                 }
-            ),
+            )
+            .padding(MaterialTheme.spacing.small),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -42,7 +45,7 @@ fun SongItem(
             contentDescription = "Album Art",
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .size(40.dp)
+                .size(48.dp)
                 .clip(RoundedCornerShape(percent = 20))
         )
         Column(

@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -53,7 +52,6 @@ import com.gabchmel.contextmusicplayer.data.local.model.Song
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
 import com.gabchmel.contextmusicplayer.utils.isPermissionNotGranted
 
-
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalMaterialApi::class
@@ -62,7 +60,6 @@ import com.gabchmel.contextmusicplayer.utils.isPermissionNotGranted
 fun SongListScreen(
     navController: NavHostController
 ) {
-
     val viewModel: SongListViewModel = viewModel()
     val songs by viewModel.songs.collectAsState()
     val context = LocalContext.current
@@ -83,7 +80,8 @@ fun SongListScreen(
                 title = {
                     Text(
                         text = stringResource(id = R.string.playlist_topbar_title),
-                        style = MaterialTheme.typography.titleMedium
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 actions = {
@@ -156,9 +154,7 @@ fun SongListScreen(
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(horizontal = 8.dp)
-                                    .padding(top = 16.dp),
-                                contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.small)
+                                    .padding(top = 16.dp)
                             ) {
                                 items(songs, key = { it.uri }) { song ->
                                     val songUri = Uri.encode(song.uri.toString())

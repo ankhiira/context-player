@@ -12,3 +12,8 @@
 /captures
 .externalNativeBuild
 .cxx
+/app/fullVariant/release/app-fullVariant-release.apk
+/.idea/appInsightsSettings.xml
+/key/context_player_key_new.jks
+/.idea/kotlinc.xml
+/.idea/migrations.xml

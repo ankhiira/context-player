@@ -8,13 +8,16 @@
     <string name="settings_item_sensors">On device sensors</string>
     <string name="settings_item_data">Collected sensor data</string>
     <string name="settings_item_privacy_policy">Privacy policy</string>
-    <string name="settings_button_item_recreate_model">Clicking on this causes recreation of the model and triggers new song prediction</string>
+    <string name="settings_button_item_recreate_model">Recreate song prediction model and trigger new song prediction</string>
     <string name="settings_item_button_recreate_model">Recreate model</string>
-    <string name="settings_button_item_delete_data">Clicking on this deletes all collected sensor data used for song prediction</string>
+    <string name="settings_button_item_delete_data">Delete all collected sensor data used for song prediction</string>
     <string name="settings_item_button_delete_data">Delete saved data</string>
-    <string name="settings_button_item_send_data">Clicking on this sends all data collected for song prediction</string>
+    <string name="settings_button_item_send_data">Send all data collected for song prediction</string>
     <string name="settings_item_button_send_data">Send collected data</string>
     <string name="email_data_from">"Data from "</string>
     <string name="settings_title">Settings</string>
     <string name="now_playing_title">Playing from library</string>
+    <string name="settings_item_title_recreate_model">Recreate model</string>
+    <string name="settings_item_title_delete_all_saved_data">Delete all saved data</string>
+    <string name="settings_item_title_send_collected_data">Send collected data</string>
 </resources>

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -79,7 +80,6 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(horizontal = 16.dp)
             ) {
                 SettingsItem(
                     iconVector = Icons.Filled.Sensors,
@@ -102,75 +102,86 @@ fun SettingsScreen(
                         uriHandler.openUri("https://github.com/ankhiira/context-player/blob/dev/privacyPolicy/Privacy%20Policy.txt")
                     }
                 )
-                SettingsButtonItem(
-                    textRes = R.string.settings_button_item_recreate_model,
-                    buttonRes = R.string.settings_item_button_recreate_model,
-                    onClick = {
-                        MediaBrowserConnector(
-                            lifecycleOwner,
-                            context
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Divider()
+
+                    SettingsButtonItem(
+                        titleText = stringResource(R.string.settings_item_title_recreate_model),
+                        textRes = R.string.settings_button_item_recreate_model,
+                        buttonRes = R.string.settings_item_button_recreate_model,
+                        onClick = {
+                            MediaBrowserConnector(
+                                lifecycleOwner,
+                                context
+                            )
+                        }
+                    )
+
+                    val openDialog = remember { mutableStateOf(false) }
+
+                    SettingsButtonItem(
+                        titleText = stringResource(R.string.settings_item_title_delete_all_saved_data),
+                        textRes = R.string.settings_button_item_delete_data,
+                        buttonRes = R.string.settings_item_button_delete_data,
+                        onClick = {
+                            openDialog.value = true
+                        }
+                    )
+
+                    if (openDialog.value) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                                // button. If you want to disable that functionality, simply use an empty
+                                // onCloseRequest.
+                                openDialog.value = false
+                            },
+                            title = {
+                                Text(text = "Delete all saved data")
+                            },
+                            text = {
+                                Text("Are you sure you want to delete all saved data?")
+                            },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        openDialog.value = false
+                                        val inputFile =
+                                            File(
+                                                context.filesDir,
+                                                "data.csv"
+                                            )
+                                        if (inputFile.exists()) {
+                                            context.deleteFile("data.csv")
+                                        }
+                                    }) {
+                                    Text("YES")
+                                }
+                            },
+                            dismissButton = {
+                                Button(
+                                    onClick = {
+                                        openDialog.value = false
+                                    }
+                                ) {
+                                    Text("NO")
+                                }
+                            }
                         )
                     }
-                )
-
-                val openDialog = remember { mutableStateOf(false) }
-
-                SettingsButtonItem(
-                    textRes = R.string.settings_button_item_delete_data,
-                    buttonRes = R.string.settings_item_button_delete_data,
-                    onClick = {
-                        openDialog.value = true
-                    }
-                )
-
-                if (openDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            // Dismiss the dialog when the user clicks outside the dialog or on the back
-                            // button. If you want to disable that functionality, simply use an empty
-                            // onCloseRequest.
-                            openDialog.value = false
-                        },
-                        title = {
-                            Text(text = "Delete all saved data")
-                        },
-                        text = {
-                            Text("Are you sure you want to delete all saved data?")
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    openDialog.value = false
-                                    val inputFile =
-                                        File(
-                                            context.filesDir,
-                                            "data.csv"
-                                        )
-                                    if (inputFile.exists()) {
-                                        context.deleteFile("data.csv")
-                                    }
-                                }) {
-                                Text("YES")
-                            }
-                        },
-                        dismissButton = {
-                            Button(
-                                onClick = {
-                                    openDialog.value = false
-                                }
-                            ) {
-                                Text("NO")
-                            }
+                    SettingsButtonItem(
+                        titleText = stringResource(R.string.settings_item_title_send_collected_data),
+                        textRes = R.string.settings_button_item_send_data,
+                        buttonRes = R.string.settings_item_button_send_data,
+                        onClick = {
+                            sendEmail(context)
                         }
                     )
                 }
-                SettingsButtonItem(
-                    textRes = R.string.settings_button_item_send_data,
-                    buttonRes = R.string.settings_item_button_send_data,
-                    onClick = {
-                        sendEmail(context)
-                    }
-                )
             }
         }
     )

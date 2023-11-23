@@ -3,17 +3,18 @@ package com.gabchmel.contextmusicplayer.ui
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.lifecycleScope
@@ -34,7 +35,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     private object PreferencesKeys {
         val LOCATION_GRANTED = booleanPreferencesKey("location_permitted")
@@ -42,14 +43,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(
+                darkScrim = Color.TRANSPARENT,
+                lightScrim = Color.TRANSPARENT
+            )
+        )
         super.onCreate(savedInstanceState)
 
         setContent {
             ContextPlayerApp()
         }
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // Start SensorProcessService to collect sensor values
         Intent(this, SensorDataProcessingService::class.java).also { intent ->

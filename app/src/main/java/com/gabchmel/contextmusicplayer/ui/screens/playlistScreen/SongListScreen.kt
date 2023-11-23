@@ -76,11 +76,14 @@ fun SongListScreen(
             }
         }
 
+
     Scaffold(
         modifier = Modifier.background(
             brush = Brush.verticalGradient(
                 colors = listOf(
                     MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.background,
+                    MaterialTheme.colorScheme.background,
                     MaterialTheme.colorScheme.background
                 )
             )

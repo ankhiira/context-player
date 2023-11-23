@@ -2,20 +2,29 @@ package com.gabchmel.contextmusicplayer.ui
 
 import android.Manifest
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import com.gabchmel.contextmusicplayer.R
 
 
-class PermissionsActivity : AppCompatActivity() {
+class PermissionsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(
+                darkScrim = Color.TRANSPARENT,
+                scrim = Color.TRANSPARENT
+            )
+        )
         super.onCreate(savedInstanceState)
 
         val requestMultiplePermissions =

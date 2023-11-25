@@ -226,6 +226,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun onCleared() {
+        //TODO crashed with This job has not completed yet
         boundService.getCompleted().unbind()
         super.onCleared()
     }

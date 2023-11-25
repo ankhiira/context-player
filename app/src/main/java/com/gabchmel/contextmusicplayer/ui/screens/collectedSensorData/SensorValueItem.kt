@@ -14,9 +14,11 @@ fun SensorRow(
         Text(
             text = "$sensorName: ",
             color = MaterialTheme.colorScheme.onPrimary,
+            style = MaterialTheme.typography.bodyMedium
         )
         Text(
             text = "$sensorValue",
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -14,12 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.ui.theme.bahnSchrift
 import com.gabchmel.sensorprocessor.utils.OnDeviceSensors
 
@@ -48,9 +47,8 @@ fun OnDeviceSensorsScreen(
                         }
                     ) {
                         Icon(
-                            imageVector =
-                            ImageVector.vectorResource(R.drawable.ic_back),
-                            contentDescription = "Back",
+                            imageVector = Icons.Rounded.ArrowBack,
+                            contentDescription = "Navigate Back",
                             modifier = Modifier.fillMaxHeight(0.4f),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
@@ -63,7 +61,7 @@ fun OnDeviceSensorsScreen(
                 verticalArrangement =
                 Arrangement.spacedBy(8.dp),
                 contentPadding = padding,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 items(sensorReader.onDeviceSensors) { sensor ->
                     Text(

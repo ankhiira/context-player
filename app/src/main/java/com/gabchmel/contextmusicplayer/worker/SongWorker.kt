@@ -1,7 +1,7 @@
-package com.gabchmel.contextmusicplayer.service
+package com.gabchmel.contextmusicplayer.worker
 
 // TODO play after music service is on - or maybe every time
-//        // Load list of songs from local storage
+        // Load list of songs from local storage
 //        loadSongs()
 //
 //        // Bind to SensorProcessService to later write to the file
@@ -10,7 +10,7 @@ package com.gabchmel.contextmusicplayer.service
 //            connection,
 //            Context.BIND_AUTO_CREATE
 //        )
-
+//
 //        // Every 10 seconds write to file sensor measurements with the song ID
 //        fixedRateTimer(period = 10000) {
 //            if (isPlaying)

@@ -13,7 +13,7 @@ import androidx.media3.session.MediaSession
 
 class MusicService : MediaLibraryService() {
 
-    private lateinit var mediaLibrarySession: MediaLibrarySession
+    private var mediaLibrarySession: MediaLibrarySession? = null
 
     private lateinit var notification: Notification
 
@@ -48,6 +48,9 @@ class MusicService : MediaLibraryService() {
 //        }
     }
 
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
+        mediaLibrarySession
+
     @UnstableApi
     override fun onCreate() {
         super.onCreate()
@@ -77,6 +80,11 @@ class MusicService : MediaLibraryService() {
         ).build()
     }
 
+    override fun onDestroy() {
+        releaseMediaSession()
+        super.onDestroy()
+    }
+
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
 
@@ -88,20 +96,13 @@ class MusicService : MediaLibraryService() {
         stopSelf()
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession =
-        mediaLibrarySession
-
-    override fun onDestroy() {
-        releaseMediaSession()
-        super.onDestroy()
-    }
-
     private fun releaseMediaSession() {
-        mediaLibrarySession.run {
+        mediaLibrarySession?.run {
             release()
             if (player.playbackState != Player.STATE_IDLE) {
                 player.release()
             }
+            mediaLibrarySession = null
         }
     }
 }

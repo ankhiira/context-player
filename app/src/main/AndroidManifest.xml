@@ -60,8 +60,6 @@
             android:exported="true"
             android:stopWithTask="true">
             <intent-filter>
-<!--                <action android:name="android.intent.action.MEDIA_BUTTON" />-->
-
                 <action android:name="androidx.media3.session.MediaSessionService"/>
                 <!-- For backwards compatibility -->
                 <action android:name="android.media.browse.MediaBrowserService" />

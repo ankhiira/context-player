@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
-import android.support.v4.media.MediaMetadataCompat
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresPermission
 import androidx.media3.common.MediaItem
@@ -18,11 +17,6 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.MetadataRetriever
 import androidx.media3.exoplayer.source.TrackGroupArray
 import com.gabchmel.contextmusicplayer.data.local.model.Song
-import com.gabchmel.contextmusicplayer.utils.getAlbum
-import com.gabchmel.contextmusicplayer.utils.getAlbumArt
-import com.gabchmel.contextmusicplayer.utils.getArtist
-import com.gabchmel.contextmusicplayer.utils.getDuration
-import com.gabchmel.contextmusicplayer.utils.getTitle
 import kotlinx.coroutines.guava.asDeferred
 import java.util.concurrent.TimeUnit
 
@@ -33,8 +27,6 @@ interface MetaDataReader {
 class MetaDataReaderImpl(
     private val app: Application
 ) : MetaDataReader {
-
-    private val metadataRetriever = MediaMetadataRetriever()
 
     @OptIn(UnstableApi::class) @RequiresPermission(anyOf = [READ_EXTERNAL_STORAGE, READ_MEDIA_AUDIO])
     override suspend fun loadLocalStorageSongs(): List<Song>? {
@@ -118,32 +110,5 @@ class MetaDataReaderImpl(
         }
 
         return null
-    }
-
-    // Function to set the metadata for a current song from URI
-    fun setMetadata(songUri: Uri): MediaMetadataRetriever {
-        // Set source to current song to retrieve metadata
-        metadataRetriever.setDataSource(app, songUri)
-
-//        currentSongUri.value = songUri
-//        getMetaData()
-
-//        isSongPredicted = true
-
-        return metadataRetriever
-    }
-
-    fun getMetaData() {
-        val metadataBuilder = MediaMetadataCompat.Builder()
-            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadataRetriever.getTitle())
-            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, metadataRetriever.getArtist())
-            .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, metadataRetriever.getAlbum())
-            .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, metadataRetriever.getAlbumArt())
-
-        metadataRetriever.getDuration()?.let { duration ->
-            metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
-        }
-
-//        mediaSession.setMetadata(metadataBuilder.build())
     }
 }

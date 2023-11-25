@@ -103,12 +103,12 @@ fun SettingsScreen(
                     }
                 )
 
+                Divider()
+
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Divider()
-
                     SettingsButtonItem(
                         titleText = stringResource(R.string.settings_item_title_recreate_model),
                         textRes = R.string.settings_button_item_recreate_model,

@@ -9,13 +9,13 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.session.MediaBrowser
+import androidx.media3.session.SessionToken
 import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.contextmusicplayer.data.local.MetaDataReaderImpl
 import com.gabchmel.contextmusicplayer.data.local.model.Song
@@ -26,20 +26,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.guava.asDeferred
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
-    private lateinit var mediaBrowser: MediaBrowserCompat
-    lateinit var mediaController: MediaControllerCompat
+    private lateinit var mediaBrowser: MediaBrowser
+    private val sessionToken = SessionToken(app, ComponentName(app, MusicService::class.java))
 
-    private val _musicState = MutableStateFlow<PlaybackStateCompat?>(null)
-    val musicState: StateFlow<PlaybackStateCompat?> = _musicState
+    private val _isPlaying = MutableStateFlow(false)
+    val isPlaying: StateFlow<Boolean> = _isPlaying
 
-    private val _musicMetadata = MutableStateFlow<MediaMetadataCompat?>(null)
-    val musicMetadata: StateFlow<MediaMetadataCompat?> = _musicMetadata
+    private val _songMetadata = MutableStateFlow<MediaMetadata?>(null)
+    val musicMetadata: StateFlow<MediaMetadata?> = _songMetadata
 
     private val _connected = MutableStateFlow(false)
     val connected: StateFlow<Boolean> = _connected
@@ -58,22 +59,25 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     init {
-        if (ActivityCompat.checkSelfPermission(
-                app,
-                Manifest.permission.READ_MEDIA_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                app,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        viewModelScope.launch {
+            mediaBrowser = MediaBrowser.Builder(app, sessionToken)
+                    .buildAsync().asDeferred().await()
+
+            mediaBrowser.addListener(object : Player.Listener {
+                override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                    _songMetadata.value = mediaMetadata
+
+                    _connected.value = true
+                }
+
+                override fun onEvents(player: Player, events: Player.Events) {
+                    super.onEvents(player, events)
+
+                    _isPlaying.value = player.isPlaying
+                }
+            })
         }
+
         viewModelScope.launch {
             val permission =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
@@ -89,50 +93,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
 
             songs.value = MetaDataReaderImpl(app).loadLocalStorageSongs()
         }
-
-        val connectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
-            override fun onConnected() {
-                mediaBrowser.sessionToken.also { token ->
-                    // Create MediaControllerCompat
-                    mediaController = MediaControllerCompat(
-                        app,
-                        token
-                    )
-                }
-
-                // Display initial state
-                _musicMetadata.value = mediaController.metadata
-                _musicState.value = mediaController.playbackState
-
-                // Media Controller callback to detect data or state change
-                val controllerCallback = object : MediaControllerCompat.Callback() {
-                    // on Metadata change save the new value
-                    override fun onMetadataChanged(metadata: MediaMetadataCompat) {
-                        _musicMetadata.value = metadata
-                        _connected.value = true
-                    }
-
-                    // on PlaybackState change save the new value
-                    override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-                        _musicState.value = state
-                    }
-                }
-
-                // Register a media controller callback
-                mediaController.registerCallback(controllerCallback)
-            }
-        }
-
-        // Setting MediaBrowser for connecting to the MediaBrowserService
-//        mediaBrowser = MediaBrowserCompat(
-//            app,
-//            ComponentName(app, MusicService::class.java),
-//            connectionCallbacks,
-//            null
-//        ).apply {
-//            // Connects to the MediaBrowseService
-//            connect()
-//        }
     }
 
     private val boundService = viewModelScope.async {
@@ -158,7 +118,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         flags: Int
     ) =
         suspendCoroutine { continuation ->
-
             val connection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     val binder = service as LocalBinder<MusicService>
@@ -189,14 +148,6 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun play() {
-        mediaController.transportControls.play()
-    }
-
-    fun pause() {
-        mediaController.transportControls.pause()
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     fun loadSongs() {
         try {
@@ -206,22 +157,23 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // Function to play song from a bottom bar
+    // Play song from a bottom bar
     fun playSong() {
-        val playbackState = this.musicState.value?.state ?: return
-        when (playbackState) {
-            PlaybackStateCompat.STATE_PLAYING -> {
-                this.pause()
-                // Preemptively set icon
-                // binding.btnPlay.setBackgroundResource(R.drawable.ic_play_arrow_black_24dp)
-            }
+        val isPlaying = this._isPlaying.value ?: false
 
-            else -> {
-                this.play()
-                // Preemptively set icon
-                // binding.btnPlay.setBackgroundResource(R.drawable.ic_pause_black_24dp)
-            }
+        if (isPlaying) {
+            this.pause()
+        } else {
+            this.play()
         }
+    }
+
+    private fun play() {
+        mediaBrowser?.play()
+    }
+
+    private fun pause() {
+        mediaBrowser?.pause()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -1,7 +1,5 @@
 package com.gabchmel.contextmusicplayer.ui.screens.playlistScreen
 
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,40 +19,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.MediaMetadata
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.utils.getAlbumArt
-import com.gabchmel.contextmusicplayer.utils.getArtist
-import com.gabchmel.contextmusicplayer.utils.getTitle
 import com.google.accompanist.glide.rememberGlidePainter
 
 @Composable
 fun BottomPlayingIndicator(
-    songMetadata: MediaMetadataCompat?,
-    playbackState: PlaybackStateCompat?,
+    songMetadata: MediaMetadata?,
+    isPlaying: Boolean,
     onPlayClicked: () -> Unit
 ) {
     BottomAppBar(
-        containerColor = MaterialTheme.colorScheme.surface
+        modifier = Modifier.clip(RoundedCornerShape(10.dp, 10.dp)),
+        containerColor = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Row(
-                modifier = Modifier.padding(8.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Album art
                 Image(
-                    painter = songMetadata?.getAlbumArt()?.let {
+                    painter = songMetadata?.artworkData?.let {
                         rememberGlidePainter(it)
                     }
                         ?: rememberVectorPainter(
@@ -65,43 +60,39 @@ fun BottomPlayingIndicator(
                     contentDescription = "Album Art",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(percent = 10))
+                        .clip(RoundedCornerShape(10.dp))
                         .height(46.dp)
                 )
                 Column(
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    modifier = Modifier.padding(horizontal = 10.dp)
                 ) {
                     Text(
-                        text = songMetadata?.getTitle() ?: "Loading",
-                        color = MaterialTheme.colorScheme.onPrimary
+                        text = songMetadata?.title?.toString() ?: "Loading",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = songMetadata?.getArtist() ?: "Loading",
+                        text = songMetadata?.artist?.toString() ?: "Loading",
                         color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.alpha(0.54f)
+                        modifier = Modifier.alpha(0.54f),
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
             IconButton(
                 onClick = onPlayClicked,
-                modifier = Modifier
-                    .size(34.dp)
-                    .padding(horizontal = 8.dp)
+                modifier = Modifier.size(48.dp)
             ) {
                 Icon(
                     painter = rememberVectorPainter(
                         ImageVector.vectorResource(
-                            when (playbackState?.state) {
-                                PlaybackStateCompat.STATE_PLAYING ->
-                                    R.drawable.ic_pause_new
-
-                                else ->
-                                    R.drawable.ic_play_button_arrowhead
-                            }
+                            if (isPlaying) R.drawable.ic_pause_new
+                            else R.drawable.ic_play_button_arrowhead
                         )
                     ),
                     contentDescription = "Play button",
-                    tint = Color(0xFFB1B1B1)
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }

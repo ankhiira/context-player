@@ -192,14 +192,14 @@ fun SongListScreen(
             }
         },
         bottomBar = {
-            val musicState by viewModel.musicState.collectAsStateWithLifecycle()
+            val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
             val musicMetadata by viewModel.musicMetadata.collectAsStateWithLifecycle()
             val connected by viewModel.connected.collectAsStateWithLifecycle()
 
             if (connected) {
                 BottomPlayingIndicator(
                     songMetadata = musicMetadata,
-                    playbackState = musicState,
+                    isPlaying = isPlaying,
                     onPlayClicked = {
                         viewModel.playSong()
                     }

@@ -13,7 +13,8 @@ private val LightColorScheme = lightColorScheme(
     secondary = Pink500,
     background = DarkGray,
     surface = DarkestGray,
-    onSecondary = LightGray
+    onSecondary = LightGray,
+    secondaryContainer = Pink600
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -22,7 +23,8 @@ private val DarkColorScheme = darkColorScheme(
     // On objets - text color
     onBackground = Yel900,
     onPrimary = Yel900,
-    onSecondary = LightGray
+    onSecondary = LightGray,
+    secondaryContainer = Pink600
 )
 
 @Composable

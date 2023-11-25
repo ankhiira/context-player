@@ -124,9 +124,6 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:$media3_version")
     implementation "androidx.media3:media3-common:$media3_version"
 
-    // Media notification
-    implementation "androidx.media:media:1.6.0"
-
     // WorkManager - Kotlin + coroutines
     implementation "androidx.work:work-runtime-ktx:2.8.1"
 

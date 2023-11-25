@@ -6,12 +6,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
 import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.utils.bindService
+import com.gabchmel.contextmusicplayer.data.local.MetaDataReaderImpl
+import com.gabchmel.contextmusicplayer.data.local.model.Song
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.reflect.KProperty1
@@ -21,7 +27,6 @@ class SongPredictor(
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner
 ) {
-//    private val boundService = CompletableDeferred<MediaBrowserConnector.BoundService>()
     private var contextData = ConvertedData()
 
     private val sensorProcessService =
@@ -40,11 +45,10 @@ class SongPredictor(
         emitAll(sensorProcessService.await().prediction)
     }.filterNotNull()
 
-//    private val songs =
-//        flow {
-//            val service = boundService.await().service
-//            emitAll(service.songs)
-//        }.stateIn(lifecycleOwner.lifecycleScope, SharingStarted.Lazily, null)
+    private val songs = flow<List<Song>> {
+        val songs = MetaDataReaderImpl(context).loadLocalStorageSongs() ?: listOf()
+        emitAll(flowOf(songs))
+    }.stateIn(lifecycleOwner.lifecycleScope, SharingStarted.Lazily, null)
 
     fun identifyPredictedSong() {
         // Check predictions
@@ -70,19 +74,17 @@ class SongPredictor(
                     predictionFile.appendText(predictionString)
 
                     // Find song that matches the prediction hash
-//                    for (song in songs.filterNotNull().first()) {
-//                        if ("${song.title},${song.author}"
-//                                .hashCode().toUInt().toString() == prediction
-//                        ) {
-//                            MediaBrowserConnector.predictedSong = song
+                    for (song in songs.filterNotNull().first()) {
+                        if ("${song.title},${song.artist}"
+                                .hashCode().toUInt().toString() == prediction
+                        ) {
+                            MediaBrowserConnector.predictedSong = song
 //                            PredictionNotificationCreator.createNotification(
 //                                context,
 //                                MediaBrowserConnector.predictedSong
 //                            )
-//
-////                            mediaBrowser.disconnect()
-//                        }
-//                    }
+                        }
+                    }
                 }
             }
         }

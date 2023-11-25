@@ -1,16 +1,13 @@
 package com.gabchmel.contextmusicplayer.data.local
 
-import android.Manifest.permission.READ_EXTERNAL_STORAGE
-import android.Manifest.permission.READ_MEDIA_AUDIO
-import android.app.Application
 import android.content.ContentUris
+import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import androidx.annotation.OptIn
-import androidx.annotation.RequiresPermission
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
@@ -25,10 +22,11 @@ interface MetaDataReader {
 }
 
 class MetaDataReaderImpl(
-    private val app: Application
+    private val context: Context
 ) : MetaDataReader {
 
-    @OptIn(UnstableApi::class) @RequiresPermission(anyOf = [READ_EXTERNAL_STORAGE, READ_MEDIA_AUDIO])
+    @OptIn(UnstableApi::class)
+//    @RequiresPermission(anyOf = [READ_EXTERNAL_STORAGE, READ_MEDIA_AUDIO])
     override suspend fun loadLocalStorageSongs(): List<Song>? {
 
         val contentUri =
@@ -52,7 +50,7 @@ class MetaDataReaderImpl(
             TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES).toString()
         )
 
-        app.contentResolver
+        context.contentResolver
             .query(
                 contentUri,
                 null,
@@ -72,13 +70,13 @@ class MetaDataReaderImpl(
 
                     val metadataRetriever = MediaMetadataRetriever()
                     metadataRetriever.setDataSource(
-                        app,
+                        context,
                         Uri.parse(uri.toString())
                     )
 
                     val mediaItem = MediaItem.fromUri(uri)
                     val trackGroups = MetadataRetriever.retrieveMetadata(
-                        app.applicationContext,
+                        context.applicationContext,
                         mediaItem
                     ).asDeferred().await()
 

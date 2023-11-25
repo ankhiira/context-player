@@ -48,10 +48,7 @@ import kotlinx.coroutines.flow.stateIn
     private val sensorDataProcessingService = MutableStateFlow<SensorDataProcessingService?>(null)
 
 //    override fun onPlayFromUri(uri: Uri, extras: Bundle?) {
-//        preparePlayer(uri)
 //        currentSongUri.value = uri
-//        updateMetadata()
-//        onPlay()
 //    }
 
 //    override fun onPlay() {
@@ -164,18 +161,4 @@ import kotlinx.coroutines.flow.stateIn
 //            onSkipToNext()
 //        }
 //    }
-
-    // Prepare the player for the song play
-    fun preparePlayer(uri: Uri) {
-        val songUri = Uri.parse(uri.toString())
-
-//        player.run {
-//            reset()
-//            setDataSource(baseContext, songUri)
-//            prepare()
-//        }
-//
-//        // Set source to current song to retrieve metadata
-//        metadataRetriever.setDataSource(applicationContext, songUri)
-    }
 }

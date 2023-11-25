@@ -37,7 +37,7 @@ class PermissionsActivity : ComponentActivity() {
         }
     }
 
-    // Composable function to show the permissions screen if some permission are not requested
+    // Show the permissions screen if some permission are not requested
     @Composable
     fun PermissionsScreen(requestMultiplePermissions : ActivityResultLauncher<Array<String>>) {
         // Request the permissions on application start

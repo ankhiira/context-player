@@ -20,7 +20,7 @@ fun isPermissionNotGranted(
     ) != PackageManager.PERMISSION_GRANTED
 }
 
-// Function to copy the file to temp file
+// Copy the file to temp file
 fun convertFileForSend(
     context: Context,
     filename: String,

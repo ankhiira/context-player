@@ -34,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
+import com.gabchmel.contextmusicplayer.service.MediaBrowserConnector
 import com.gabchmel.contextmusicplayer.utils.convertFileForSend
 import java.io.File
 
@@ -113,10 +114,10 @@ fun SettingsScreen(
                         buttonRes = R.string.settings_item_button_recreate_model,
                         onClick = {
                             //TODO create via Media3
-//                            MediaBrowserConnector(
-//                                lifecycleOwner,
-//                                context
-//                            )
+                            MediaBrowserConnector(
+                                lifecycleOwner,
+                                context
+                            )
                         }
                     )
 

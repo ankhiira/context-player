@@ -12,7 +12,7 @@ import kotlin.coroutines.suspendCoroutine
 
 // Function to handle service binding
 suspend fun <T : Service> Context.bindService(clazz: Class<T>) =
-    suspendCoroutine<T> { cont ->
+    suspendCoroutine { cont ->
         val connection = object : ServiceConnection {
 
             override fun onServiceConnected(className: ComponentName, service: IBinder) {

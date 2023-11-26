@@ -21,7 +21,6 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
-import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -77,11 +76,8 @@ class SensorDataProcessingService : Service() {
     val prediction: StateFlow<String?> = _prediction
 
     // Service binder given to clients
-    private val binder = LocalBinder()
-
-    inner class LocalBinder : Binder() {
-        // Return this instance of LocalService so clients can call public methods.
-        fun getService(): SensorDataProcessingService = this@SensorDataProcessingService
+    private val binder = object : LocalBinder<SensorDataProcessingService>() {
+        override fun getService() = this@SensorDataProcessingService
     }
 
     private var processedCsvValues: ProcessedCsvValues = ProcessedCsvValues()

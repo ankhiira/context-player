@@ -13,7 +13,7 @@ import weka.core.converters.CSVLoader
 import weka.filters.Filter
 import weka.filters.unsupervised.instance.RemovePercentage
 import java.io.File
-import java.util.*
+import java.util.Random
 
 
 class PredictionModelBuiltIn(val context: Context) {
@@ -71,7 +71,7 @@ class PredictionModelBuiltIn(val context: Context) {
             return false
         }
 
-        convertCsvToArrf(context, classNames, wifiList)
+        convertCsvToArff(context, classNames, wifiList)
 
         if (File(context.filesDir, file).exists()) {
 
@@ -260,7 +260,7 @@ class PredictionModelBuiltIn(val context: Context) {
     }
 
     // Function to convert CSV file to arff file representation
-    private fun convertCsvToArrf(
+    private fun convertCsvToArff(
         context: Context,
         classNames: ArrayList<String>,
         wifiList: ArrayList<UInt>

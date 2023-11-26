@@ -79,10 +79,10 @@ class SongPredictor(
                         if ("${song.title},${song.artist}"
                                 .hashCode().toUInt().toString() == prediction
                         ) {
-                            MediaBrowserConnector.predictedSong = song
+                            PredictionCreator.predictedSong = song
                             PredictionNotificationCreator.showNewNotification(
                                 context,
-                                MediaBrowserConnector.predictedSong
+                                PredictionCreator.predictedSong
                             )
                         }
                     }

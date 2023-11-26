@@ -15,7 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.local.model.Song
-import com.gabchmel.contextmusicplayer.service.MediaBrowserConnector
+import com.gabchmel.contextmusicplayer.service.PredictionCreator
 import com.gabchmel.contextmusicplayer.ui.MainActivity
 
 object PredictionNotificationCreator {
@@ -69,7 +69,7 @@ object PredictionNotificationCreator {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-        val intentPlay = Intent(context, MediaBrowserConnector.ActionReceiver::class.java).apply {
+        val intentPlay = Intent(context, PredictionCreator.ActionReceiver::class.java).apply {
             this.putExtra("action", "actionPlay")
         }
 
@@ -81,7 +81,7 @@ object PredictionNotificationCreator {
                 PendingIntent.FLAG_IMMUTABLE
             )
 
-        val intentSkip = Intent(context, MediaBrowserConnector.ActionReceiver::class.java).apply {
+        val intentSkip = Intent(context, PredictionCreator.ActionReceiver::class.java).apply {
             this.putExtra("action", "actionSkip")
         }
 

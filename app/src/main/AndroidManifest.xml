@@ -91,7 +91,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".service.MediaBrowserConnector$ActionReceiver" />
+        <receiver android:name=".service.PredictionCreator$ActionReceiver" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -7,7 +7,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.gabchmel.contextmusicplayer.service.MediaBrowserConnector
+import com.gabchmel.contextmusicplayer.service.PredictionCreator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -23,7 +23,7 @@ class PredictionWorker(
             val inputFile = File(appContext.filesDir, "data.csv")
             if (inputFile.exists()) {
                 // Connect to the MediaBrowserService, run prediction and create notification
-                MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
+                PredictionCreator(ProcessLifecycleOwner.get(), appContext)
             }
 
             val tenMinutesRequest = OneTimeWorkRequestBuilder<PredictionWorker>()

@@ -20,7 +20,7 @@ import com.gabchmel.contextmusicplayer.data.local.model.Song
 import kotlinx.coroutines.guava.asDeferred
 import kotlinx.coroutines.launch
 
-class MediaBrowserConnector(
+class PredictionCreator(
     private val lifecycleOwner: LifecycleOwner,
     val context: Context
 ) : LifecycleObserver {
@@ -123,6 +123,10 @@ class MediaBrowserConnector(
 
         mediaBrowser = MediaBrowser.Builder(context, sessionToken)
             .buildAsync().asDeferred().await()
+    }
+
+    fun getPredictedData() {
+
     }
 
     companion object {

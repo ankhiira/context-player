@@ -10,6 +10,7 @@
     <!-- Permission to read local song files -->
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />

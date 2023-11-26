@@ -8,6 +8,7 @@ import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.data.local.MetaDataReaderImpl
 import com.gabchmel.contextmusicplayer.data.local.model.Song
+import com.gabchmel.contextmusicplayer.ui.notifications.PredictionNotificationCreator
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
@@ -79,10 +80,10 @@ class SongPredictor(
                                 .hashCode().toUInt().toString() == prediction
                         ) {
                             MediaBrowserConnector.predictedSong = song
-//                            PredictionNotificationCreator.createNotification(
-//                                context,
-//                                MediaBrowserConnector.predictedSong
-//                            )
+                            PredictionNotificationCreator.showNewNotification(
+                                context,
+                                MediaBrowserConnector.predictedSong
+                            )
                         }
                     }
                 }

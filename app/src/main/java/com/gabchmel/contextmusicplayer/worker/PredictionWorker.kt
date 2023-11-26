@@ -23,7 +23,6 @@ class PredictionWorker(
             val inputFile = File(appContext.filesDir, "data.csv")
             if (inputFile.exists()) {
                 // Connect to the MediaBrowserService, run prediction and create notification
-                //TODO connect via Media3
                 MediaBrowserConnector(ProcessLifecycleOwner.get(), appContext)
             }
 

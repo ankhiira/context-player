@@ -28,4 +28,7 @@
     <string name="collected_data_title_battery">Battery</string>
     <string name="collected_data_title_health">Health</string>
     <string name="collected_data_title_result_category">Result category</string>
+    <string name="prediction_notification_title">Do you want to listen to?</string>
+    <string name="channel_name">Prediction notification channel</string>
+    <string name="channel_description">Channel for displaying predicted song for the current user context.</string>
 </resources>

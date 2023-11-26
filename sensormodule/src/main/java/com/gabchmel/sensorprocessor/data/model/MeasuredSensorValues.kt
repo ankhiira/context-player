@@ -1,6 +1,6 @@
 package com.gabchmel.sensorprocessor.data.model
 
-import java.util.*
+import java.util.Date
 
 data class MeasuredSensorValues(
     var currentTime: Date? = null,
@@ -9,7 +9,7 @@ data class MeasuredSensorValues(
     var currentState: String = "UNKNOWN",
     var lightSensorValue: Float = 0.0f,
     var deviceLying: Float = 0.0f,
-    var BTDeviceConnected: Float = 0.0f,
+    var bluetoothDeviceConnected: Float = 0.0f,
     var headphonesPluggedIn: Float = 0.0f,
     var pressure: Float = 0.0f,
     var temperature: Float = 0.0f,

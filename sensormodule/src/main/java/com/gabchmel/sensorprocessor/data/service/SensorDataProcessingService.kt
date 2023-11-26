@@ -21,6 +21,7 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
+import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -63,7 +64,7 @@ class SensorDataProcessingService : Service() {
     // Structure to store sensor values
     private val _measuredSensorValues = MutableStateFlow(MeasuredSensorValues())
     val measuredSensorValues: StateFlow<MeasuredSensorValues> = _measuredSensorValues
-    private val coords = mutableListOf<Float>()
+    private val coordinates = mutableListOf<Float>()
 
     // Input CSV file to save sensor values
     private lateinit var csvFile: File
@@ -76,8 +77,11 @@ class SensorDataProcessingService : Service() {
     val prediction: StateFlow<String?> = _prediction
 
     // Service binder given to clients
-    private val binder = object : LocalBinder<SensorDataProcessingService>() {
-        override fun getService() = this@SensorDataProcessingService
+    private val binder = LocalBinder()
+
+    inner class LocalBinder : Binder() {
+        // Return this instance of LocalService so clients can call public methods.
+        fun getService(): SensorDataProcessingService = this@SensorDataProcessingService
     }
 
     private var processedCsvValues: ProcessedCsvValues = ProcessedCsvValues()
@@ -104,11 +108,17 @@ class SensorDataProcessingService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder {
+        onServiceBound()
+
+        return binder
+    }
+
+    private fun onServiceBound() {
         CoroutineScope(Dispatchers.Default).launch {
             // Register listeners to sensor value changes
             SensorReader.registerSensorReader(
                 baseContext, Sensor.TYPE_ACCELEROMETER,
-            ).collect { values: Collection<Float> -> coords.addAll(values) }
+            ).collect { values: Collection<Float> -> coordinates.addAll(values) }
 
             SensorReader.registerSensorReader(
                 baseContext, Sensor.TYPE_LIGHT,
@@ -156,11 +166,9 @@ class SensorDataProcessingService : Service() {
         }
 
         headphonesPluggedInDetection()
-
-        return binder
     }
 
-    // Function to write sensor values to file
+    // Write sensor values to file
     fun writeToFile(songID: String) {
         // Read current time
         _measuredSensorValues.value.currentTime = Calendar.getInstance().time
@@ -207,7 +215,7 @@ class SensorDataProcessingService : Service() {
                         + measuredSensorValues.value.currentState + ","
                         + measuredSensorValues.value.lightSensorValue + ","
                         + measuredSensorValues.value.deviceLying + ","
-                        + measuredSensorValues.value.BTDeviceConnected + ","
+                        + measuredSensorValues.value.bluetoothDeviceConnected + ","
                         + measuredSensorValues.value.headphonesPluggedIn + ","
                         + measuredSensorValues.value.pressure + ","
                         + measuredSensorValues.value.temperature + ","
@@ -290,7 +298,7 @@ class SensorDataProcessingService : Service() {
                         && prefs.state != "UNDEFINED") -> true
                 (measuredSensorValues.value.deviceLying != prefs.isDeviceLying
                         && prefs.isDeviceLying != -1.0f) -> true
-                (measuredSensorValues.value.BTDeviceConnected != prefs.isBluetoothDeviceConnected
+                (measuredSensorValues.value.bluetoothDeviceConnected != prefs.isBluetoothDeviceConnected
                         && prefs.isBluetoothDeviceConnected != -1.0f) -> true
                 (measuredSensorValues.value.headphonesPluggedIn != prefs.areHeadphonesConnected
                         && prefs.areHeadphonesConnected != -1.0f) -> true
@@ -314,7 +322,7 @@ class SensorDataProcessingService : Service() {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.STATE] = _measuredSensorValues.value.currentState
             preferences[PreferencesKeys.IS_DEVICE_LYING] = _measuredSensorValues.value.deviceLying
-            preferences[PreferencesKeys.IS_BT_DEVICE_CONNECTED] = measuredSensorValues.value.BTDeviceConnected
+            preferences[PreferencesKeys.IS_BT_DEVICE_CONNECTED] = measuredSensorValues.value.bluetoothDeviceConnected
             preferences[PreferencesKeys.ARE_HEADPHONES_CONNECTED] = measuredSensorValues.value.headphonesPluggedIn
             preferences[PreferencesKeys.CONNECTED_WIFI_SSID] = measuredSensorValues.value.wifi.toInt()
             preferences[PreferencesKeys.CURRENT_NETWORK_CONNECTION] = measuredSensorValues.value.connection
@@ -361,21 +369,21 @@ class SensorDataProcessingService : Service() {
     // Function for detection if the device is lying
     private fun processCurrentOrientation() {
         // Inspired by: https://stackoverflow.com/questions/30948131/how-to-know-if-android-device-is-flat-on-table
-        when (coords.size) {
+        when (coordinates.size) {
             3 -> {
                 val norm = sqrt(
-                    (coords[0] * coords[0]
-                            + coords[1] * coords[1]
-                            + coords[2] * coords[2])
+                    (coordinates[0] * coordinates[0]
+                            + coordinates[1] * coordinates[1]
+                            + coordinates[2] * coordinates[2])
                         .toDouble()
                 )
 
                 // Normalize the accelerometer vector
-                coords[0] = (coords[0] / norm).toFloat()
-                coords[1] = (coords[1] / norm).toFloat()
-                coords[2] = (coords[2] / norm).toFloat()
+                coordinates[0] = (coordinates[0] / norm).toFloat()
+                coordinates[1] = (coordinates[1] / norm).toFloat()
+                coordinates[2] = (coordinates[2] / norm).toFloat()
 
-                val inclination = Math.toDegrees(acos(coords[2]).toDouble()).roundToInt()
+                val inclination = Math.toDegrees(acos(coordinates[2]).toDouble()).roundToInt()
 
                 // Device detected as lying is with inclination in range < 25 or > 155 degrees
                 _measuredSensorValues.value.deviceLying =
@@ -411,7 +419,7 @@ class SensorDataProcessingService : Service() {
                 return
             }
             bluetoothAdapter?.let {
-                _measuredSensorValues.value.BTDeviceConnected =
+                _measuredSensorValues.value.bluetoothDeviceConnected =
                     if (BluetoothProfile.STATE_CONNECTED
                         == bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)
                     ) 1.0f else 0.0f

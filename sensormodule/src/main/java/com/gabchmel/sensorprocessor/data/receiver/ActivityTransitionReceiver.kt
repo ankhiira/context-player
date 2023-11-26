@@ -1,14 +1,38 @@
 package com.gabchmel.sensorprocessor.data.receiver
 
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
+import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 
 
 class ActivityTransitionReceiver : BroadcastReceiver() {
+
+    private lateinit var sensorService: SensorDataProcessingService
+    private var bound = false
+
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance.
+            val binder = service as SensorDataProcessingService.LocalBinder
+            sensorService = binder.getService()
+            bound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            bound = false
+        }
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         if (ActivityTransitionResult.hasResult(intent)) {
@@ -21,16 +45,19 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 
                     context.sendBroadcast(Intent("MyAction"))
 
-//                    val sensorProcessService = CoroutineScope(Dispatchers.Default).async {
-//                            val service = context.bindService(SensorProcessService::class.java)
-//                            if (service.createModel()) {
-//                                input = service.triggerPrediction()
+                    val sensorProcessService = CoroutineScope(Dispatchers.Default).async {
+                        val intent = Intent(context, SensorDataProcessingService::class.java)
+                            .putExtra("is_binding", true)
+                        val service =
+                            context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+                        if (sensorService.createModel()) {
+                                val input = sensorService.triggerPrediction()
 //                                CollectedSensorDataFragment.updateUI(input)
-//                            }
-//                            service
-//                        }
-//
-//                    SensorProcessService.sensor.value.currentState = activity
+                        }
+                        sensorService
+                    }
+
+//                    sensorService.sensor.value.currentState = activity
                 }
             }
         }

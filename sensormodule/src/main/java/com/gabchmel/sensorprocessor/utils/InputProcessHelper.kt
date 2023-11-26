@@ -109,7 +109,7 @@ object InputProcessHelper {
             sensorData.currentState,
             sensorData.lightSensorValue,
             sensorData.deviceLying,
-            sensorData.BTDeviceConnected,
+            sensorData.bluetoothDeviceConnected,
             sensorData.headphonesPluggedIn,
             sensorData.pressure,
             sensorData.temperature,

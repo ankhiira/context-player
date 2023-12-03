@@ -23,6 +23,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         // Enables Jetpack Compose for this module
         compose = true
     }
@@ -60,14 +61,12 @@ android {
             dimension = "mode"
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            buildConfigField("boolean", "IS_DEBUG", "true")
         }
 
         create("full") {
             dimension = "mode"
             applicationIdSuffix = ".release"
             versionNameSuffix = "-full"
-            buildConfigField("boolean", "IS_DEBUG", "false")
         }
     }
 

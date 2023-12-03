@@ -99,7 +99,7 @@ class PredictionCreator(
 //                val sensorProcessService = sensorProcessService.await()
 
                 when {
-                    !BuildConfig.IS_DEBUG -> {
+                    BuildConfig.FLAVOR != "debugVersion" -> {
 //                        if (sensorProcessService.hasContextChanged()) {
                             createMediaBrowser()
                             songPredictor.identifyPredictedSong()

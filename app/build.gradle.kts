@@ -132,9 +132,9 @@ dependencies {
     implementation("androidx.media3:media3-common:$media3Version")
 
     // WorkManager - Kotlin + coroutines
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.7.1")
 
     // For occurring error of duplicate library?
     implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")

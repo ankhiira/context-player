@@ -9,4 +9,4 @@ data class SensorDataPreferences(
     val currentNetworkConnection: String,
     val batteryState: String,
     val chargingMethod: String
-    )
+)

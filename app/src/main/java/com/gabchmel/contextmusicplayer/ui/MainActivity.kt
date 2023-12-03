@@ -23,7 +23,7 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.gabchmel.common.data.GlobalPreferences
+import com.gabchmel.common.data.dataStore.GlobalPreferences
 import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.utils.isPermissionNotGranted

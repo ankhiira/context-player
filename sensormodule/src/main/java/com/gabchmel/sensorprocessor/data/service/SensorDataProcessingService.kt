@@ -3,6 +3,7 @@ package com.gabchmel.sensorprocessor.data.service
 import android.Manifest
 import android.app.PendingIntent
 import android.app.Service
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.BroadcastReceiver
@@ -45,13 +46,14 @@ import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityTransitionRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
-import java.util.*
+import java.util.Calendar
 import kotlin.math.acos
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -264,28 +266,7 @@ class SensorDataProcessingService : Service() {
     }
 
     suspend fun hasContextChanged(): Boolean {
-        val savedGlobalPreferences = dataStore.data
-            .map { preferences ->
-                SensorDataPreferences(
-                    state =
-                    preferences[PreferencesKeys.STATE] ?: "",
-                    isDeviceLying =
-                    preferences[PreferencesKeys.IS_DEVICE_LYING] ?: -1.0f,
-                    isBluetoothDeviceConnected =
-                    preferences[PreferencesKeys.IS_BT_DEVICE_CONNECTED] ?: -1.0f,
-                    areHeadphonesConnected =
-                    preferences[PreferencesKeys.ARE_HEADPHONES_CONNECTED] ?: -1.0f,
-                    connectedWifiSsid =
-                    preferences[PreferencesKeys.CONNECTED_WIFI_SSID] ?: -1,
-                    currentNetworkConnection =
-                    preferences[PreferencesKeys.CURRENT_NETWORK_CONNECTION] ?: "UNDEFINED",
-                    batteryState =
-                    preferences[PreferencesKeys.BATTERY_STATUS] ?: "UNDEFINED",
-                    chargingMethod =
-                    preferences[PreferencesKeys.CHARGING_METHOD] ?: "UNDEFINED"
-                )
-            }
-
+        val savedGlobalPreferences = getPreferencesSavedDataFlow()
         var result = false
 
         savedGlobalPreferences.collect { prefs ->
@@ -311,6 +292,30 @@ class SensorDataProcessingService : Service() {
         }
 
         return result
+    }
+
+    private fun getPreferencesSavedDataFlow(): Flow<SensorDataPreferences> {
+        return dataStore.data
+            .map { preferences ->
+                SensorDataPreferences(
+                    state =
+                    preferences[PreferencesKeys.STATE] ?: "",
+                    isDeviceLying =
+                    preferences[PreferencesKeys.IS_DEVICE_LYING] ?: -1.0f,
+                    isBluetoothDeviceConnected =
+                    preferences[PreferencesKeys.IS_BT_DEVICE_CONNECTED] ?: -1.0f,
+                    areHeadphonesConnected =
+                    preferences[PreferencesKeys.ARE_HEADPHONES_CONNECTED] ?: -1.0f,
+                    connectedWifiSsid =
+                    preferences[PreferencesKeys.CONNECTED_WIFI_SSID] ?: -1,
+                    currentNetworkConnection =
+                    preferences[PreferencesKeys.CURRENT_NETWORK_CONNECTION] ?: "UNDEFINED",
+                    batteryState =
+                    preferences[PreferencesKeys.BATTERY_STATUS] ?: "UNDEFINED",
+                    chargingMethod =
+                    preferences[PreferencesKeys.CHARGING_METHOD] ?: "UNDEFINED"
+                )
+            }
     }
 
     // Function to save current context values to shared preferences for later comparison
@@ -414,10 +419,11 @@ class SensorDataProcessingService : Service() {
                 // for ActivityCompat#requestPermissions for more details.
                 return
             }
+
             bluetoothAdapter?.let {
                 _measuredSensorValues.value.bluetoothDeviceConnected =
-                    if (BluetoothProfile.STATE_CONNECTED
-                        == bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)
+                    if (bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)
+                        == BluetoothAdapter.STATE_CONNECTED
                     ) 1.0f else 0.0f
             }
         }

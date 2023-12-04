@@ -89,7 +89,7 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Current Activity",
-                    collectedSensorData.state
+                    collectedSensorData.currentActivity
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_physical_values)
@@ -130,7 +130,7 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Bluetooth headphones connected",
-                    if (collectedSensorData.BTDeviceConnected == 0.0f) "No" else "Yes"
+                    if (collectedSensorData.bluetoothDeviceConnected == 0.0f) "No" else "Yes"
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_network)

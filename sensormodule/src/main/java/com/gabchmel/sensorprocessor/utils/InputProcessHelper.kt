@@ -106,7 +106,7 @@ object InputProcessHelper {
             cosTime,
             dayOfWeekSin,
             dayOfWeekCos,
-            sensorData.currentState,
+            sensorData.userActivity,
             sensorData.lightSensorValue,
             sensorData.deviceLying,
             sensorData.bluetoothDeviceConnected,

@@ -1,12 +1,15 @@
 package com.gabchmel.common.data
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SensorDataPreferences(
-    val state: String,
-    val isDeviceLying: Float,
-    val isBluetoothDeviceConnected: Float,
-    val areHeadphonesConnected: Float,
-    val connectedWifiSsid: Int,
-    val currentNetworkConnection: String,
-    val batteryState: String,
-    val chargingMethod: String
+    val state: String = "",
+    val isDeviceLying: Float = -1.0f,
+    val isBluetoothDeviceConnected: Float = -1.0f,
+    val areHeadphonesConnected: Float = -1.0f,
+    val connectedWifiSsid: Int = -1,
+    val currentNetworkConnection: String = "UNDEFINED",
+    val batteryState: String = "UNDEFINED",
+    val chargingMethod: String = "UNDEFINED"
 )

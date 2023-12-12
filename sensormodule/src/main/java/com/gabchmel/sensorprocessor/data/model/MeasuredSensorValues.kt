@@ -6,7 +6,7 @@ data class MeasuredSensorValues(
     var currentTime: Date? = null,
     var longitude: Double = 0.0,
     var latitude: Double = 0.0,
-    var currentState: String = "UNKNOWN",
+    var userActivity: String = "UNKNOWN",
     var lightSensorValue: Float = 0.0f,
     var deviceLying: Float = 0.0f,
     var bluetoothDeviceConnected: Float = 0.0f,

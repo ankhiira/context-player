@@ -29,14 +29,16 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
                     val sensorProcessService = CoroutineScope(Dispatchers.Default).async {
                         val service =
                             context.bindService(SensorDataProcessingService::class.java)
+
                         if (service.createModel()) {
                                 val input = service.triggerPrediction()
 //                                CollectedSensorDataFragment.updateUI(input)
                         }
+
+                        service.measuredSensorValues.value.userActivity = activity
+
                         service
                     }
-
-//                    sensorService.sensor.value.currentState = activity
                 }
             }
         }

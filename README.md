@@ -34,11 +34,11 @@ A smart music player that predicts a song depending on the user's context. Whene
 ## Contextual data collected
 
 - Sensor data
-  - ambient light sensor
-  - temperature sensor
-  - humidity sensor
-  - proximity sensor
-  - pressure sensor
+  - ambient light sensor - if the user is in room, outside, daytime, type of lightning (room - eg. in office, bedroom, gym)
+  - temperature sensor - outside or inside, season - winter songs, summer songs
+  - humidity sensor - ?
+  - proximity sensor - tilt => if the device is in horizontal or different position
+  - pressure sensor - ?
 - Detected activities
   - activity detection - walking, still, running, riding a bike, traveling by a car
   - cable heaphones plugged in

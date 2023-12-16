@@ -8,8 +8,8 @@ data class SensorDataPreferences(
     val isDeviceLying: Boolean? = null,
     val isBluetoothDeviceConnected: Boolean? = null,
     val areHeadphonesConnected: Boolean? = null,
-    val connectedWifiSsid: Int = -1,
+    val connectedWifiSsid: Int? = null,
     val currentNetworkConnection: NetworkType = NetworkType.NONE,
-    val batteryStatus: BatteryStatus? = null,
+    val isDeviceCharging: Boolean? = null,
     val chargingMethod: ChargingMethod? = null
 )

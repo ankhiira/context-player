@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 @Composable
 fun SensorRow(
     sensorName: String,
-    sensorValue: Any
+    sensorValue: Any?
 ) {
     Row {
         Text(
@@ -17,7 +17,7 @@ fun SensorRow(
             style = MaterialTheme.typography.bodyMedium
         )
         Text(
-            text = "$sensorValue",
+            text = if (sensorValue != null) "$sensorValue" else "UNKNOWN",
             style = MaterialTheme.typography.bodyMedium
         )
     }

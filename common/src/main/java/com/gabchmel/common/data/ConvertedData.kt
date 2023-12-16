@@ -14,7 +14,7 @@ data class ConvertedData(
     var temperature: Float = 0.0f,
     var wifi: UInt = 0u,
     var connection: NetworkType = NetworkType.NONE,
-    var batteryStatus: BatteryStatus? = null,
+    var isDeviceCharging: Boolean? = null,
     var chargingType: ChargingMethod? = null,
     var proximity: Float = 0.0f,
     var humidity: Float = 0.0f,

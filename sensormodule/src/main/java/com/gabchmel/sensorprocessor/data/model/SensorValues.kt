@@ -1,6 +1,5 @@
 package com.gabchmel.sensorprocessor.data.model
 
-import com.gabchmel.common.data.BatteryStatus
 import com.gabchmel.common.data.ChargingMethod
 import com.gabchmel.common.data.NetworkType
 import com.gabchmel.common.data.UserActivity
@@ -16,10 +15,10 @@ data class SensorValues(
     var temperature: Float = 0.0f,
     var isBluetoothDeviceConnected: Boolean? = null,
     var isHeadphonesPluggedIn: Boolean? = null,
-    var wifiSsid: UInt = 0u,
+    var wifiSsid: UInt? = null,
     var userActivity: UserActivity = UserActivity.UNKNOWN,
     var networkConnectionType: NetworkType = NetworkType.NONE,
-    var batteryStatus: BatteryStatus? = null,
+    var isDeviceCharging: Boolean? = null,
     var chargingType: ChargingMethod? = null,
     var proximity: Float = 0.0f,
     var humidity: Float = 0.0f,

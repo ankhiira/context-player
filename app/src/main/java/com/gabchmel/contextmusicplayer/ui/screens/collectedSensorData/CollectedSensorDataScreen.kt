@@ -131,7 +131,7 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Battery status",
-                    collectedSensorData.batteryStatus.toString()
+                    collectedSensorData.isDeviceCharging.toString()
                 )
                 SensorRow(
                     "Type of charger",

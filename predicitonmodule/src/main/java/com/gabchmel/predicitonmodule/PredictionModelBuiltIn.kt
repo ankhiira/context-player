@@ -225,7 +225,7 @@ class PredictionModelBuiltIn(val context: Context) {
                 setValue(temperature, input.temperature.toDouble())
                 setValue(wifi, input.wifi.toString())
                 setValue(connection, input.connection.toString())
-                setValue(batteryStatus, input.batteryStatus.toString())
+                setValue(batteryStatus, input.isDeviceCharging.toString())
                 setValue(chargingType, input.chargingType.toString())
                 setValue(proximity, input.proximity.toDouble())
                 setValue(humidity, input.humidity.toDouble())

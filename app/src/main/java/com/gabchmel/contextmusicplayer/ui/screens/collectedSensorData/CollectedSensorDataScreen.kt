@@ -18,10 +18,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.gabchmel.common.data.SensorValues
+import com.gabchmel.common.data.dataStore.DataStore
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.ui.components.NavigationTopAppBar
-import com.gabchmel.sensorprocessor.data.model.SensorValues
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 
 @Composable
@@ -33,9 +34,11 @@ fun CollectedSensorDataScreen(
     var sensorDataProcessingService: SensorDataProcessingService? by remember {
         mutableStateOf(null)
     }
-    val collectedSensorData: SensorValues =
-        sensorDataProcessingService?.sensorValues?.collectAsStateWithLifecycle()?.value
-        ?: SensorValues()
+//    val sensorData: SensorValues =
+//        sensorDataProcessingService?.sensorValues?.collectAsStateWithLifecycle()?.value
+//        ?: SensorValues()
+
+    val sensorData by DataStore.getSensorDataFlow(context).collectAsStateWithLifecycle(initialValue = SensorValues())
 
     LaunchedEffect(key1 = Unit) {
         sensorDataProcessingService =
@@ -79,44 +82,44 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Ambient light",
-                    collectedSensorData.lightSensorValue
+                    sensorData.lightSensorValue
                 )
                 SensorRow(
                     "Temperature",
-                    collectedSensorData.temperature
+                    sensorData.temperature
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_device_position)
                 )
                 SensorRow(
                     "Is device lying",
-                    if (collectedSensorData.isDeviceLying == true) "Yes" else "No"
+                    if (sensorData.isDeviceLying == true) "Yes" else "No"
                 )
                 SensorRow(
                     "Proximity",
-                    collectedSensorData.proximity
+                    sensorData.proximity
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_conected_devices)
                 )
                 SensorRow(
                     "Cable headphones connected",
-                    if (collectedSensorData.isHeadphonesPluggedIn == true) "Yes" else "No"
+                    if (sensorData.isHeadphonesPluggedIn == true) "Yes" else "No"
                 )
                 SensorRow(
                     "Bluetooth headphones connected",
-                    if (collectedSensorData.isBluetoothDeviceConnected == true) "Yes" else "No"
+                    if (sensorData.isBluetoothDeviceConnected == true) "Yes" else "No"
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_network)
                 )
                 SensorRow(
                     "Hashed WiFi name",
-                    collectedSensorData.wifiSsid
+                    sensorData.wifiSsid
                 )
                 SensorRow(
                     "Connection type",
-                    collectedSensorData.networkConnectionType
+                    sensorData.networkConnectionType
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_battery)
@@ -124,18 +127,18 @@ fun CollectedSensorDataScreen(
                 //TODO convert data to string elsewhere
                 SensorRow(
                     "Is device charging",
-                    if (collectedSensorData.isDeviceCharging == true) "Yes" else "No"
+                    if (sensorData.isDeviceCharging == true) "Yes" else "No"
                 )
                 SensorRow(
                     "Type of charger",
-                    collectedSensorData.chargingType.toString()
+                    sensorData.chargingType.toString()
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_health)
                 )
                 SensorRow(
                     "Heart Rate",
-                    collectedSensorData.heartRate
+                    sensorData.heartRate
                 )
             }
         }

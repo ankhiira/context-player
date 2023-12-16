@@ -1,12 +1,11 @@
-package com.gabchmel.sensorprocessor.data.model
+package com.gabchmel.common.data
 
-import com.gabchmel.common.data.ChargingMethod
-import com.gabchmel.common.data.NetworkType
-import com.gabchmel.common.data.UserActivity
-import java.util.Date
+import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class SensorValues(
-    var currentTime: Date? = null,
+    var currentTime: LocalDateTime? = null,
     var longitude: Double = 0.0,
     var latitude: Double = 0.0,
     var isDeviceLying: Boolean? = null,

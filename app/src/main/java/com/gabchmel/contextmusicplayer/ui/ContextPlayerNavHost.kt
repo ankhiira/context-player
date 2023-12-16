@@ -9,13 +9,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.gabchmel.common.data.SensorValues
 import com.gabchmel.contextmusicplayer.ui.screens.collectedSensorData.CollectedSensorDataScreen
 import com.gabchmel.contextmusicplayer.ui.screens.collectedSensorData.CollectedSensorDataViewModel
 import com.gabchmel.contextmusicplayer.ui.screens.nowPlayingScreen.NowPlayingScreen
 import com.gabchmel.contextmusicplayer.ui.screens.onDeviceSensors.OnDeviceSensorsScreen
 import com.gabchmel.contextmusicplayer.ui.screens.playlistScreen.SongListScreen
 import com.gabchmel.contextmusicplayer.ui.screens.settingsScreen.SettingsScreen
-import com.gabchmel.sensorprocessor.data.model.SensorValues
 
 @Composable
 fun ContextPlayerNavHost(

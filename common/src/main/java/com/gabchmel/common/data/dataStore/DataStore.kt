@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.gabchmel.common.data.SensorDataPreferences
+import com.gabchmel.common.data.SensorValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
@@ -21,16 +21,16 @@ object DataStore {
 
     private val SENSOR_DATA = stringPreferencesKey("sensorData")
 
-    fun getSensorDataFlow(context: Context): Flow<SensorDataPreferences?> {
+    fun getSensorDataFlow(context: Context): Flow<SensorValues> {
         val sensorData = context.dataStore.data
             .map { preferences ->
                 preferences[SENSOR_DATA]
             }
             .map { sensorDataJson ->
                 if (sensorDataJson != null) {
-                    Json.decodeFromString<SensorDataPreferences>(sensorDataJson)
+                    Json.decodeFromString<SensorValues>(sensorDataJson)
                 } else {
-                    null
+                    SensorValues()
                 }
             }
         return sensorData
@@ -38,13 +38,13 @@ object DataStore {
 
     suspend fun saveSensorData(
         context: Context,
-        sensorData: SensorDataPreferences
+        sensorData: SensorValues
     ) {
         context.dataStore.edit { preferences ->
             val sensorDataJson = preferences[SENSOR_DATA]
             if (sensorDataJson != null) {
                 //todo update already saved value
-                val sensorData = Json.decodeFromString<SensorDataPreferences>(sensorDataJson)
+                val sensorData = Json.decodeFromString<SensorValues>(sensorDataJson)
             }
             preferences[SENSOR_DATA] = Json.encodeToString(sensorData)
         }

@@ -135,6 +135,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 
     // For occurring error of duplicate library?
     implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")

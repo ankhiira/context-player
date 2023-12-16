@@ -30,11 +30,11 @@ import com.gabchmel.common.data.ChargingMethod
 import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.common.data.NetworkType
+import com.gabchmel.common.data.SensorValues
 import com.gabchmel.common.data.UserActivity
 import com.gabchmel.common.data.dataStore.DataStore
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.data.model.ProcessedCsvValues
-import com.gabchmel.sensorprocessor.data.model.SensorValues
 import com.gabchmel.sensorprocessor.data.receiver.ActivityTransitionReceiver
 import com.gabchmel.sensorprocessor.data.receiver.TransitionList
 import com.gabchmel.sensorprocessor.utils.InputProcessHelper.inputProcessHelper
@@ -49,9 +49,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import java.io.File
 import java.io.IOException
-import java.util.Calendar
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.acos
@@ -139,6 +141,11 @@ class SensorDataProcessingService : Service() {
                             sensorValues.value.heartRate = sensorValue.first()
                         }
                     }
+
+                    DataStore.saveSensorData(
+                        context = this@SensorDataProcessingService,
+                        sensorData = sensorValues.value
+                    )
                 }
             }
         }
@@ -235,7 +242,7 @@ class SensorDataProcessingService : Service() {
     }
 
     private suspend fun SensorDataProcessingService.readAdditionalInformation() {
-        _sensorValues.value.currentTime = Calendar.getInstance().time
+        _sensorValues.value.currentTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         _sensorValues.value.wifiSsid = getConnectedWiFiSsid()
         _sensorValues.value.networkConnectionType = getCurrentNetworkConnectionType(this)
         _sensorValues.value.isDeviceCharging = isDeviceCharging()
@@ -249,7 +256,6 @@ class SensorDataProcessingService : Service() {
 
         sensorDataFlow.collectLatest { sensorData ->
             result = when {
-                sensorData == null -> false
                 (sensorValues.value.userActivity != sensorData.userActivity
                         && sensorData.userActivity != UserActivity.UNKNOWN) -> true
 
@@ -259,20 +265,20 @@ class SensorDataProcessingService : Service() {
                 (sensorValues.value.isBluetoothDeviceConnected != sensorData.isBluetoothDeviceConnected
                         && sensorData.isBluetoothDeviceConnected != null) -> true
 
-                (sensorValues.value.isHeadphonesPluggedIn != sensorData.areHeadphonesConnected
-                        && sensorData.areHeadphonesConnected != null) -> true
+                (sensorValues.value.isHeadphonesPluggedIn != sensorData.isHeadphonesPluggedIn
+                        && sensorData.isHeadphonesPluggedIn != null) -> true
 
-                (sensorValues.value.wifiSsid != sensorData.connectedWifiSsid?.toUInt()
-                        && sensorData.connectedWifiSsid != null) -> true
+                (sensorValues.value.wifiSsid != sensorData.wifiSsid
+                        && sensorData.wifiSsid != null) -> true
 
-                (sensorValues.value.networkConnectionType != sensorData.currentNetworkConnection
-                        && sensorData.currentNetworkConnection != NetworkType.NONE) -> true
+                (sensorValues.value.networkConnectionType != sensorData.networkConnectionType
+                        && sensorData.networkConnectionType != NetworkType.NONE) -> true
 
                 (sensorValues.value.isDeviceCharging != sensorData.isDeviceCharging
                         && sensorData.isDeviceCharging != null) -> true
 
-                (sensorValues.value.chargingType != sensorData.chargingMethod
-                        && sensorData.chargingMethod != null) -> true
+                (sensorValues.value.chargingType != sensorData.chargingType
+                        && sensorData.chargingType != null) -> true
 
                 else -> false
             }
@@ -410,8 +416,7 @@ class SensorDataProcessingService : Service() {
     private fun headphonesPluggedInDetection() {
         val broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
-                val action = intent.action
-                if (Intent.ACTION_HEADSET_PLUG == action) {
+                if (intent.action == Intent.ACTION_HEADSET_PLUG) {
                     _sensorValues.value.isHeadphonesPluggedIn =
                         intent.getIntExtra("state", -1) == 1
                 }

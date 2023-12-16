@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabchmel.common.utils.bindService
-import com.gabchmel.sensorprocessor.data.model.SensorValues
+import com.gabchmel.common.data.SensorValues
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

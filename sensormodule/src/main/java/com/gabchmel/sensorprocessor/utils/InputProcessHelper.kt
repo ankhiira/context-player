@@ -4,8 +4,8 @@ import android.app.Service
 import android.content.Context
 import android.util.Log
 import com.gabchmel.common.data.ConvertedData
+import com.gabchmel.common.data.SensorValues
 import com.gabchmel.sensorprocessor.data.model.ProcessedCsvValues
-import com.gabchmel.sensorprocessor.data.model.SensorValues
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import java.io.File
 import java.io.IOException
@@ -55,12 +55,13 @@ object InputProcessHelper {
         var timeInSeconds = 0
 
         currentTime?.let {
+            //TODO NEW : check the representation
             // Convert to similar representation as in other models
-            dayOfWeek = if (currentTime.day == 0) 6 else currentTime.day - 1
+//            dayOfWeek = if (currentTime.day == 0) 6 else currentTime.day - 1
+            dayOfWeek = currentTime.dayOfWeek.ordinal
 
             // Convert current time to seconds
-            timeInSeconds =
-                (currentTime.hours * 60 + currentTime.minutes) * 60 + currentTime.seconds
+            timeInSeconds = (currentTime.hour * 60 + currentTime.minute) * 60 + currentTime.second
         }
 
         // Get number of seconds in a day

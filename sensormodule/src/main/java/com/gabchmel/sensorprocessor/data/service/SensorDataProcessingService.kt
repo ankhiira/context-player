@@ -26,8 +26,12 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.gabchmel.common.data.BatteryStatus
+import com.gabchmel.common.data.ChargingMethod
 import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.data.LocalBinder
+import com.gabchmel.common.data.NetworkType
+import com.gabchmel.common.data.UserActivity
 import com.gabchmel.common.data.dataStore.DataStore
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.data.model.MeasuredSensorValues
@@ -148,7 +152,11 @@ class SensorDataProcessingService : Service() {
         headphonesPluggedInDetection()
     }
 
-    // Write sensor values to file
+    /**
+     * Writes sensor values to CSV file
+     *
+     * @param songID
+     */
     fun writeToFile(songID: String) {
         // Read current time
         _measuredSensorValues.value.currentTime = Calendar.getInstance().time
@@ -194,13 +202,13 @@ class SensorDataProcessingService : Service() {
                         + measuredSensorValues.value.latitude + ","
                         + measuredSensorValues.value.userActivity + ","
                         + measuredSensorValues.value.lightSensorValue + ","
-                        + measuredSensorValues.value.deviceLying + ","
-                        + measuredSensorValues.value.bluetoothDeviceConnected + ","
-                        + measuredSensorValues.value.headphonesPluggedIn + ","
+                        + measuredSensorValues.value.isDeviceLying + ","
+                        + measuredSensorValues.value.isBluetoothDeviceConnected + ","
+                        + measuredSensorValues.value.isHeadphonesPluggedIn + ","
                         + measuredSensorValues.value.pressure + ","
                         + measuredSensorValues.value.temperature + ","
-                        + measuredSensorValues.value.wifi + ","
-                        + measuredSensorValues.value.connection + ","
+                        + measuredSensorValues.value.wifiSsid + ","
+                        + measuredSensorValues.value.networkConnectionType + ","
                         + measuredSensorValues.value.batteryStatus + ","
                         + measuredSensorValues.value.chargingType + ","
                         + measuredSensorValues.value.proximity + ","
@@ -254,29 +262,29 @@ class SensorDataProcessingService : Service() {
         sensorDataFlow.collectLatest { sensorData ->
             result = when {
                 sensorData == null -> false
-                (measuredSensorValues.value.userActivity != sensorData.state
-                        && sensorData.state != "UNDEFINED") -> true
+                (measuredSensorValues.value.userActivity != sensorData.userActivity
+                        && sensorData.userActivity != UserActivity.UNKNOWN) -> true
 
-                (measuredSensorValues.value.deviceLying != sensorData.isDeviceLying
+                (measuredSensorValues.value.isDeviceLying != sensorData.isDeviceLying
                         && sensorData.isDeviceLying != -1.0f) -> true
 
-                (measuredSensorValues.value.bluetoothDeviceConnected != sensorData.isBluetoothDeviceConnected
-                        && sensorData.isBluetoothDeviceConnected != -1.0f) -> true
+                (measuredSensorValues.value.isBluetoothDeviceConnected != sensorData.isBluetoothDeviceConnected
+                        && sensorData.isBluetoothDeviceConnected != null) -> true
 
-                (measuredSensorValues.value.headphonesPluggedIn != sensorData.areHeadphonesConnected
-                        && sensorData.areHeadphonesConnected != -1.0f) -> true
+                (measuredSensorValues.value.isHeadphonesPluggedIn != sensorData.areHeadphonesConnected
+                        && sensorData.areHeadphonesConnected != null) -> true
 
-                (measuredSensorValues.value.wifi != sensorData.connectedWifiSsid.toUInt()
+                (measuredSensorValues.value.wifiSsid != sensorData.connectedWifiSsid.toUInt()
                         && sensorData.connectedWifiSsid != -1) -> true
 
-                (measuredSensorValues.value.connection != sensorData.currentNetworkConnection
-                        && sensorData.currentNetworkConnection != "UNDEFINED") -> true
+                (measuredSensorValues.value.networkConnectionType != sensorData.currentNetworkConnection
+                        && sensorData.currentNetworkConnection != NetworkType.NONE) -> true
 
-                (measuredSensorValues.value.batteryStatus != sensorData.batteryState
-                        && sensorData.batteryState != "UNDEFINED") -> true
+                (measuredSensorValues.value.batteryStatus != sensorData.batteryStatus
+                        && sensorData.batteryStatus != null) -> true
 
                 (measuredSensorValues.value.chargingType != sensorData.chargingMethod
-                        && sensorData.chargingMethod != "UNDEFINED") -> true
+                        && sensorData.chargingMethod != null) -> true
 
                 else -> false
             }
@@ -319,6 +327,7 @@ class SensorDataProcessingService : Service() {
                 Manifest.permission.ACTIVITY_RECOGNITION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
+            //TODO request permission
             Log.e("permission", "permission not granted")
             return
         }
@@ -364,11 +373,11 @@ class SensorDataProcessingService : Service() {
                 val inclination = Math.toDegrees(acos(coordinates[2]).toDouble()).roundToInt()
 
                 // Device detected as lying is with inclination in range < 25 or > 155 degrees
-                _measuredSensorValues.value.deviceLying =
+                _measuredSensorValues.value.isDeviceLying =
                     if (inclination < 25 || inclination > 155) 1.0f else 0.0f
             }
 
-            else -> _measuredSensorValues.value.deviceLying = 0.0f
+            else -> _measuredSensorValues.value.isDeviceLying = 0.0f
         }
     }
 
@@ -402,10 +411,9 @@ class SensorDataProcessingService : Service() {
         }
 
         bluetoothAdapter?.let {
-            _measuredSensorValues.value.bluetoothDeviceConnected =
-                if (bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)
-                    == BluetoothAdapter.STATE_CONNECTED
-                ) 1.0f else 0.0f
+            _measuredSensorValues.value.isBluetoothDeviceConnected =
+                (bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)
+                        == BluetoothAdapter.STATE_CONNECTED)
         }
     }
 
@@ -415,8 +423,8 @@ class SensorDataProcessingService : Service() {
             override fun onReceive(context: Context?, intent: Intent) {
                 val action = intent.action
                 if (Intent.ACTION_HEADSET_PLUG == action) {
-                    _measuredSensorValues.value.headphonesPluggedIn =
-                        intent.getIntExtra("state", -1).toFloat()
+                    _measuredSensorValues.value.isHeadphonesPluggedIn =
+                        intent.getIntExtra("state", -1) == 1
                 }
             }
         }
@@ -444,7 +452,7 @@ class SensorDataProcessingService : Service() {
                     val wifiInfo = networkCapabilities.transportInfo as WifiInfo
 
                     if (wifiInfo.ssid != "<unknown ssid>") {
-                        _measuredSensorValues.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+                        _measuredSensorValues.value.wifiSsid = wifiInfo.ssid.hashCode().toUInt()
                     }
                 }
             })
@@ -453,7 +461,7 @@ class SensorDataProcessingService : Service() {
             val wifiInfo = wifiManager.connectionInfo
 
             if (wifiInfo.ssid != "<unknown ssid>") {
-                _measuredSensorValues.value.wifi = wifiInfo.ssid.hashCode().toUInt()
+                _measuredSensorValues.value.wifiSsid = wifiInfo.ssid.hashCode().toUInt()
             }
         }
     }
@@ -468,24 +476,20 @@ class SensorDataProcessingService : Service() {
             capabilities =
                 connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         } else {
-            _measuredSensorValues.value.connection = "NONE"
+            _measuredSensorValues.value.networkConnectionType = NetworkType.NONE
         }
 
         capabilities?.let {
             when {
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                    _measuredSensorValues.value.connection = "TRANSPORT_CELLULAR"
+                    _measuredSensorValues.value.networkConnectionType = NetworkType.CELLULAR
                 }
 
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                    _measuredSensorValues.value.connection = "TRANSPORT_WIFI"
+                    _measuredSensorValues.value.networkConnectionType = NetworkType.WIFI
                 }
 
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-                    _measuredSensorValues.value.connection = "TRANSPORT_ETHERNET"
-                }
-
-                else -> _measuredSensorValues.value.connection = "NONE"
+                else -> _measuredSensorValues.value.networkConnectionType = NetworkType.NONE
             }
         }
     }
@@ -528,18 +532,16 @@ class SensorDataProcessingService : Service() {
         }
 
         // Detect if the device is charged
-        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: "NONE") {
+        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1)) {
             BatteryManager.BATTERY_STATUS_CHARGING ->
-                _measuredSensorValues.value.batteryStatus = "CHARGING"
+                _measuredSensorValues.value.batteryStatus = BatteryStatus.CHARGING
 
+            //TODO test if necessary, if it is not enough to have only the charging
             BatteryManager.BATTERY_STATUS_FULL ->
-                _measuredSensorValues.value.batteryStatus = "CHARGING"
+                _measuredSensorValues.value.batteryStatus = BatteryStatus.CHARGING
 
             BatteryManager.BATTERY_STATUS_NOT_CHARGING ->
-                _measuredSensorValues.value.batteryStatus = "NOT_CHARGING"
-
-            "NONE" ->
-                _measuredSensorValues.value.chargingType = "NONE"
+                _measuredSensorValues.value.batteryStatus = BatteryStatus.NOT_CHARGING
         }
     }
 
@@ -548,18 +550,15 @@ class SensorDataProcessingService : Service() {
             this.registerReceiver(null, iFilter)
         }
 
-        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) ?: "NONE") {
+        when (batteryStatus?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)) {
             BatteryManager.BATTERY_PLUGGED_USB ->
-                _measuredSensorValues.value.chargingType = "USB"
+                _measuredSensorValues.value.chargingType = ChargingMethod.USB
 
             BatteryManager.BATTERY_PLUGGED_AC ->
-                _measuredSensorValues.value.chargingType = "AC"
+                _measuredSensorValues.value.chargingType = ChargingMethod.AC
 
             BatteryManager.BATTERY_PLUGGED_WIRELESS ->
-                _measuredSensorValues.value.chargingType = "WIRELESS"
-
-            "NONE" ->
-                _measuredSensorValues.value.chargingType = "NONE"
+                _measuredSensorValues.value.chargingType = ChargingMethod.WIRELESS
         }
     }
 }

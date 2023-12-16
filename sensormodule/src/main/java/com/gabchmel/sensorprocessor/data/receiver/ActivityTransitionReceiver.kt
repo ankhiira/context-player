@@ -3,6 +3,7 @@ package com.gabchmel.sensorprocessor.data.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.gabchmel.common.data.UserActivity
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import com.google.android.gms.location.ActivityTransition
@@ -52,13 +53,14 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun detectActivityType(activity: Int): String {
+    private fun detectActivityType(activity: Int): UserActivity {
         return when (activity) {
-            DetectedActivity.IN_VEHICLE -> "IN_VEHICLE"
-            DetectedActivity.STILL -> "STILL"
-            DetectedActivity.WALKING -> "WALKING"
-            DetectedActivity.RUNNING -> "RUNNING"
-            else -> "UNKNOWN"
+            DetectedActivity.STILL -> UserActivity.STILL
+            DetectedActivity.WALKING -> UserActivity.WALKING
+            DetectedActivity.RUNNING -> UserActivity.RUNNING
+            DetectedActivity.ON_BICYCLE -> UserActivity.ON_BICYCLE
+            DetectedActivity.IN_VEHICLE -> UserActivity.IN_VEHICLE
+            else -> UserActivity.UNKNOWN
         }
     }
 }

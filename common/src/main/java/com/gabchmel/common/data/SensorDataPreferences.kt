@@ -4,12 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SensorDataPreferences(
-    val state: String = "",
+    val userActivity: UserActivity = UserActivity.UNKNOWN,
     val isDeviceLying: Float = -1.0f,
-    val isBluetoothDeviceConnected: Float = -1.0f,
-    val areHeadphonesConnected: Float = -1.0f,
+    val isBluetoothDeviceConnected: Boolean? = null,
+    val areHeadphonesConnected: Boolean? = null,
     val connectedWifiSsid: Int = -1,
-    val currentNetworkConnection: String = "UNDEFINED",
-    val batteryState: String = "UNDEFINED",
-    val chargingMethod: String = "UNDEFINED"
+    val currentNetworkConnection: NetworkType = NetworkType.NONE,
+    val batteryStatus: BatteryStatus? = null,
+    val chargingMethod: ChargingMethod? = null
 )

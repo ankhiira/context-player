@@ -10,10 +10,13 @@ import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.math.*
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.primaryConstructor
+import java.util.Locale
+import kotlin.math.PI
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 
 object InputProcessHelper {
@@ -108,13 +111,13 @@ object InputProcessHelper {
             dayOfWeekCos,
             sensorData.userActivity,
             sensorData.lightSensorValue,
-            sensorData.deviceLying,
-            sensorData.bluetoothDeviceConnected,
-            sensorData.headphonesPluggedIn,
+            sensorData.isDeviceLying,
+            if (sensorData.isBluetoothDeviceConnected == true) 1 else 0,
+            if (sensorData.isHeadphonesPluggedIn == true) 1 else 0,
             sensorData.pressure,
             sensorData.temperature,
-            sensorData.wifi,
-            sensorData.connection,
+            sensorData.wifiSsid,
+            sensorData.networkConnectionType,
             sensorData.batteryStatus,
             sensorData.chargingType,
             sensorData.proximity,
@@ -178,56 +181,57 @@ object InputProcessHelper {
 //                        locationListDouble.add(doubleArrayOf(row[3].toDouble(), row[2].toDouble()))
 
                         // Convert the CSV row to SensorData class
-                        row[0] to MeasuredSensorValues(
-                            dateNew,
-                            row[2].toDouble(),
-                            row[3].toDouble(),
-                            row[4],
-                            row[5].toFloat(),
-                            row[6].toFloat(),
-                            row[7].toFloat(),
-                            row[8].toFloat(),
-                            row[9].toFloat(),
-                            row[10].toFloat(),
-                            row[11].toUInt(),
-                            row[12],
-                            row[13],
-                            row[14],
-                            row[15].toFloat(),
-                            row[16].toFloat(),
-                            row[17].toFloat(),
-                            row[18].toFloat()
-                        )
+                        //TODO don't depend on position
+//                        row[0] to MeasuredSensorValues(
+//                            dateNew,
+//                            row[2].toDouble(),
+//                            row[3].toDouble(),
+//                            row[4],
+//                            row[5].toFloat(),
+//                            row[6].toFloat(),
+//                            row[7].toFloat(),
+//                            row[8].toFloat(),
+//                            row[9].toFloat(),
+//                            row[10].toFloat(),
+//                            row[11].toUInt(),
+//                            row[12],
+//                            row[13],
+//                            row[14],
+//                            row[15].toFloat(),
+//                            row[16].toFloat(),
+//                            row[17].toFloat(),
+//                            row[18].toFloat()
+//                        )
                     }.map {
                         // Process the data to be suitable as model input
-                        it.first to inputProcessHelper(it.second)
+//                        it.first to inputProcessHelper(it.second)
                     }.forEach { pair ->
                         try {
-                            // Write to csv file
-                            val data: ConvertedData = pair.second
-                            var csvString = ""
-                            // Iterate over object properties
-                            ConvertedData::class.primaryConstructor?.parameters?.let { parameters ->
-                                for (property in parameters) {
-                                    val propertyNew = data::class.members
-                                        .first { it.name == property.name } as KProperty1<Any, *>
-                                    // Check for wifi property because with UInt it is not working well
-                                    if (property.name == "wifi") {
-                                        csvString += "${data.wifi},"
-                                        // Save every individual wifi into the list
-                                        if (!wifiList.contains(data.wifi)) {
-                                            data.wifi.let { it1 -> wifiList.add(it1) }
-                                        }
-                                    } else {
-                                        csvString += "${propertyNew.get(data)},"
-                                    }
-                                }
-                            }
-
-                            // Drop comma after last element
-                            csvString = csvString.dropLast(1)
-                            csvString += "\n"
-                            csvFile.appendText(pair.first + "," + csvString)
+//                            // Write to csv file
+//                            val data: ConvertedData = pair.second
+//                            var csvString = ""
+//                            // Iterate over object properties
+//                            ConvertedData::class.primaryConstructor?.parameters?.let { parameters ->
+//                                for (property in parameters) {
+//                                    val propertyNew = data::class.members
+//                                        .first { it.name == property.name } as KProperty1<Any, *>
+//                                    // Check for wifi property because with UInt it is not working well
+//                                    if (property.name == "wifi") {
+//                                        csvString += "${data.wifi},"
+//                                        // Save every individual wifi into the list
+//                                        if (!wifiList.contains(data.wifi)) {
+//                                            data.wifi.let { it1 -> wifiList.add(it1) }
+//                                        }
+//                                    } else {
+//                                        csvString += "${propertyNew.get(data)},"
+//                                    }
+//                                }
+//                            }
+//
+//                            // Drop comma after last element
+//                            csvString = csvString.dropLast(1)
+//                            csvString += "\n"
+//                            csvFile.appendText(pair.first + "," + csvString)
                         } catch (e: IOException) {
                             Log.e("Err", "Couldn't write to file", e)
                         }

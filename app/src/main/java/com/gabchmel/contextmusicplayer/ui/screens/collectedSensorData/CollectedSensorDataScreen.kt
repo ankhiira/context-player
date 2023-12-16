@@ -16,17 +16,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.gabchmel.common.data.ConvertedData
+import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.ui.theme.bahnSchrift
+import com.gabchmel.sensorprocessor.data.model.MeasuredSensorValues
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 
 
@@ -34,9 +38,19 @@ import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 @Composable
 fun CollectedSensorDataScreen(
     navController: NavHostController,
-    collectedSensorData: ConvertedData
+    data: MeasuredSensorValues
 ) {
-    val sensorDataProcessingService: SensorDataProcessingService? by remember { mutableStateOf(null) }
+    val context = LocalContext.current
+    var sensorDataProcessingService: SensorDataProcessingService? by remember {
+        mutableStateOf(null)
+    }
+    val collectedSensorData: MeasuredSensorValues = sensorDataProcessingService?.measuredSensorValues?.collectAsStateWithLifecycle()?.value
+        ?: MeasuredSensorValues()
+
+    LaunchedEffect(key1 = Unit) {
+        sensorDataProcessingService =
+            context.bindService(SensorDataProcessingService::class.java)
+    }
 
     Scaffold(
         topBar = {
@@ -71,26 +85,21 @@ fun CollectedSensorDataScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                sensorDataProcessingService?.let { sensorProcessService ->
-                    val sensorData by
-                    sensorProcessService.measuredSensorValues.collectAsState(null)
-                }
-
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_result_category)
                 )
-                SensorRow(
-                    "Result category",
-                    collectedSensorData.locationCluster
-                )
+//                SensorRow(
+//                    "Result category",
+//                    collectedSensorData.locationCluster
+//                )
 
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_activity)
                 )
-                SensorRow(
-                    "Current Activity",
-                    collectedSensorData.currentActivity
-                )
+//                SensorRow(
+//                    "Current Activity",
+//                    collectedSensorData.currentActivity
+//                )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_physical_values)
                 )
@@ -115,7 +124,7 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Is device lying",
-                    if (collectedSensorData.deviceLying == 0.0f) "No" else "Yes"
+                    if (collectedSensorData.isDeviceLying == 0.0f) "No" else "Yes"
                 )
                 SensorRow(
                     "Proximity",
@@ -126,33 +135,33 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Cable headphones connected",
-                    if (collectedSensorData.headphonesPluggedIn == 0.0f) "No" else "Yes"
+                    if (collectedSensorData.isHeadphonesPluggedIn == true) "Yes" else "No"
                 )
                 SensorRow(
                     "Bluetooth headphones connected",
-                    if (collectedSensorData.bluetoothDeviceConnected == 0.0f) "No" else "Yes"
+                    if (collectedSensorData.isBluetoothDeviceConnected == true) "Yes" else "No"
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_network)
                 )
                 SensorRow(
                     "Hashed WiFi name",
-                    collectedSensorData.wifi
+                    collectedSensorData.wifiSsid
                 )
                 SensorRow(
                     "Connection type",
-                    collectedSensorData.connection
+                    collectedSensorData.networkConnectionType
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_battery)
                 )
                 SensorRow(
                     "Battery status",
-                    collectedSensorData.batteryStatus
+                    collectedSensorData.batteryStatus.toString()
                 )
                 SensorRow(
                     "Type of charger",
-                    collectedSensorData.chargingType
+                    collectedSensorData.chargingType.toString()
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_health)

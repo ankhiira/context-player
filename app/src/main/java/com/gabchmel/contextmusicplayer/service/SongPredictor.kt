@@ -36,7 +36,6 @@ class SongPredictor(
                 val service = context.bindService(SensorDataProcessingService::class.java)
                 if (service.createModel()) {
                     contextData = service.triggerPrediction()
-//                    CollectedSensorDataScreen.updateUI(contextData)
                 }
                 service
             }

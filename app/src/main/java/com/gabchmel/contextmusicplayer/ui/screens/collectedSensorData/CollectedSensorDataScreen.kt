@@ -82,16 +82,8 @@ fun CollectedSensorDataScreen(
                     collectedSensorData.lightSensorValue
                 )
                 SensorRow(
-                    "Pressure",
-                    collectedSensorData.pressure
-                )
-                SensorRow(
                     "Temperature",
                     collectedSensorData.temperature
-                )
-                SensorRow(
-                    "Humidity",
-                    collectedSensorData.humidity
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_device_position)
@@ -129,9 +121,10 @@ fun CollectedSensorDataScreen(
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_battery)
                 )
+                //TODO convert data to string elsewhere
                 SensorRow(
-                    "Battery status",
-                    collectedSensorData.isDeviceCharging.toString()
+                    "Is device charging",
+                    if (collectedSensorData.isDeviceCharging == true) "Yes" else "No"
                 )
                 SensorRow(
                     "Type of charger",
@@ -139,10 +132,6 @@ fun CollectedSensorDataScreen(
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_health)
-                )
-                SensorRow(
-                    "Heart Beat",
-                    collectedSensorData.heartBeat
                 )
                 SensorRow(
                     "Heart Rate",

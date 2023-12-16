@@ -21,7 +21,7 @@
     <string name="settings_item_title_delete_all_saved_data">Delete all saved data</string>
     <string name="settings_item_title_send_collected_data">Send collected data</string>
     <string name="collected_data_title_activity">Activity</string>
-    <string name="collected_data_title_physical_values">Physical Values</string>
+    <string name="collected_data_title_physical_values">Physical Sensors</string>
     <string name="collected_data_title_device_position">Device Position</string>
     <string name="collected_data_title_conected_devices">Connected devices</string>
     <string name="collected_data_title_network">Network</string>

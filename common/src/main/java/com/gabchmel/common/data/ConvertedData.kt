@@ -7,7 +7,7 @@ data class ConvertedData(
     var dayOfWeekCos: Double = 0.0,
     var currentActivity: UserActivity = UserActivity.UNKNOWN,
     var lightSensorValue: Float = 0.0f,
-    var deviceLying: Float = 0.0f,
+    var isDeviceLying: Int = 0,
     var bluetoothDeviceConnected: Int = 0,
     var headphonesPluggedIn: Int = 0,
     var pressure: Float = 0.0f,

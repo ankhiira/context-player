@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,22 +21,21 @@ import androidx.navigation.NavHostController
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.ui.components.NavigationTopAppBar
-import com.gabchmel.sensorprocessor.data.model.MeasuredSensorValues
+import com.gabchmel.sensorprocessor.data.model.SensorValues
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectedSensorDataScreen(
     navController: NavHostController,
-    data: MeasuredSensorValues
+    data: SensorValues
 ) {
     val context = LocalContext.current
     var sensorDataProcessingService: SensorDataProcessingService? by remember {
         mutableStateOf(null)
     }
-    val collectedSensorData: MeasuredSensorValues = sensorDataProcessingService?.measuredSensorValues?.collectAsStateWithLifecycle()?.value
-        ?: MeasuredSensorValues()
+    val collectedSensorData: SensorValues =
+        sensorDataProcessingService?.sensorValues?.collectAsStateWithLifecycle()?.value
+        ?: SensorValues()
 
     LaunchedEffect(key1 = Unit) {
         sensorDataProcessingService =
@@ -100,7 +98,7 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Is device lying",
-                    if (collectedSensorData.isDeviceLying == 0.0f) "No" else "Yes"
+                    if (collectedSensorData.isDeviceLying == true) "Yes" else "No"
                 )
                 SensorRow(
                     "Proximity",

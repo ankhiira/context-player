@@ -6,11 +6,11 @@ import com.gabchmel.common.data.NetworkType
 import com.gabchmel.common.data.UserActivity
 import java.util.Date
 
-data class MeasuredSensorValues(
+data class SensorValues(
     var currentTime: Date? = null,
     var longitude: Double = 0.0,
     var latitude: Double = 0.0,
-    var isDeviceLying: Float = 0.0f,
+    var isDeviceLying: Boolean? = null,
     var lightSensorValue: Float = 0.0f,
     var pressure: Float = 0.0f,
     var temperature: Float = 0.0f,

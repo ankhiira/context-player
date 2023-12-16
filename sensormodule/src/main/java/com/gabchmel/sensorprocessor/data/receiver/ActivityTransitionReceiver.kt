@@ -36,7 +36,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 //                                CollectedSensorDataFragment.updateUI(input)
                         }
 
-                        service.measuredSensorValues.value.userActivity = activity
+                        service.sensorValues.value.userActivity = activity
 
                         service
                     }

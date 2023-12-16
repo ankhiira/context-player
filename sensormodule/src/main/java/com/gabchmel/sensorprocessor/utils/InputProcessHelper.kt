@@ -4,8 +4,8 @@ import android.app.Service
 import android.content.Context
 import android.util.Log
 import com.gabchmel.common.data.ConvertedData
-import com.gabchmel.sensorprocessor.data.model.MeasuredSensorValues
 import com.gabchmel.sensorprocessor.data.model.ProcessedCsvValues
+import com.gabchmel.sensorprocessor.data.model.SensorValues
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import java.io.File
 import java.io.IOException
@@ -44,7 +44,7 @@ object InputProcessHelper {
         }
     }
 
-    fun inputProcessHelper(sensorData: MeasuredSensorValues): ConvertedData {
+    fun inputProcessHelper(sensorData: SensorValues): ConvertedData {
         val currentTime = sensorData.currentTime
         val latitude = sensorData.latitude
         val longitude = sensorData.longitude
@@ -111,7 +111,7 @@ object InputProcessHelper {
             dayOfWeekCos,
             sensorData.userActivity,
             sensorData.lightSensorValue,
-            sensorData.isDeviceLying,
+            if (sensorData.isDeviceLying == true) 1 else 0,
             if (sensorData.isBluetoothDeviceConnected == true) 1 else 0,
             if (sensorData.isHeadphonesPluggedIn == true) 1 else 0,
             sensorData.pressure,

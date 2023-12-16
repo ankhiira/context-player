@@ -15,7 +15,7 @@ import com.gabchmel.contextmusicplayer.ui.screens.nowPlayingScreen.NowPlayingScr
 import com.gabchmel.contextmusicplayer.ui.screens.onDeviceSensors.OnDeviceSensorsScreen
 import com.gabchmel.contextmusicplayer.ui.screens.playlistScreen.SongListScreen
 import com.gabchmel.contextmusicplayer.ui.screens.settingsScreen.SettingsScreen
-import com.gabchmel.sensorprocessor.data.model.MeasuredSensorValues
+import com.gabchmel.sensorprocessor.data.model.SensorValues
 
 @Composable
 fun ContextPlayerNavHost(
@@ -47,7 +47,7 @@ fun ContextPlayerNavHost(
 
             CollectedSensorDataScreen(
                 navController = navController,
-                data = collectedSensorData?.value ?: MeasuredSensorValues()
+                data = collectedSensorData?.value ?: SensorValues()
             )
         }
         composable(

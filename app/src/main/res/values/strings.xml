@@ -31,4 +31,5 @@
     <string name="prediction_notification_title">Do you want to listen to?</string>
     <string name="channel_name">Prediction notification channel</string>
     <string name="channel_description">Channel for displaying predicted song for the current user context.</string>
+    <string name="settings_item_on_device_sensors">Device sensors</string>
 </resources>

@@ -137,8 +137,7 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
             context.bindService(intent, connection, flags)
         }
 
-    // Function to refresh list of song on pull down
-    fun refresh() {
+    fun refreshSongList() {
         // This doesn't handle multiple 'refreshing' tasks, don't use this
         viewModelScope.launch {
             _isRefreshing.value = true
@@ -169,11 +168,11 @@ class SongListViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     private fun play() {
-        mediaBrowser?.play()
+        mediaBrowser.play()
     }
 
     private fun pause() {
-        mediaBrowser?.pause()
+        mediaBrowser.pause()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

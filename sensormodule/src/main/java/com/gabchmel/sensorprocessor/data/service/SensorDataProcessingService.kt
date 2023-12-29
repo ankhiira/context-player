@@ -37,7 +37,7 @@ import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.data.model.ProcessedCsvValues
 import com.gabchmel.sensorprocessor.data.receiver.ActivityTransitionReceiver
 import com.gabchmel.sensorprocessor.data.receiver.TransitionList
-import com.gabchmel.sensorprocessor.utils.InputProcessHelper.inputProcessHelper
+import com.gabchmel.sensorprocessor.utils.InputProcessHelper.getProcessedSensorValues
 import com.gabchmel.sensorprocessor.utils.InputProcessHelper.processInputCSV
 import com.gabchmel.sensorprocessor.utils.SensorReader
 import com.google.android.gms.location.ActivityRecognition
@@ -190,24 +190,26 @@ class SensorDataProcessingService : Service() {
 
         try {
             // Write to csv file
-            csvFile.appendText(
-                songID + ","
-                        + sensorValues.value.currentTime + ","
-                        + sensorValues.value.longitude + ","
-                        + sensorValues.value.latitude + ","
-                        + sensorValues.value.userActivity + ","
-                        + sensorValues.value.lightSensorValue + ","
-                        + sensorValues.value.isDeviceLying + ","
-                        + sensorValues.value.isBluetoothDeviceConnected + ","
-                        + sensorValues.value.isHeadphonesPluggedIn + ","
-                        + sensorValues.value.temperature + ","
-                        + sensorValues.value.wifiSsid + ","
-                        + sensorValues.value.networkConnectionType + ","
-                        + sensorValues.value.isDeviceCharging + ","
-                        + sensorValues.value.chargingType + ","
-                        + sensorValues.value.proximity + ","
-                        + sensorValues.value.heartRate + "\n"
-            )
+            sensorValues.value.also {
+                csvFile.appendText(
+                    songID + ","
+                            + it.currentTime + ","
+                            + it.longitude + ","
+                            + it.latitude + ","
+                            + it.userActivity + ","
+                            + it.lightSensorValue + ","
+                            + it.isDeviceLying + ","
+                            + it.isBluetoothDeviceConnected + ","
+                            + it.isHeadphonesPluggedIn + ","
+                            + it.temperature + ","
+                            + it.wifiSsid + ","
+                            + it.networkConnectionType + ","
+                            + it.isDeviceCharging + ","
+                            + it.chargingType + ","
+                            + it.proximity + ","
+                            + it.heartRate + "\n"
+                )
+            }
         } catch (e: IOException) {
             Log.e("Err", "Couldn't write to file", e)
         }
@@ -230,8 +232,7 @@ class SensorDataProcessingService : Service() {
     suspend fun triggerPrediction(): ConvertedData {
         readAdditionalInformation()
 
-        // Get the processed input values
-        val input = inputProcessHelper(sensorValues.value)
+        val input = getProcessedSensorValues(sensorValues.value)
 
         // Check for the case that there is different wifi
         if (processedCsvValues.wifiNames.contains(input.wifi)) {
@@ -285,30 +286,6 @@ class SensorDataProcessingService : Service() {
         }
 
         return result
-    }
-
-//    private fun hasSensorDataChanged(sensorData: SensorDataPreferences): Boolean {
-//        sensorData !=
-//    }
-
-    // Function to save current context values to shared preferences for later comparison
-    suspend fun saveSensorValuesToSharedPrefs() {
-        //TODO map measuredDValues to SensorDataPreferences
-//        DataStore.saveSensorData(_measuredSensorValues)
-//        dataStore.edit { preferences ->
-//            preferences[PreferencesKeys.STATE] = _measuredSensorValues.value.currentState
-//            preferences[PreferencesKeys.IS_DEVICE_LYING] = _measuredSensorValues.value.deviceLying
-//            preferences[PreferencesKeys.IS_BT_DEVICE_CONNECTED] =
-//                measuredSensorValues.value.bluetoothDeviceConnected
-//            preferences[PreferencesKeys.ARE_HEADPHONES_CONNECTED] =
-//                measuredSensorValues.value.headphonesPluggedIn
-//            preferences[PreferencesKeys.CONNECTED_WIFI_SSID] =
-//                measuredSensorValues.value.wifi.toInt()
-//            preferences[PreferencesKeys.CURRENT_NETWORK_CONNECTION] =
-//                measuredSensorValues.value.connection
-//            preferences[PreferencesKeys.BATTERY_STATUS] = measuredSensorValues.value.batteryStatus
-//            preferences[PreferencesKeys.CHARGING_METHOD] = measuredSensorValues.value.chargingType
-//        }
     }
 
     /**
@@ -468,7 +445,7 @@ class SensorDataProcessingService : Service() {
     private fun getCurrentNetworkConnectionType(context: Context): NetworkType {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        var capabilities: NetworkCapabilities? = null
+        val capabilities: NetworkCapabilities?
         // Function activeNetwork requires minimal level 23
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             capabilities =
@@ -494,7 +471,10 @@ class SensorDataProcessingService : Service() {
         return NetworkType.NONE
     }
 
-    // Function for current location detection
+    /**
+     * Current location detection
+     *
+     */
     fun registerLocationListener() {
         val locationListener = LocationListener { location ->
             _sensorValues.value.longitude = location.longitude

@@ -44,7 +44,7 @@ object InputProcessHelper {
         }
     }
 
-    fun inputProcessHelper(sensorData: SensorValues): ConvertedData {
+    fun getProcessedSensorValues(sensorData: SensorValues): ConvertedData {
         val currentTime = sensorData.currentTime
         val latitude = sensorData.latitude
         val longitude = sensorData.longitude

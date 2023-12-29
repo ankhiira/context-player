@@ -10,13 +10,18 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenCreated
 import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionToken
 import com.gabchmel.common.data.ConvertedData
+import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.data.local.model.Song
+import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.guava.asDeferred
 import kotlinx.coroutines.launch
 
@@ -27,24 +32,25 @@ class PredictionCreator(
 
     private var input = ConvertedData()
 
-//    private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
-//        lifecycleOwner.whenCreated {
-//            val service = context.bindService(SensorDataProcessingService::class.java)
-//            if (service.createModel()) {
-//                input = service.triggerPrediction()
-//                val viewModel: CollectedSensorDataViewModel = view
-//                viewModel.updateUI(input)
-//            }
-//            service
-//        }
-//    }
+    private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
+        val service = context.bindService(SensorDataProcessingService::class.java)
+        if (service.createModel()) {
+            input = service.triggerPrediction()
+//            val viewModel: CollectedSensorDataViewModel = viewModel()
+//            viewModel.updateUI(input)
+        }
+        service
+    }
 
-//    private var prediction = flow<String?> {
-//        val sensorProcessService = sensorProcessService.await()
-//        emitAll(sensorProcessService.prediction)
-//    }.filterNotNull()
+    private var prediction = flow {
+        val sensorProcessService = sensorProcessService.await()
+        emitAll(sensorProcessService.prediction)
+    }.filterNotNull()
 
-    // Broadcast Receiver listening to action performed by click on prediction notification buttons
+    /**
+     * Listening to action performed by click on prediction notification buttons.
+     *
+     */
     class ActionReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.getStringExtra("action")
@@ -74,12 +80,12 @@ class PredictionCreator(
 
         // Send action to MediaPlaybackService to set predicted song for play
         private suspend fun skip(songUri: Uri) {
-//            lifecycleOwnerNew.lifecycleScope.launch {
-//                mediaControllerNew.await().transportControls.sendCustomAction(
+            lifecycleOwnerNew.lifecycleScope.launch {
+//                mediaBrowser.transportControls.sendCustomAction(
 //                    "skip",
 //                    bundleOf("songUri" to songUri)
 //                )
-//            }.join()
+            }.join()
         }
     }
 
@@ -90,29 +96,24 @@ class PredictionCreator(
         )
 
         lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.whenCreated {
-                lifecycleOwnerNew = lifecycleOwner
+            lifecycleOwnerNew = lifecycleOwner
 
-                // Register receiver of the notification button action
-                context.registerReceiver(ActionReceiver(), IntentFilter("action"))
+            // Register receiver of the notification button action
+            context.registerReceiver(ActionReceiver(), IntentFilter("action"))
 
 //                val sensorProcessService = sensorProcessService.await()
 
-                when {
-                    BuildConfig.FLAVOR != "debugVersion" -> {
-//                        if (sensorProcessService.hasContextChanged()) {
-                            createMediaBrowser()
-                            songPredictor.identifyPredictedSong()
-//                        }
-
-                        // Save current sensor values to later detect if the context changed
-//                        sensorProcessService.saveSensorValuesToSharedPrefs()
-                    }
-
-                    else -> {
+            when {
+                BuildConfig.FLAVOR != "debugVersion" -> {
+                    if (sensorProcessService.await().hasContextChanged()) {
                         createMediaBrowser()
                         songPredictor.identifyPredictedSong()
                     }
+                }
+
+                else -> {
+                    createMediaBrowser()
+                    songPredictor.identifyPredictedSong()
                 }
             }
         }
@@ -123,10 +124,6 @@ class PredictionCreator(
 
         mediaBrowser = MediaBrowser.Builder(context, sessionToken)
             .buildAsync().asDeferred().await()
-    }
-
-    fun getPredictedData() {
-
     }
 
     companion object {

@@ -60,10 +60,8 @@ class MainActivity : ComponentActivity() {
             startService(intent)
         }
 
-        // Save the current sensor values to shared preferences
         lifecycleScope.launch {
-            val service = this@MainActivity.bindService(SensorDataProcessingService::class.java)
-            service.saveSensorValuesToSharedPrefs()
+            this@MainActivity.bindService(SensorDataProcessingService::class.java)
         }
 
         enqueueNewWork(this@MainActivity)

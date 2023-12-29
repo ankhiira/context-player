@@ -151,9 +151,13 @@ fun SongListScreen(
                 }
 
                 isPermissionGranted || !isPermissionNotGranted(context, permission) -> {
-                    val refreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
-                    val pullRefreshState =
-                        rememberPullRefreshState(refreshing, { viewModel.refresh() })
+                    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+                    val pullRefreshState = rememberPullRefreshState(
+                        refreshing = isRefreshing,
+                        onRefresh = {
+                            viewModel.refreshSongList()
+                        }
+                    )
 
                     LaunchedEffect(Unit) {
                         viewModel.loadSongs()
@@ -180,13 +184,12 @@ fun SongListScreen(
                                     )
                                 }
                             }
-
-                            PullRefreshIndicator(
-                                refreshing,
-                                pullRefreshState,
-                                Modifier.align(Alignment.TopCenter)
-                            )
                         }
+                        PullRefreshIndicator(
+                            isRefreshing,
+                            pullRefreshState,
+                            Modifier.align(Alignment.TopCenter)
+                        )
                     }
                 }
             }

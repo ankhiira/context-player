@@ -17,7 +17,11 @@ fun SensorRow(
             style = MaterialTheme.typography.bodyMedium
         )
         Text(
-            text = if (sensorValue != null) "$sensorValue" else "UNKNOWN",
+            text = when(sensorValue) {
+                is Boolean -> if (sensorValue) "Yes" else "No"
+                null -> "UNKNOWN"
+                else -> sensorValue.toString()
+            },
             style = MaterialTheme.typography.bodyMedium
         )
     }

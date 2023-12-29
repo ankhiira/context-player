@@ -68,7 +68,7 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Is device lying",
-                    if (sensorData.isDeviceLying == true) "Yes" else "No"
+                    sensorData.isDeviceLying
                 )
                 SensorRow(
                     "Proximity",
@@ -79,11 +79,11 @@ fun CollectedSensorDataScreen(
                 )
                 SensorRow(
                     "Cable headphones connected",
-                    if (sensorData.isHeadphonesPluggedIn == true) "Yes" else "No"
+                    sensorData.isHeadphonesPluggedIn
                 )
                 SensorRow(
                     "Bluetooth headphones connected",
-                    if (sensorData.isBluetoothDeviceConnected == true) "Yes" else "No"
+                    sensorData.isBluetoothDeviceConnected
                 )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_network)
@@ -99,10 +99,9 @@ fun CollectedSensorDataScreen(
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_battery)
                 )
-                //TODO convert data to string elsewhere
                 SensorRow(
                     "Is device charging",
-                    if (sensorData.isDeviceCharging == true) "Yes" else "No"
+                    sensorData.isDeviceCharging
                 )
                 SensorRow(
                     "Type of charger",

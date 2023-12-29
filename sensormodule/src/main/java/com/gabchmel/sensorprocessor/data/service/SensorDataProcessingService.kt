@@ -200,15 +200,12 @@ class SensorDataProcessingService : Service() {
                         + sensorValues.value.isDeviceLying + ","
                         + sensorValues.value.isBluetoothDeviceConnected + ","
                         + sensorValues.value.isHeadphonesPluggedIn + ","
-                        + sensorValues.value.pressure + ","
                         + sensorValues.value.temperature + ","
                         + sensorValues.value.wifiSsid + ","
                         + sensorValues.value.networkConnectionType + ","
                         + sensorValues.value.isDeviceCharging + ","
                         + sensorValues.value.chargingType + ","
                         + sensorValues.value.proximity + ","
-                        + sensorValues.value.humidity + ","
-                        + sensorValues.value.heartBeat + ","
                         + sensorValues.value.heartRate + "\n"
             )
         } catch (e: IOException) {

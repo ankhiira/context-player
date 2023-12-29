@@ -115,15 +115,12 @@ object InputProcessHelper {
             isDeviceLying = if (sensorData.isDeviceLying == true) 1 else 0,
             bluetoothDeviceConnected = if (sensorData.isBluetoothDeviceConnected == true) 1 else 0,
             headphonesPluggedIn = if (sensorData.isHeadphonesPluggedIn == true) 1 else 0,
-            pressure = sensorData.pressure,
             temperature = sensorData.temperature,
             wifi = sensorData.wifiSsid ?: 0u,
             connection = sensorData.networkConnectionType,
             isDeviceCharging = sensorData.isDeviceCharging,
             chargingType = sensorData.chargingType,
             proximity = sensorData.proximity,
-            humidity = sensorData.humidity,
-            heartBeat = sensorData.heartBeat,
             heartRate = sensorData.heartRate,
             locationCluster = locationCluster,
             xCoord = xCoord,
@@ -143,8 +140,8 @@ object InputProcessHelper {
         csvFile.writeText(
             "class,sinTime,cosTime,dayOfWeekSin," +
                     "dayOfWeekCos,state,light,orientation,BTConnected,headphonesPlugged," +
-                    "pressure,temperature,wifi,connection,batteryStatus,chargingType," +
-                    "proximity,humidity,heartRate,heartBeat,location,xCoord,yCoord,zCoord" + "\n"
+                    "temperature,wifi,connection,batteryStatus,chargingType," +
+                    "proximity,heartRate,location,xCoord,yCoord,zCoord" + "\n"
         )
 
         if (inputFile.exists()) {

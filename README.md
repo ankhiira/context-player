@@ -36,12 +36,10 @@ A smart music player that predicts a song depending on the user's context. Whene
 - Sensor data
   - ambient light sensor - if the user is in room, outside, daytime, type of lightning (room - eg. in office, bedroom, gym)
   - temperature sensor - outside or inside, season - winter songs, summer songs
-  - humidity sensor - ?
   - proximity sensor - tilt => if the device is in horizontal or different position
-  - pressure sensor - ?
 - Detected activities
   - activity detection - walking, still, running, riding a bike, traveling by a car
-  - cable heaphones plugged in
+  - cable headphones plugged in
   - bluetooth headphones plugged in
   - to which WiFi is the devices connected - hashed name
   - type of internet connection - WiFi, cellular, none

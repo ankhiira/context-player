@@ -48,6 +48,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -116,9 +118,10 @@ class SensorDataProcessingService : Service() {
             readAdditionalInformation()
 
             sensorTypes.forEach { sensorType ->
+
                 SensorReader.registerSensorReader(
                     baseContext, sensorType,
-                ).collect { sensorValue ->
+                ).onEach { sensorValue ->
                     when (sensorType) {
                         Sensor.TYPE_ACCELEROMETER -> {
                             sensorValues.value.isDeviceLying =
@@ -146,7 +149,7 @@ class SensorDataProcessingService : Service() {
                         context = this@SensorDataProcessingService,
                         sensorData = sensorValues.value
                     )
-                }
+                }.launchIn(coroutineScope)
             }
         }
     }

@@ -7,44 +7,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.gabchmel.common.data.SensorValues
-import com.gabchmel.common.data.dataStore.DataStore
-import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.ui.components.NavigationTopAppBar
-import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 
 @Composable
 fun CollectedSensorDataScreen(
     navController: NavHostController,
-    data: SensorValues
+    sensorData: SensorValues
 ) {
-    val context = LocalContext.current
-    var sensorDataProcessingService: SensorDataProcessingService? by remember {
-        mutableStateOf(null)
-    }
-//    val sensorData: SensorValues =
-//        sensorDataProcessingService?.sensorValues?.collectAsStateWithLifecycle()?.value
-//        ?: SensorValues()
-
-    val sensorData by DataStore.getSensorDataFlow(context).collectAsStateWithLifecycle(initialValue = SensorValues())
-
-    LaunchedEffect(key1 = Unit) {
-        sensorDataProcessingService =
-            context.bindService(SensorDataProcessingService::class.java)
-    }
-
     Scaffold(
         topBar = {
             NavigationTopAppBar(
@@ -65,18 +40,18 @@ fun CollectedSensorDataScreen(
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_result_category)
                 )
+                //TODO get result category
 //                SensorRow(
 //                    "Result category",
-//                    collectedSensorData.locationCluster
+//                    sensorData.
 //                )
-
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_activity)
                 )
-//                SensorRow(
-//                    "Current Activity",
-//                    collectedSensorData.currentActivity
-//                )
+                SensorRow(
+                    "Current Activity",
+                    sensorData.userActivity
+                )
                 CategoryTitle(
                     text = stringResource(id = R.string.collected_data_title_physical_values)
                 )

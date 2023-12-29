@@ -42,12 +42,11 @@ fun ContextPlayerNavHost(
         }
         composable("collected_sensor_data") {
             val viewModel: CollectedSensorDataViewModel = viewModel()
-            viewModel.getSensorData(LocalContext.current)
-            val collectedSensorData = viewModel.sensorData?.collectAsStateWithLifecycle()
+            val collectedSensorData = viewModel.getSensorData(LocalContext.current)
 
             CollectedSensorDataScreen(
                 navController = navController,
-                data = collectedSensorData?.value ?: SensorValues()
+                sensorData = collectedSensorData.collectAsStateWithLifecycle(initialValue = SensorValues()).value
             )
         }
         composable(

@@ -1,5 +1,6 @@
 package com.gabchmel.common.data
 
+//TODO boolean nullable - muze byt nezjistene
 data class ConvertedData(
     var sinTime: Double = 0.0,
     var cosTime: Double = 0.0,
@@ -13,7 +14,7 @@ data class ConvertedData(
     var temperature: Float = 0.0f,
     var wifi: UInt = 0u,
     var connection: NetworkType = NetworkType.NONE,
-    var isDeviceCharging: Boolean? = null,
+    var isDeviceCharging: Int = 0,
     var chargingType: ChargingMethod? = null,
     var proximity: Float = 0.0f,
     var heartRate: Float = 0.0f,

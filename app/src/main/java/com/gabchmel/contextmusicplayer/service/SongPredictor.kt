@@ -7,7 +7,6 @@ import androidx.lifecycle.whenCreated
 import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.data.local.MetaDataReaderImpl
-import com.gabchmel.contextmusicplayer.data.local.model.Song
 import com.gabchmel.contextmusicplayer.ui.notifications.PredictionNotificationCreator
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.async
@@ -45,7 +44,7 @@ class SongPredictor(
         emitAll(sensorProcessService.await().prediction)
     }.filterNotNull()
 
-    private val songs = flow<List<Song>> {
+    private val songs = flow {
         val songs = MetaDataReaderImpl(context).loadLocalStorageSongs() ?: listOf()
         emitAll(flowOf(songs))
     }.stateIn(lifecycleOwner.lifecycleScope, SharingStarted.Lazily, null)

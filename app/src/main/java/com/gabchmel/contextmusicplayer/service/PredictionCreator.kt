@@ -1,11 +1,13 @@
 package com.gabchmel.contextmusicplayer.service
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.guava.asDeferred
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnspecifiedRegisterReceiverFlag")
 class PredictionCreator(
     private val lifecycleOwner: LifecycleOwner,
     val context: Context
@@ -99,7 +102,16 @@ class PredictionCreator(
             lifecycleOwnerNew = lifecycleOwner
 
             // Register receiver of the notification button action
-            context.registerReceiver(ActionReceiver(), IntentFilter("action"))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.registerReceiver(
+                    ActionReceiver(), IntentFilter("action"),
+                    Context.RECEIVER_NOT_EXPORTED,
+                )
+            } else {
+                context.registerReceiver(
+                    ActionReceiver(), IntentFilter("action")
+                )
+            }
 
 //                val sensorProcessService = sensorProcessService.await()
 

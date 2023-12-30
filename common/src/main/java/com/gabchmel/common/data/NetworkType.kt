@@ -2,6 +2,6 @@ package com.gabchmel.common.data
 
 enum class NetworkType {
     NONE,
-    WIFI,
+    TRANSPORT_WIFI,
     CELLULAR
 }

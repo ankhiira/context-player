@@ -33,6 +33,7 @@ import com.gabchmel.common.data.NetworkType
 import com.gabchmel.common.data.SensorValues
 import com.gabchmel.common.data.UserActivity
 import com.gabchmel.common.data.dataStore.DataStore
+import com.gabchmel.common.utils.dataCsvFileName
 import com.gabchmel.predicitonmodule.PredictionModelBuiltIn
 import com.gabchmel.sensorprocessor.data.model.ProcessedCsvValues
 import com.gabchmel.sensorprocessor.data.receiver.ActivityTransitionReceiver
@@ -92,7 +93,7 @@ class SensorDataProcessingService : Service() {
         super.onCreate()
 
         // CSV file with sensor measurements and context data
-        csvFile = File(this.filesDir, "data.csv")
+        csvFile = File(this.filesDir, dataCsvFileName)
 
         registerLocationListener()
         registerActivityDetectionListener()
@@ -163,28 +164,28 @@ class SensorDataProcessingService : Service() {
         //TODO update periodically
         readAdditionalInformation()
 
-        var measuredSensorValuesCount = 1
+        var sensorValuesCount = 1
         for (prop in SensorValues::class.memberProperties) {
-            measuredSensorValuesCount++
+            sensorValuesCount++
         }
 
         if (csvFile.length() == 0L) {
             // If the file is empty, save the current MeasuredSensorValues class size
             val editor = getSharedPreferences("MyPrefsFile", MODE_PRIVATE).edit()
-            editor.putInt("csv", measuredSensorValuesCount)
+            editor.putInt("csv", sensorValuesCount)
             editor.apply()
         } else {
             // If the file is not empty, then check if the size of SensorData didn't change
             val prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE)
             val counterOld = prefs.getInt("csv", 0)
-            if (counterOld != measuredSensorValuesCount && counterOld != 0) {
+            if (counterOld != sensorValuesCount && counterOld != 0) {
                 // If the size changed, delete the CSV file
-                val inputFile = File(this.filesDir, "data.csv")
+                val inputFile = File(this.filesDir, dataCsvFileName)
                 if (inputFile.exists()) {
-                    this.deleteFile("data.csv")
+                    this.deleteFile(dataCsvFileName)
                 }
                 // Create new CSV file
-                csvFile = File(this.filesDir, "data.csv")
+                csvFile = File(this.filesDir, dataCsvFileName)
             }
         }
 
@@ -198,15 +199,15 @@ class SensorDataProcessingService : Service() {
                             + it.latitude + ","
                             + it.userActivity + ","
                             + it.lightSensorValue + ","
-                            + it.isDeviceLying + ","
-                            + it.isBluetoothDeviceConnected + ","
-                            + it.isHeadphonesPluggedIn + ","
                             + it.temperature + ","
+                            + it.proximity + ","
+                            + it.isDeviceLying + ","
+                            + it.isHeadphonesPluggedIn + ","
+                            + it.isBluetoothDeviceConnected + ","
                             + it.wifiSsid + ","
                             + it.networkConnectionType + ","
                             + it.isDeviceCharging + ","
                             + it.chargingType + ","
-                            + it.proximity + ","
                             + it.heartRate + "\n"
                 )
             }
@@ -216,13 +217,9 @@ class SensorDataProcessingService : Service() {
     }
 
     fun createModel(): Boolean {
-        processedCsvValues =
-            ProcessedCsvValues(
-                processInputCSV(this).classNames,
-                processInputCSV(this).wifiNames
-            )
+        processedCsvValues = processInputCSV(this)
 
-        // If we don't have enough input data, don't create a model
+        //TODO: If we don't have enough input data, don't create a model
         return predictionModel.createModel(
             processedCsvValues.classNames,
             processedCsvValues.wifiNames
@@ -243,12 +240,14 @@ class SensorDataProcessingService : Service() {
     }
 
     private suspend fun SensorDataProcessingService.readAdditionalInformation() {
-        _sensorValues.value.currentTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)
-        _sensorValues.value.wifiSsid = getConnectedWiFiSsid()
-        _sensorValues.value.networkConnectionType = getCurrentNetworkConnectionType(this)
-        _sensorValues.value.isDeviceCharging = isDeviceCharging()
-        _sensorValues.value.chargingType = getChargingMethod()
-        _sensorValues.value.isBluetoothDeviceConnected = isBluetoothDeviceConnected(this)
+        _sensorValues.value.also {
+            it.currentTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+            it.wifiSsid = getConnectedWiFiSsid()
+            it.networkConnectionType = getCurrentNetworkConnectionType(this)
+            it.isDeviceCharging = isDeviceCharging()
+            it.chargingType = getChargingMethod()
+            it.isBluetoothDeviceConnected = isBluetoothDeviceConnected(this)
+        }
     }
 
     suspend fun hasContextChanged(): Boolean {
@@ -461,7 +460,7 @@ class SensorDataProcessingService : Service() {
                 }
 
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                    return NetworkType.WIFI
+                    return NetworkType.TRANSPORT_WIFI
                 }
 
                 else -> return NetworkType.NONE

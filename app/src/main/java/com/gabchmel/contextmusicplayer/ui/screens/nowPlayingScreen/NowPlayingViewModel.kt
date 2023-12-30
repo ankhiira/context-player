@@ -11,7 +11,9 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionToken
+import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.service.MusicService
+import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.guava.asDeferred
@@ -47,6 +49,9 @@ class NowPlayingViewModel(
 
             mediaBrowserLocal = mediaBrowser
 
+            // Bind to SensorProcessService to later write to the file
+            val sensorDataProcessingService = app.bindService(SensorDataProcessingService::class.java)
+
             mediaBrowser.setMediaItem(mediaItem)
             mediaBrowser.prepare()
             mediaBrowser.play()
@@ -66,6 +71,16 @@ class NowPlayingViewModel(
                         else 0.0f
 
                     isPlaying.value = player.isPlaying
+
+                    if (player.isPlaying) {
+                        val songId =
+                            "${player.mediaMetadata.title},${player.mediaMetadata.artist}"
+                                .hashCode()
+                                .toString()
+                        viewModelScope.launch {
+                            sensorDataProcessingService.writeToFile(songId)
+                        }
+                    }
                 }
             })
         }

@@ -49,4 +49,12 @@ object DataStore {
             preferences[SENSOR_DATA] = Json.encodeToString(sensorData)
         }
     }
+
+    suspend fun removeSensorData(
+        context: Context
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences.remove(SENSOR_DATA)
+        }
+    }
 }

@@ -49,7 +49,7 @@ dependencies {
 
 //    implementation "nz.ac.waikato.cms.weka:weka-stable:3.6.13"
 
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:0.15.2")
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")
     implementation("com.opencsv:opencsv:4.4")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
 

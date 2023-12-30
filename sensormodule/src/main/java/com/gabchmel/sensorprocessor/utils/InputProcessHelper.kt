@@ -3,20 +3,26 @@ package com.gabchmel.sensorprocessor.utils
 import android.app.Service
 import android.content.Context
 import android.util.Log
+import com.gabchmel.common.data.ChargingMethod
 import com.gabchmel.common.data.ConvertedData
+import com.gabchmel.common.data.NetworkType
 import com.gabchmel.common.data.SensorValues
+import com.gabchmel.common.data.UserActivity
+import com.gabchmel.common.utils.convertedCsvFileName
+import com.gabchmel.common.utils.dataCsvFileName
 import com.gabchmel.sensorprocessor.data.model.ProcessedCsvValues
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import kotlinx.datetime.toLocalDateTime
 import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.primaryConstructor
 
 
 object InputProcessHelper {
@@ -112,13 +118,13 @@ object InputProcessHelper {
             dayOfWeekCos = dayOfWeekCos,
             currentActivity = sensorData.userActivity,
             lightSensorValue = sensorData.lightSensorValue,
-            isDeviceLying = if (sensorData.isDeviceLying == true) 1 else 0,
-            bluetoothDeviceConnected = if (sensorData.isBluetoothDeviceConnected == true) 1 else 0,
-            headphonesPluggedIn = if (sensorData.isHeadphonesPluggedIn == true) 1 else 0,
+            isDeviceLying = sensorData.isDeviceLying.toInt(),
+            bluetoothDeviceConnected = sensorData.isBluetoothDeviceConnected.toInt(),
+            headphonesPluggedIn = sensorData.isHeadphonesPluggedIn.toInt(),
             temperature = sensorData.temperature,
             wifi = sensorData.wifiSsid ?: 0u,
             connection = sensorData.networkConnectionType,
-            isDeviceCharging = sensorData.isDeviceCharging,
+            isDeviceCharging = sensorData.isDeviceCharging.toInt(),
             chargingType = sensorData.chargingType,
             proximity = sensorData.proximity,
             heartRate = sensorData.heartRate,
@@ -129,30 +135,47 @@ object InputProcessHelper {
         )
     }
 
+    private fun Boolean?.toInt(): Int {
+        return if (this == true) 1 else 0
+    }
+
     // Give header to the file and process dates
     fun processInputCSV(context: Context): ProcessedCsvValues {
-        val inputFile = File(context.filesDir, "data.csv")
-        val csvFile = File(context.filesDir, "convertedData.csv")
+
         val classNames = arrayListOf<String>()
         val wifiList = arrayListOf<UInt>()
 
         // Convert the whole file each time
-        csvFile.writeText(
-            "class,sinTime,cosTime,dayOfWeekSin," +
-                    "dayOfWeekCos,state,light,orientation,BTConnected,headphonesPlugged," +
-                    "temperature,wifi,connection,batteryStatus,chargingType," +
-                    "proximity,heartRate,location,xCoord,yCoord,zCoord" + "\n"
+        val convertedCsvFile = File(context.filesDir, convertedCsvFileName)
+        convertedCsvFile.writeText(
+            "class," +
+                    "sinTime," +
+                    "cosTime," +
+                    "dayOfWeekSin," +
+                    "dayOfWeekCos," +
+                    "state," +
+                    "light," +
+                    "orientation," +
+                    "BTConnected," +
+                    "headphonesPlugged," +
+                    "temperature," +
+                    "wifi," +
+                    "connection," +
+                    "batteryStatus," +
+                    "chargingType," +
+                    "proximity," +
+                    "heartRate," +
+                    "location," +
+                    "xCoord," +
+                    "yCoord," +
+                    "zCoord" + "\n"
         )
 
-        if (inputFile.exists()) {
-            csvReader().open(inputFile) {
+        val csvFile = File(context.filesDir, dataCsvFileName)
+        if (csvFile.exists()) {
+            csvReader().open(csvFile) {
                 readAllAsSequence()
                     .map { row ->
-                        // Format the date
-                        val formatter =
-                            SimpleDateFormat("E MMM dd HH:mm:ss ZZZZ yyyy", Locale.ENGLISH)
-                        val dateNew = formatter.parse(row[1])
-
                         // Check if the target class is int he list of classes, if not add it
                         if (!classNames.contains(row[0])) {
                             classNames.add(row[0])
@@ -164,9 +187,9 @@ object InputProcessHelper {
                         val counterOld = prefs.getInt("csv", 0)
                         if (counterOld != row.size && counterOld != 0) {
                             // If yes, delete the data.csv file
-                            val dataInputFile = File(context.filesDir, "data.csv")
+                            val dataInputFile = File(context.filesDir, dataCsvFileName)
                             if (dataInputFile.exists()) {
-                                context.deleteFile("data.csv")
+                                context.deleteFile(dataCsvFileName)
                             }
                         }
 
@@ -180,56 +203,53 @@ object InputProcessHelper {
 
                         // Convert the CSV row to SensorData class
                         //TODO don't depend on position
-//                        row[0] to MeasuredSensorValues(
-//                            dateNew,
-//                            row[2].toDouble(),
-//                            row[3].toDouble(),
-//                            row[4],
-//                            row[5].toFloat(),
-//                            row[6].toFloat(),
-//                            row[7].toFloat(),
-//                            row[8].toFloat(),
-//                            row[9].toFloat(),
-//                            row[10].toFloat(),
-//                            row[11].toUInt(),
-//                            row[12],
-//                            row[13],
-//                            row[14],
-//                            row[15].toFloat(),
-//                            row[16].toFloat(),
-//                            row[17].toFloat(),
-//                            row[18].toFloat()
-//                        )
+                        row[0] to SensorValues(
+                            row[1].toLocalDateTime(),
+                            row[2].toDouble(),
+                            row[3].toDouble(),
+                            UserActivity.valueOf(row[4]),
+                            row[5].toFloat(),
+                            row[6].toFloat(),
+                            row[7].toFloat(),
+                            row[8].toBoolean(),
+                            row[9].toBoolean(),
+                            row[10].toBoolean(),
+                            if (row[11] != "null") row[11].toUInt() else null,
+                            NetworkType.valueOf(row[12]),
+                            row[13].toBoolean(),
+                            ChargingMethod.valueOf(row[14]),
+                            row[15].toFloat()
+                        )
                     }.map {
                         // Process the data to be suitable as model input
-//                        it.first to inputProcessHelper(it.second)
+                        it.first to getProcessedSensorValues(it.second)
                     }.forEach { pair ->
                         try {
-//                            // Write to csv file
-//                            val data: ConvertedData = pair.second
-//                            var csvString = ""
-//                            // Iterate over object properties
-//                            ConvertedData::class.primaryConstructor?.parameters?.let { parameters ->
-//                                for (property in parameters) {
-//                                    val propertyNew = data::class.members
-//                                        .first { it.name == property.name } as KProperty1<Any, *>
-//                                    // Check for wifi property because with UInt it is not working well
-//                                    if (property.name == "wifi") {
-//                                        csvString += "${data.wifi},"
-//                                        // Save every individual wifi into the list
-//                                        if (!wifiList.contains(data.wifi)) {
-//                                            data.wifi.let { it1 -> wifiList.add(it1) }
-//                                        }
-//                                    } else {
-//                                        csvString += "${propertyNew.get(data)},"
-//                                    }
-//                                }
-//                            }
-//
-//                            // Drop comma after last element
-//                            csvString = csvString.dropLast(1)
-//                            csvString += "\n"
-//                            csvFile.appendText(pair.first + "," + csvString)
+                            // Write to csv file
+                            val data: ConvertedData = pair.second
+                            var csvString = ""
+                            // Iterate over object properties
+                            ConvertedData::class.primaryConstructor?.parameters?.let { parameters ->
+                                for (property in parameters) {
+                                    val propertyNew = data::class.members
+                                        .first { it.name == property.name } as KProperty1<Any, *>
+                                    // Check for wifi property because with UInt it is not working well
+                                    if (property.name == "wifi") {
+                                        csvString += "${data.wifi},"
+                                        // Save every individual wifi into the list
+                                        if (!wifiList.contains(data.wifi)) {
+                                            data.wifi.let { it1 -> wifiList.add(it1) }
+                                        }
+                                    } else {
+                                        csvString += "${propertyNew.get(data)},"
+                                    }
+                                }
+                            }
+
+                            // Drop comma after last element
+                            csvString = csvString.dropLast(1)
+                            csvString += "\n"
+                            convertedCsvFile.appendText(pair.first + "," + csvString)
                         } catch (e: IOException) {
                             Log.e("Err", "Couldn't write to file", e)
                         }

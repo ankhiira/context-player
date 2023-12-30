@@ -7,6 +7,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.gabchmel.common.utils.dataCsvFileName
 import com.gabchmel.contextmusicplayer.service.PredictionCreator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,7 +21,7 @@ class PredictionWorker(
     override suspend fun doWork(): Result {
         withContext(Dispatchers.IO) {
             // Run prediction only if there are input data
-            val inputFile = File(appContext.filesDir, "data.csv")
+            val inputFile = File(appContext.filesDir, dataCsvFileName)
             if (inputFile.exists()) {
                 // Connect to the MediaBrowserService, run prediction and create notification
                 PredictionCreator(ProcessLifecycleOwner.get(), appContext)

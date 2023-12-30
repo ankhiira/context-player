@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.gabchmel.common.utils.convertedArffFileName
+import com.gabchmel.common.utils.dataCsvFileName
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.service.PredictionCreator
 import com.gabchmel.contextmusicplayer.ui.components.NavigationTopAppBar
@@ -128,13 +130,9 @@ fun SettingsScreen(
                                 Button(
                                     onClick = {
                                         openDialog.value = false
-                                        val inputFile =
-                                            File(
-                                                context.filesDir,
-                                                "data.csv"
-                                            )
+                                        val inputFile = File(context.filesDir, dataCsvFileName)
                                         if (inputFile.exists()) {
-                                            context.deleteFile("data.csv")
+                                            context.deleteFile(dataCsvFileName)
                                         }
                                     }) {
                                     Text("YES")
@@ -166,17 +164,10 @@ fun SettingsScreen(
 }
 
 private fun sendEmail(context: Context) {
-    val locationNewFile =
-        File(context.filesDir, "convertedData.csv")
-    val origFileArff =
-        File(
-            context.filesDir,
-            "arffData_converted.arff"
-        )
-    val origFilePrediction =
-        File(context.filesDir, "predictions.csv")
-    val origFileData =
-        File(context.filesDir, "data.csv")
+    val locationNewFile = File(context.filesDir, "convertedData.csv")
+    val origFileArff = File(context.filesDir, convertedArffFileName)
+    val origFilePrediction = File(context.filesDir, "predictions.csv")
+    val origFileData = File(context.filesDir, dataCsvFileName)
 
     val data = ArrayList<Uri>()
 

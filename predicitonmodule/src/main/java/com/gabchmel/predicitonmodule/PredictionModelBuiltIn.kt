@@ -1,7 +1,12 @@
 package com.gabchmel.predicitonmodule
 
 import android.content.Context
+import com.gabchmel.common.data.ChargingMethod
 import com.gabchmel.common.data.ConvertedData
+import com.gabchmel.common.data.NetworkType
+import com.gabchmel.common.data.UserActivity
+import com.gabchmel.common.utils.arffFileName
+import com.gabchmel.common.utils.convertedArffFileName
 import weka.classifiers.Evaluation
 import weka.classifiers.trees.RandomForest
 import weka.core.Attribute
@@ -20,60 +25,73 @@ class PredictionModelBuiltIn(val context: Context) {
 
     private lateinit var forest: RandomForest
 
-    // Name of the input arff file
-    val file = "arffData_converted.arff"
-    val testFile = "arffData_convertedTest.arff"
+    val testArffFileName = "arffData_convertedTest.arff"
     private val csvConvertedFile = "convertedData.csv"
+
     private var wifiList = arrayListOf<UInt>()
 
-    // Function to read the dataset from arff file
+    /**
+     * Read the dataset from arff file
+     *
+     * @return
+     */
     private fun getDataset(): Triple<Instances, Instances, Instances> {
 
-        val initialFile = File(context.filesDir, file)
+        val arffFile = File(context.filesDir, convertedArffFileName)
         val classIdx = 0
 
         // Load arff file
         val loader = ArffLoader()
-        loader.setFile(initialFile)
-        val dataSet = loader.dataSet
+        loader.setFile(arffFile)
+        val dataset = loader.dataSet
 
         // Randomize dataset values
-        dataSet.randomize(Random(0))
+        //TODO is seed 0 doing something?
+        dataset.randomize(Random(0))
 
         // If the class is of the nominal type, stratify the data
         // dataSet.stratify(10)
 
         // Remove test percentage from data to get the train set
-        var removePercentage = RemovePercentage()
-        removePercentage.setInputFormat(dataSet)
-        removePercentage.percentage = 20.0
-        val train: Instances = Filter.useFilter(dataSet, removePercentage)
+        var removePercentage = RemovePercentage().apply {
+            setInputFormat(dataset)
+            percentage = 20.0
+        }
+        val train = Filter.useFilter(dataset, removePercentage)
 
         // Remove train percentage from data to get the test set
-        removePercentage = RemovePercentage()
-        removePercentage.setInputFormat(dataSet)
-        removePercentage.percentage = 20.0
-        removePercentage.invertSelection = true
-        val test: Instances = Filter.useFilter(dataSet, removePercentage)
+        //TODO check if setInputFormat and percentage necessary
+        removePercentage = RemovePercentage().apply {
+            setInputFormat(dataset)
+            percentage = 20.0
+            invertSelection = true
+        }
+        val test = Filter.useFilter(dataset, removePercentage)
 
         // Set index of the class attribute
         train.setClassIndex(classIdx)
         test.setClassIndex(classIdx)
 
-        return Triple(train, test, dataSet)
+        return Triple(train, test, dataset)
     }
 
-    // Function to create and evaluate model
+    /**
+     * Create and evaluate model
+     *
+     * @param classNames
+     * @param wifiList
+     * @return
+     */
     fun createModel(classNames: ArrayList<String>, wifiList: ArrayList<UInt>): Boolean {
 
         this.wifiList = wifiList
-        if (classNames.size == 1) {
+        if (classNames.size <= 1) {
             return false
         }
 
         convertCsvToArff(context, classNames, wifiList)
 
-        if (File(context.filesDir, file).exists()) {
+        if (File(context.filesDir, convertedArffFileName).exists()) {
 
             val (trainingDataSet, testDataSet, origDataSet) = getDataset()
 
@@ -108,14 +126,19 @@ class PredictionModelBuiltIn(val context: Context) {
         return true
     }
 
-    // Function to make prediction on input data
+    /**
+     * Make prediction on input data
+     *
+     * @param input
+     * @param classNames
+     * @return
+     */
     fun predict(input: ConvertedData, classNames: ArrayList<String>): String {
 
         // To create attributes with all possible values
         val stateList = listOf("IN_VEHICLE", "STILL", "WALKING", "RUNNING", "ON_BICYCLE", "UNKNOWN")
         val connectionList =
             listOf("NONE", "TRANSPORT_CELLULAR", "TRANSPORT_WIFI", "TRANSPORT_ETHERNET")
-        val batteryStatusList = listOf("NONE", "CHARGING", "NOT_CHARGING")
         val chargingTypeList = listOf("NONE", "USB", "AC", "WIRELESS")
         val wifiNamesList = mutableListOf<String>()
 
@@ -130,9 +153,6 @@ class PredictionModelBuiltIn(val context: Context) {
 
         val connectionVector = ArrayList<String>(4)
         connectionVector.addAll(connectionList)
-
-        val batteryStatVector = ArrayList<String>(3)
-        batteryStatVector.addAll(batteryStatusList)
 
         val chargingTypeVector = ArrayList<String>(4)
         chargingTypeVector.addAll(chargingTypeList)
@@ -156,7 +176,7 @@ class PredictionModelBuiltIn(val context: Context) {
         val temperature = Attribute("temperature")
         val wifi = Attribute("wifi", wifiListVec)
         val connection = Attribute("connection", connectionVector)
-        val batteryStatus = Attribute("batteryStatus", batteryStatVector)
+        val batteryStatus = Attribute("batteryStatus", boolVec)
         val chargingType = Attribute("chargingType", chargingTypeVector)
         val proximity = Attribute("proximity")
         val heartRate = Attribute("heartRate")
@@ -218,7 +238,7 @@ class PredictionModelBuiltIn(val context: Context) {
                 setValue(temperature, input.temperature.toDouble())
                 setValue(wifi, input.wifi.toString())
                 setValue(connection, input.connection.toString())
-                setValue(batteryStatus, input.isDeviceCharging.toString())
+                setValue(batteryStatus, input.isDeviceCharging.toDouble())
                 setValue(chargingType, input.chargingType.toString())
                 setValue(proximity, input.proximity.toDouble())
                 setValue(heartRate, input.heartRate.toDouble())
@@ -250,87 +270,95 @@ class PredictionModelBuiltIn(val context: Context) {
         return className
     }
 
-    // Function to convert CSV file to arff file representation
+    /**
+     * Convert csv to arff file representation
+     *
+     * @param context
+     * @param classNames
+     * @param wifiList
+     */
     private fun convertCsvToArff(
         context: Context,
         classNames: ArrayList<String>,
         wifiList: ArrayList<UInt>
     ) {
-
-        // load the CSV file
-        val load = CSVLoader()
         val csvFile = File(context.filesDir, csvConvertedFile)
 
-        if (csvFile.exists()) {
-            load.setSource(csvFile)
-            val data = load.dataSet
+        if (!csvFile.exists()) {
+            return
+        }
 
-            // convert data to arff format
-            val arffSaver = ArffSaver()
-            arffSaver.instances = data
-            arffSaver.setFile(File(context.filesDir, "arffData.arff"))
-            arffSaver.writeBatch()
+        val csvLoader = CSVLoader()
+        csvLoader.setSource(csvFile)
+        val data = csvLoader.dataSet
 
-            // create nominal attribute label
-            val file = File(context.filesDir, "arffData.arff")
-            val fileOut = File(context.filesDir, "arffData_converted.arff")
-            var text = file.readText()
+        // convert data to arff format
+        ArffSaver().apply {
+            instances = data
+            setFile(File(context.filesDir, arffFileName))
+            writeBatch()
+        }
 
-            val classNamesString = classNames.joinToString(separator = ",") { className ->
-                className
-            }
+        // create nominal attribute label
+        val arffFile = File(context.filesDir, arffFileName)
+        var text = arffFile.readText()
 
-            val wifiListString = wifiList.joinToString(separator = ",") { wifiName ->
-                wifiName.toString()
-            }
+        // Replace attribute description in arff file
+        val classNamesString = classNames.joinToString(separator = ",")
+        text = text.replace(
+            oldValue = "@attribute class numeric",
+            newValue = "@attribute class {$classNamesString}"
+        )
 
+        val userActivity = UserActivity.entries.toTypedArray().joinToString()
+        text = text.replace(
+            regex = "@attribute state \\{.*\\}".toRegex(),
+            replacement = "@attribute state {$userActivity}"
+        )
+
+        val networkType = NetworkType.entries.toTypedArray().joinToString()
+        text = text.replace(
+            regex = "@attribute connection \\{.*\\}".toRegex(),
+            replacement = "@attribute connection {$networkType}"
+        )
+
+        text = text.replace(
+            oldValue = "@attribute batteryStatus numeric",
+            newValue = "@attribute batteryStatus {0,1}"
+        )
+
+        val chargingMethod = ChargingMethod.entries.toTypedArray().joinToString()
+        text = text.replace(
+            regex = "@attribute chargingType \\{.*\\}".toRegex(),
+            replacement = "@attribute chargingType {$chargingMethod}"
+        )
+
+        text = text.replace(
+            oldValue = "@attribute orientation numeric",
+            newValue = "@attribute orientation {0,1}"
+        )
+        text = text.replace(
+            oldValue = "@attribute btConnected numeric",
+            newValue = "@attribute btConnected {0,1}"
+        )
+        text = text.replace(
+            oldValue = "@attribute headphonesPlugged numeric",
+            newValue = "@attribute headphonesPlugged {0,1}"
+        )
+
+        val wifiListString = wifiList.joinToString(separator = ",") { wifiName ->
+            wifiName.toString()
+        }
+        if (wifiList.isNotEmpty()) {
             // Replace attribute description in arff file
             text = text.replace(
-                "@attribute class numeric", "@attribute class {" +
-                        classNamesString + "}"
+                oldValue = "@attribute wifi numeric",
+                newValue = "@attribute wifi {$wifiListString}"
             )
-
-            text = text.replace(
-                "@attribute state \\{.*}".toRegex(), "@attribute state {" +
-                        "IN_VEHICLE,STILL,WALKING,RUNNING,ON_BICYCLE,UNKNOWN}"
-            )
-
-            text = text.replace(
-                "@attribute connection \\{.*}".toRegex(), "@attribute connection {" +
-                        "NONE,TRANSPORT_CELLULAR,TRANSPORT_WIFI,TRANSPORT_ETHERNET}"
-            )
-
-            text = text.replace(
-                "@attribute batteryStatus \\{.*}".toRegex(), "@attribute batteryStatus {" +
-                        "NONE,CHARGING,NOT_CHARGING}"
-            )
-
-            text = text.replace(
-                "@attribute chargingType \\{.*}".toRegex(), "@attribute chargingType {" +
-                        "NONE,USB,AC,WIRELESS}"
-            )
-
-            text = text.replace(
-                "@attribute orientation numeric", "@attribute orientation {" +
-                        "0,1}"
-            )
-            text = text.replace(
-                "@attribute btConnected numeric", "@attribute btConnected {" +
-                        "0,1}"
-            )
-            text = text.replace(
-                "@attribute headphonesPlugged numeric", "@attribute headphonesPlugged {" +
-                        "0,1}"
-            )
-
-            if (wifiList.isNotEmpty()) {
-                // Replace attribute description in arff file
-                text = text.replace(
-                    "@attribute wifi numeric", "@attribute wifi {" +
-                            wifiListString + "}"
-                )
-            }
-            fileOut.writeText(text)
         }
+
+        val convertedArffFile = File(context.filesDir, convertedArffFileName)
+        convertedArffFile.writeText(text)
+
     }
 }

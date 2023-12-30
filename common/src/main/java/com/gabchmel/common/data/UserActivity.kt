@@ -7,4 +7,11 @@ enum class UserActivity {
     ON_BICYCLE,
     IN_VEHICLE,
     UNKNOWN
+    ;
+
+    companion object {
+        fun getEntriesString(): String {
+            return entries.toTypedArray().joinToString()
+        }
+    }
 }

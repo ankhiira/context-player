@@ -7,6 +7,7 @@ import com.gabchmel.common.data.NetworkType
 import com.gabchmel.common.data.UserActivity
 import com.gabchmel.common.utils.arffFileName
 import com.gabchmel.common.utils.convertedArffFileName
+import com.gabchmel.common.utils.convertedCsvFileName
 import weka.classifiers.Evaluation
 import weka.classifiers.trees.RandomForest
 import weka.core.Attribute
@@ -24,9 +25,6 @@ import java.util.Random
 class PredictionModelBuiltIn(val context: Context) {
 
     private lateinit var forest: RandomForest
-
-    val testArffFileName = "arffData_convertedTest.arff"
-    private val csvConvertedFile = "convertedData.csv"
 
     private var wifiList = arrayListOf<UInt>()
 
@@ -135,27 +133,19 @@ class PredictionModelBuiltIn(val context: Context) {
      */
     fun predict(input: ConvertedData, classNames: ArrayList<String>): String {
 
-        // To create attributes with all possible values
-        val stateList = listOf("IN_VEHICLE", "STILL", "WALKING", "RUNNING", "ON_BICYCLE", "UNKNOWN")
-        val connectionList =
-            listOf("NONE", "TRANSPORT_CELLULAR", "TRANSPORT_WIFI", "TRANSPORT_ETHERNET")
-        val chargingTypeList = listOf("NONE", "USB", "AC", "WIRELESS")
         val wifiNamesList = mutableListOf<String>()
-
-        if (wifiList.isNotEmpty()) {
-            for (wifiName in wifiList) {
-                wifiNamesList.add(wifiName.toString())
-            }
+        wifiList.forEach { wifiName ->
+            wifiNamesList.add(wifiName.toString())
         }
 
         val stateVector = ArrayList<String>(5)
-        stateVector.addAll(stateList)
+        stateVector.add(UserActivity.getEntriesString())
 
         val connectionVector = ArrayList<String>(4)
-        connectionVector.addAll(connectionList)
+        connectionVector.add(NetworkType.getEntriesString())
 
         val chargingTypeVector = ArrayList<String>(4)
-        chargingTypeVector.addAll(chargingTypeList)
+        chargingTypeVector.add(ChargingMethod.getEntriesString())
 
         val boolVec = ArrayList<String>(2)
         boolVec.addAll(listOf("0", "1"))
@@ -282,7 +272,7 @@ class PredictionModelBuiltIn(val context: Context) {
         classNames: ArrayList<String>,
         wifiList: ArrayList<UInt>
     ) {
-        val csvFile = File(context.filesDir, csvConvertedFile)
+        val csvFile = File(context.filesDir, convertedCsvFileName)
 
         if (!csvFile.exists()) {
             return
@@ -305,60 +295,46 @@ class PredictionModelBuiltIn(val context: Context) {
 
         // Replace attribute description in arff file
         val classNamesString = classNames.joinToString(separator = ",")
-        text = text.replace(
-            oldValue = "@attribute class numeric",
-            newValue = "@attribute class {$classNamesString}"
-        )
+        text = replaceNumeric(text, "class", classNamesString)
 
-        val userActivity = UserActivity.entries.toTypedArray().joinToString()
-        text = text.replace(
-            regex = "@attribute state \\{.*\\}".toRegex(),
-            replacement = "@attribute state {$userActivity}"
-        )
+        text = replaceNominal(text, "state", UserActivity.getEntriesString())
+        text = replaceNominal(text, "connection", NetworkType.getEntriesString())
+        text = replaceNominal(text, "chargingType", ChargingMethod.getEntriesString())
 
-        val networkType = NetworkType.entries.toTypedArray().joinToString()
-        text = text.replace(
-            regex = "@attribute connection \\{.*\\}".toRegex(),
-            replacement = "@attribute connection {$networkType}"
-        )
+        text = replaceToBoolean(text, "batteryStatus")
+        text = replaceToBoolean(text, "orientation")
+        text = replaceToBoolean(text, "btConnected")
+        text = replaceToBoolean(text, "headphonesPlugged")
 
-        text = text.replace(
-            oldValue = "@attribute batteryStatus numeric",
-            newValue = "@attribute batteryStatus {0,1}"
-        )
-
-        val chargingMethod = ChargingMethod.entries.toTypedArray().joinToString()
-        text = text.replace(
-            regex = "@attribute chargingType \\{.*\\}".toRegex(),
-            replacement = "@attribute chargingType {$chargingMethod}"
-        )
-
-        text = text.replace(
-            oldValue = "@attribute orientation numeric",
-            newValue = "@attribute orientation {0,1}"
-        )
-        text = text.replace(
-            oldValue = "@attribute btConnected numeric",
-            newValue = "@attribute btConnected {0,1}"
-        )
-        text = text.replace(
-            oldValue = "@attribute headphonesPlugged numeric",
-            newValue = "@attribute headphonesPlugged {0,1}"
-        )
-
-        val wifiListString = wifiList.joinToString(separator = ",") { wifiName ->
-            wifiName.toString()
-        }
         if (wifiList.isNotEmpty()) {
-            // Replace attribute description in arff file
-            text = text.replace(
-                oldValue = "@attribute wifi numeric",
-                newValue = "@attribute wifi {$wifiListString}"
-            )
+            val wifiListString = wifiList.joinToString(separator = ",") { wifiName ->
+                wifiName.toString()
+            }
+            text = replaceNumeric(text, "wifi", wifiListString)
         }
 
         val convertedArffFile = File(context.filesDir, convertedArffFileName)
         convertedArffFile.writeText(text)
+    }
 
+    private fun replaceNominal(text: String, attribute: String, nominalValues: String): String {
+        return text.replace(
+            regex = "@attribute $attribute \\{.*\\}".toRegex(),
+            replacement = "@attribute $attribute {$nominalValues}"
+        )
+    }
+
+    private fun replaceToBoolean(text: String, attribute: String): String {
+        return text.replace(
+            oldValue = "@attribute $attribute numeric",
+            newValue = "@attribute $attribute {0,1}"
+        )
+    }
+
+    private fun replaceNumeric(text: String, attribute: String, values: String): String {
+        return text.replace(
+            oldValue = "@attribute $attribute numeric",
+            newValue = "@attribute $attribute {$values}"
+        )
     }
 }

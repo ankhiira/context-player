@@ -5,4 +5,10 @@ enum class ChargingMethod {
     AC,
     WIRELESS,
     NONE
+    ;
+    companion object {
+        fun getEntriesString(): String {
+            return entries.toTypedArray().joinToString()
+        }
+    }
 }

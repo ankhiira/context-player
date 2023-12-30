@@ -33,15 +33,11 @@ class PredictionModelBuiltIn(val context: Context) {
      *
      * @return
      */
-    private fun getDataset(): Triple<Instances, Instances, Instances> {
-
+    private fun getDataset(): Instances {
+        val arffLoader = ArffLoader()
         val arffFile = File(context.filesDir, convertedArffFileName)
-        val classIdx = 0
-
-        // Load arff file
-        val loader = ArffLoader()
-        loader.setFile(arffFile)
-        val dataset = loader.dataSet
+        arffLoader.setFile(arffFile)
+        val dataset = arffLoader.dataSet
 
         // Randomize dataset values
         //TODO is seed 0 doing something?
@@ -50,27 +46,26 @@ class PredictionModelBuiltIn(val context: Context) {
         // If the class is of the nominal type, stratify the data
         // dataSet.stratify(10)
 
-        // Remove test percentage from data to get the train set
-        var removePercentage = RemovePercentage().apply {
+        return dataset
+    }
+
+    private fun getTrainDataset(dataset: Instances): Instances {
+        val removePercentage = RemovePercentage().apply {
             setInputFormat(dataset)
             percentage = 20.0
         }
-        val train = Filter.useFilter(dataset, removePercentage)
 
-        // Remove train percentage from data to get the test set
-        //TODO check if setInputFormat and percentage necessary
-        removePercentage = RemovePercentage().apply {
+        return Filter.useFilter(dataset, removePercentage)
+    }
+
+    private fun getTestDataset(dataset: Instances): Instances {
+        val removePercentage = RemovePercentage().apply {
             setInputFormat(dataset)
             percentage = 20.0
             invertSelection = true
         }
-        val test = Filter.useFilter(dataset, removePercentage)
 
-        // Set index of the class attribute
-        train.setClassIndex(classIdx)
-        test.setClassIndex(classIdx)
-
-        return Triple(train, test, dataset)
+        return Filter.useFilter(dataset, removePercentage)
     }
 
     /**
@@ -90,26 +85,26 @@ class PredictionModelBuiltIn(val context: Context) {
         convertCsvToArff(context, classNames, wifiList)
 
         if (File(context.filesDir, convertedArffFileName).exists()) {
+            val originalDataset = getDataset()
+            val trainDataset = getTrainDataset(originalDataset)
+            val testDataset = getTestDataset(originalDataset)
 
-            val (trainingDataSet, testDataSet, origDataSet) = getDataset()
-
-            trainingDataSet.setClassIndex(0)
-            testDataSet.setClassIndex(0)
-            origDataSet.setClassIndex(0)
-
-            val test = trainingDataSet.equalHeaders(testDataSet)
+            // Set index of the class attribute
+            trainDataset.setClassIndex(0)
+            testDataset.setClassIndex(0)
+            originalDataset.setClassIndex(0)
 
             forest = RandomForest()
-
-            // Set number of trees to 100
             forest.numTrees = 100
-            // Train the model
-            forest.buildClassifier(trainingDataSet)
-            // Test the model
-            val eval = Evaluation(trainingDataSet)
-            eval.evaluateModel(forest, testDataSet)
 
-//            eval.crossValidateModel(forest, origDataSet, 10, Random(1))
+            // Train the model
+            forest.buildClassifier(trainDataset)
+
+            // Test the model
+            val eval = Evaluation(trainDataset)
+            eval.evaluateModel(forest, testDataset)
+
+//            eval.crossValidateModel(forest, originalDataset, 10, Random(1))
 //            println("Estimated Accuracy: ${eval.pctCorrect()}")
 
             // Print the evaluation summary
@@ -133,32 +128,23 @@ class PredictionModelBuiltIn(val context: Context) {
      */
     fun predict(input: ConvertedData, classNames: ArrayList<String>): String {
 
-        val wifiNamesList = mutableListOf<String>()
-        wifiList.forEach { wifiName ->
-            wifiNamesList.add(wifiName.toString())
-        }
-
-        val stateVector = ArrayList<String>(UserActivity.entries.map { it.toString() })
-        val connectionVector = ArrayList<String>(NetworkType.entries.map { it.toString() })
-        val chargingTypeVector = ArrayList<String>(ChargingMethod.entries.map { it.toString() })
         val booleanVector = ArrayList<String>(listOf("0", "1"))
-        val wifiListVec = ArrayList<String>(wifiNamesList)
 
         // Names of the attributes used in input
         val sinTime = Attribute("sinTime")
         val cosTime = Attribute("cosTime")
         val dayOfWeekSin = Attribute("dayOfWeekSin")
         val dayOfWeekCos = Attribute("dayOfWeekCos")
-        val state = Attribute("state", stateVector)
+        val state = Attribute("state", UserActivity.entries.getStringList())
         val light = Attribute("light")
         val orientation = Attribute("orientation", booleanVector)
         val btConnected = Attribute("btConnected", booleanVector)
         val headphonesPlugged = Attribute("headphonesPlugged", booleanVector)
         val temperature = Attribute("temperature")
-        val wifi = Attribute("wifi", wifiListVec)
-        val connection = Attribute("connection", connectionVector)
+        val wifi = Attribute("wifi", wifiList.getStringList())
+        val connection = Attribute("connection", NetworkType.entries.getStringList())
         val batteryStatus = Attribute("batteryStatus", booleanVector)
-        val chargingType = Attribute("chargingType", chargingTypeVector)
+        val chargingType = Attribute("chargingType", ChargingMethod.entries.getStringList())
         val proximity = Attribute("proximity")
         val heartRate = Attribute("heartRate")
         val location = Attribute("location")
@@ -169,8 +155,7 @@ class PredictionModelBuiltIn(val context: Context) {
         // Create a list of input attributes
         val attributeList = object : ArrayList<Attribute?>(2) {
             init {
-                val attributeClass = Attribute("@@class@@", classNames)
-                add(attributeClass)
+                add(Attribute("@@class@@", classNames))
                 add(sinTime)
                 add(cosTime)
                 add(dayOfWeekSin)
@@ -194,7 +179,7 @@ class PredictionModelBuiltIn(val context: Context) {
             }
         }
 
-        // unpredicted data sets (reference to sample structure for new instances)
+        // Unpredicted datasets (reference to sample structure for new instances)
         val dataUnpredicted = Instances(
             "TestInstances",
             attributeList,
@@ -234,22 +219,26 @@ class PredictionModelBuiltIn(val context: Context) {
         newInstance.setDataset(dataUnpredicted)
 
         var className = ""
-        val resultArray = Array<String?>(4) { null }
 
         // predict new sample
         try {
+            val resultArray = Array<String?>(4) { null }
+
             // Classify instance multiple times to get more results
             for (i in 0..3) {
                 val result = forest.classifyInstance(newInstance)
                 resultArray[i] = classNames[result.toInt()]
             }
+
             className = resultArray.random().toString()
-            // Log.d("random", className)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
         return className
     }
+
+    private fun List<Any>.getStringList() = this.map { it.toString() }
 
     /**
      * Convert csv to arff file representation

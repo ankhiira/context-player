@@ -138,20 +138,11 @@ class PredictionModelBuiltIn(val context: Context) {
             wifiNamesList.add(wifiName.toString())
         }
 
-        val stateVector = ArrayList<String>(5)
-        stateVector.add(UserActivity.getEntriesString())
-
-        val connectionVector = ArrayList<String>(4)
-        connectionVector.add(NetworkType.getEntriesString())
-
-        val chargingTypeVector = ArrayList<String>(4)
-        chargingTypeVector.add(ChargingMethod.getEntriesString())
-
-        val boolVec = ArrayList<String>(2)
-        boolVec.addAll(listOf("0", "1"))
-
-        val wifiListVec = ArrayList<String>(2)
-        wifiListVec.addAll(wifiNamesList)
+        val stateVector = ArrayList<String>(UserActivity.entries.map { it.toString() })
+        val connectionVector = ArrayList<String>(NetworkType.entries.map { it.toString() })
+        val chargingTypeVector = ArrayList<String>(ChargingMethod.entries.map { it.toString() })
+        val booleanVector = ArrayList<String>(listOf("0", "1"))
+        val wifiListVec = ArrayList<String>(wifiNamesList)
 
         // Names of the attributes used in input
         val sinTime = Attribute("sinTime")
@@ -160,13 +151,13 @@ class PredictionModelBuiltIn(val context: Context) {
         val dayOfWeekCos = Attribute("dayOfWeekCos")
         val state = Attribute("state", stateVector)
         val light = Attribute("light")
-        val orientation = Attribute("orientation", boolVec)
-        val btConnected = Attribute("btConnected", boolVec)
-        val headphonesPlugged = Attribute("headphonesPlugged", boolVec)
+        val orientation = Attribute("orientation", booleanVector)
+        val btConnected = Attribute("btConnected", booleanVector)
+        val headphonesPlugged = Attribute("headphonesPlugged", booleanVector)
         val temperature = Attribute("temperature")
         val wifi = Attribute("wifi", wifiListVec)
         val connection = Attribute("connection", connectionVector)
-        val batteryStatus = Attribute("batteryStatus", boolVec)
+        val batteryStatus = Attribute("batteryStatus", booleanVector)
         val chargingType = Attribute("chargingType", chargingTypeVector)
         val proximity = Attribute("proximity")
         val heartRate = Attribute("heartRate")

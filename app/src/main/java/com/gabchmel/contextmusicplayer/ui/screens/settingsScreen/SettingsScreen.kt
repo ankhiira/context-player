@@ -30,7 +30,7 @@ import androidx.navigation.NavHostController
 import com.gabchmel.common.utils.convertedArffFileName
 import com.gabchmel.common.utils.dataCsvFileName
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.service.PredictionCreator
+import com.gabchmel.contextmusicplayer.songpredictor.PredictionCreator
 import com.gabchmel.contextmusicplayer.ui.components.NavigationTopAppBar
 import com.gabchmel.contextmusicplayer.utils.convertFileForSend
 import java.io.File

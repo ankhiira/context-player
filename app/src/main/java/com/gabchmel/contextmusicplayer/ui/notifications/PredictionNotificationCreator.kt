@@ -15,13 +15,13 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.data.local.model.Song
-import com.gabchmel.contextmusicplayer.service.PredictionCreator
+import com.gabchmel.contextmusicplayer.songpredictor.PredictionCreator
 import com.gabchmel.contextmusicplayer.ui.MainActivity
 
 object PredictionNotificationCreator {
 
-    val CHANNEL_ID = "1234"
-    val NOTIFICATION_ID = 678
+    const val CHANNEL_ID = "1234"
+    const val NOTIFICATION_ID = 678
 
     fun showNewNotification(context: Context, song: Song) {
         val notificationBuilder = createNotificationBuilder(context, song)

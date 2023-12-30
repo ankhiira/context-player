@@ -8,7 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.gabchmel.common.utils.dataCsvFileName
-import com.gabchmel.contextmusicplayer.service.PredictionCreator
+import com.gabchmel.contextmusicplayer.songpredictor.PredictionCreator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

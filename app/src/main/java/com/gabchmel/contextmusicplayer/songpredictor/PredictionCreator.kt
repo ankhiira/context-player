@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.service
+package com.gabchmel.contextmusicplayer.songpredictor
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -15,15 +15,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionToken
-import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.data.local.model.Song
+import com.gabchmel.contextmusicplayer.service.MusicService
+import com.gabchmel.contextmusicplayer.ui.notifications.PredictionNotificationCreator.NOTIFICATION_ID
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.guava.asDeferred
 import kotlinx.coroutines.launch
 
@@ -33,8 +31,6 @@ class PredictionCreator(
     val context: Context
 ) : LifecycleObserver {
 
-    private var input = ConvertedData()
-
     private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
         val service = context.bindService(SensorDataProcessingService::class.java)
         if (service.createModel()) {
@@ -43,103 +39,88 @@ class PredictionCreator(
         service
     }
 
-    private var prediction = flow {
-        val sensorProcessService = sensorProcessService.await()
-        emitAll(sensorProcessService.prediction)
-    }.filterNotNull()
-
     /**
-     * Listening to action performed by click on prediction notification buttons.
+     * Listening to an action performed by click on prediction notification buttons.
      *
      */
-    class ActionReceiver : BroadcastReceiver() {
+    class ActionReceiver(
+        private val lifecycleOwner: LifecycleOwner,
+        private val mediaBrowser: MediaBrowser,
+        private val predictedSong: Song?
+    ) : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.getStringExtra("action")
-            lifecycleOwnerNew.lifecycleScope.launch {
+            lifecycleOwner.lifecycleScope.launch {
                 when {
-                    action.equals("actionPlay") -> play(predictedSong.uri)
-                    action.equals("actionSkip") -> skip(predictedSong.uri)
+                    action.equals("actionPlay") -> predictedSong?.let { play(it.uri) }
+                    action.equals("actionSkip") -> predictedSong?.let { skip(it.uri) }
                 }
             }
 
             // After clicking on the notification button, dismiss the notification
-            NotificationManagerCompat.from(context).cancel(678)
+            NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
 
-            // Close the notification tray
+            // Close the notification
             context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
         }
 
         private suspend fun play(songUri: Uri) {
-            lifecycleOwnerNew.lifecycleScope.launch {
+            lifecycleOwner.lifecycleScope.launch {
                 val mediaItem = MediaItem.Builder()
                     .setUri(songUri)
                     .build()
 
                 mediaBrowser.setMediaItem(mediaItem)
+                mediaBrowser.play()
             }.join()
         }
 
-        // Send action to MediaPlaybackService to set predicted song for play
         private suspend fun skip(songUri: Uri) {
-            lifecycleOwnerNew.lifecycleScope.launch {
-//                mediaBrowser.transportControls.sendCustomAction(
-//                    "skip",
-//                    bundleOf("songUri" to songUri)
-//                )
+            lifecycleOwner.lifecycleScope.launch {
+                val mediaItem = MediaItem.Builder()
+                    .setUri(songUri)
+                    .build()
+
+                mediaBrowser.setMediaItem(mediaItem)
+                //TODO skip
             }.join()
         }
     }
 
     init {
-        val songPredictor = SongPredictor(
-            context,
-            lifecycleOwner
-        )
-
         lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwnerNew = lifecycleOwner
+            val mediaBrowser = createMediaBrowser()
+            val songPredictor = SongPredictor(context, lifecycleOwner)
+            val predictedSong = if (BuildConfig.FLAVOR == "full") {
+                if (sensorProcessService.await().hasContextChanged()) {
+                    songPredictor.identifyPredictedSong()
+                } else {
+                    null
+                }
+            } else {
+                songPredictor.identifyPredictedSong()
+            }
 
             // Register receiver of the notification button action
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 context.registerReceiver(
-                    ActionReceiver(), IntentFilter("action"),
+                    ActionReceiver(lifecycleOwner, mediaBrowser, predictedSong),
+                    IntentFilter("action"),
                     Context.RECEIVER_NOT_EXPORTED,
                 )
             } else {
                 context.registerReceiver(
-                    ActionReceiver(), IntentFilter("action")
+                    ActionReceiver(lifecycleOwner, mediaBrowser, predictedSong),
+                    IntentFilter("action")
                 )
-            }
-
-//                val sensorProcessService = sensorProcessService.await()
-
-            when {
-                BuildConfig.FLAVOR != "debugVersion" -> {
-                    if (sensorProcessService.await().hasContextChanged()) {
-                        createMediaBrowser()
-                        songPredictor.identifyPredictedSong()
-                    }
-                }
-
-                else -> {
-                    createMediaBrowser()
-                    songPredictor.identifyPredictedSong()
-                }
             }
         }
     }
 
-    private suspend fun createMediaBrowser() {
+    private suspend fun createMediaBrowser(): MediaBrowser {
         val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
 
-        mediaBrowser = MediaBrowser.Builder(context, sessionToken)
+        return MediaBrowser.Builder(context, sessionToken)
             .buildAsync().asDeferred().await()
-    }
-
-    companion object {
-        lateinit var lifecycleOwnerNew: LifecycleOwner
-        lateinit var predictedSong: Song
-
-        private lateinit var mediaBrowser: MediaBrowser
     }
 }

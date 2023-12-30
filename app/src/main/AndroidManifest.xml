@@ -87,7 +87,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".service.PredictionCreator$ActionReceiver" />
+        <receiver android:name=".songpredictor.PredictionCreator$ActionReceiver" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

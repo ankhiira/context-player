@@ -11,7 +11,7 @@ import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 
 class ActivityTransitionReceiver : BroadcastReceiver() {
@@ -27,18 +27,15 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 
                     context.sendBroadcast(Intent("MyAction"))
 
-                    val sensorProcessService = CoroutineScope(Dispatchers.Default).async {
+                    CoroutineScope(Dispatchers.Default).launch {
                         val service =
                             context.bindService(SensorDataProcessingService::class.java)
 
                         if (service.createModel()) {
-                                val input = service.triggerPrediction()
-//                                CollectedSensorDataFragment.updateUI(input)
+                            service.triggerPrediction()
                         }
 
                         service.sensorValues.value.userActivity = activity
-
-                        service
                     }
                 }
             }

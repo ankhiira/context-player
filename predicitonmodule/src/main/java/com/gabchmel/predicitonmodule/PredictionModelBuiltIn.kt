@@ -40,11 +40,7 @@ class PredictionModelBuiltIn(val context: Context) {
         val dataset = arffLoader.dataSet
 
         // Randomize dataset values
-        //TODO is seed 0 doing something?
         dataset.randomize(Random(0))
-
-        // If the class is of the nominal type, stratify the data
-        // dataSet.stratify(10)
 
         return dataset
     }
@@ -103,9 +99,6 @@ class PredictionModelBuiltIn(val context: Context) {
             // Test the model
             val eval = Evaluation(trainDataset)
             eval.evaluateModel(forest, testDataset)
-
-//            eval.crossValidateModel(forest, originalDataset, 10, Random(1))
-//            println("Estimated Accuracy: ${eval.pctCorrect()}")
 
             // Print the evaluation summary
             println("Decision Tress Evaluation")
@@ -316,5 +309,25 @@ class PredictionModelBuiltIn(val context: Context) {
             oldValue = "@attribute $attribute numeric",
             newValue = "@attribute $attribute {$values}"
         )
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun savePredictionToFile(convertedData: ConvertedData, prediction: String) {
+        // Save predictions with their input to CSV file
+        val predictionFile = File(context.filesDir, "predictions.csv")
+        var predictionString = "$prediction,"
+//        ConvertedData::class.primaryConstructor?.parameters?.let { parameters ->
+//            for (property in parameters) {
+//                val propertyNew = convertedData::class.members
+//                    .first { it.name == property.name } as KProperty1<Any, *>
+//                predictionString += when (property.name) {
+//                    "wifi" -> "${convertedData.wifi},"
+//                    else -> "${propertyNew.get(convertedData)},"
+//                }
+//            }
+//        }
+
+        predictionString = predictionString.dropLast(1).apply { this + "\n" }
+        predictionFile.appendText(predictionString)
     }
 }

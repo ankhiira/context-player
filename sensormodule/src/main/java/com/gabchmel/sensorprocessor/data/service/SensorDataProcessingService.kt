@@ -27,7 +27,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.gabchmel.common.data.ChargingMethod
-import com.gabchmel.common.data.ConvertedData
 import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.common.data.NetworkType
 import com.gabchmel.common.data.SensorValues
@@ -226,17 +225,17 @@ class SensorDataProcessingService : Service() {
         )
     }
 
-    suspend fun triggerPrediction(): ConvertedData {
+    suspend fun triggerPrediction(): String? {
         readAdditionalInformation()
 
         val input = getProcessedSensorValues(sensorValues.value)
 
         // Check for the case that there is different wifi
         if (processedCsvValues.wifiNames.contains(input.wifi)) {
-            _prediction.value = predictionModel.predict(input, processedCsvValues.classNames)
+            return predictionModel.predict(input, processedCsvValues.classNames)
         }
 
-        return input
+        return null
     }
 
     private suspend fun SensorDataProcessingService.readAdditionalInformation() {

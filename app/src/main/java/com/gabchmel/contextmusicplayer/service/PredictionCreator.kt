@@ -38,9 +38,7 @@ class PredictionCreator(
     private val sensorProcessService = lifecycleOwner.lifecycleScope.async {
         val service = context.bindService(SensorDataProcessingService::class.java)
         if (service.createModel()) {
-            input = service.triggerPrediction()
-//            val viewModel: CollectedSensorDataViewModel = viewModel()
-//            viewModel.updateUI(input)
+            service.triggerPrediction()
         }
         service
     }

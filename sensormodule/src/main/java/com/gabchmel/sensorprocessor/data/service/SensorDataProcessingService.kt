@@ -459,7 +459,7 @@ class SensorDataProcessingService : Service() {
                 }
 
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                    return NetworkType.TRANSPORT_WIFI
+                    return NetworkType.WIFI
                 }
 
                 else -> return NetworkType.NONE

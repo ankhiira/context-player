@@ -2,7 +2,7 @@ package com.gabchmel.common.data
 
 enum class NetworkType {
     NONE,
-    TRANSPORT_WIFI,
+    WIFI,
     CELLULAR
     ;
     companion object {

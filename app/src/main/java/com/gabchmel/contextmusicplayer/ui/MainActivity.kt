@@ -23,7 +23,6 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.gabchmel.common.data.dataStore.DataStore
 import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.data.dataStore.GlobalPreferences
 import com.gabchmel.common.utils.bindService
@@ -45,9 +44,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(
-                darkScrim = Color.TRANSPARENT,
-                lightScrim = Color.TRANSPARENT
+            statusBarStyle = SystemBarStyle.dark(
+                scrim = Color.TRANSPARENT,
+//                lightScrim = Color.TRANSPARENT
             )
         )
         super.onCreate(savedInstanceState)

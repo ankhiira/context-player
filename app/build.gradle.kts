@@ -94,10 +94,10 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
-    implementation("androidx.core:core-splashscreen:1.1.0-alpha02")
+    implementation("androidx.core:core-splashscreen:1.1.0-rc01")
 
     // Compose
-    val composeVersion = "1.5.4"
+    val composeVersion = "1.6.5"
     implementation("androidx.compose.ui:ui:$composeVersion")
     // Tooling support (Previews, etc.)
     implementation("androidx.compose.ui:ui-tooling:$composeVersion")

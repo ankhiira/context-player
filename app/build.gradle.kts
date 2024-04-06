@@ -7,13 +7,13 @@ plugins {
 val kotlinVersion: String by rootProject.extra
 
 android {
-    compileSdk = 34
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.gabchmel.contextmusicplayer"
 
-        minSdk = 21
-        targetSdk = 34
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
 
         versionCode = 15
         versionName = "1.3.0"

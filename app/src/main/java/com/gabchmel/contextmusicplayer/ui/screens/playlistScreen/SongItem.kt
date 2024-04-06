@@ -37,7 +37,10 @@ fun SongItem(
                     onItemSelected()
                 }
             )
-            .padding(MaterialTheme.spacing.small),
+            .padding(
+                horizontal = MaterialTheme.spacing.medium,
+                vertical = 6.dp
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(

@@ -1,5 +1,6 @@
 package com.gabchmel.contextmusicplayer.ui.screens.settingsScreen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,48 +10,57 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingsButtonItem(
-    titleText: String,
-    textRes: Int,
-    buttonRes: Int,
+    title: String,
+    description: String,
+    buttonText: String,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column {
+        Column(
+            modifier = Modifier.weight(1.0f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
             Text(
-                text = titleText,
+                text = title,
                 color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.bodyLarge
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(id = textRes),
-                    modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                OutlinedButton(
-                    onClick = onClick,
-                    modifier = Modifier.padding(start = 16.dp),
-                    shape = RoundedCornerShape(50)
-                ) {
-                    Text(
-                        text = stringResource(id = buttonRes),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
+            Text(
+                text = description,
+                color = MaterialTheme.colorScheme.onSecondary,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
+        OutlinedButton(
+            onClick = onClick,
+            modifier = Modifier.padding(start = 16.dp),
+            shape = RoundedCornerShape(50)
+        ) {
+            Text(
+                text = buttonText,
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun SettingButtonItemPreview() {
+    SettingsButtonItem(
+        title = "test",
+        description = "test",
+        buttonText = "test"
+    ) {
+
     }
 }

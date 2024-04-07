@@ -19,6 +19,7 @@ kotlin = "1.9.21"
 kotlinxSerializationJson = "1.6.2"
 google-services = "4.4.1"
 precompose = "1.5.10"
+workTesting = "2.9.0"
 
 [libraries]
 firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebaseFirestore" }
@@ -41,6 +42,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 precompose = { module = "moe.tlaster:precompose", version.ref = "precompose" }
 precompose-viewmodel = { module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose" }
 precompose-koin = { module = "moe.tlaster:precompose-koin", version.ref = "precompose" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "workTesting" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

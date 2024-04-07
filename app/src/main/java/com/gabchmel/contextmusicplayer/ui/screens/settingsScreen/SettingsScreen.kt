@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
@@ -56,9 +55,7 @@ fun SettingsScreen(
         content = { padding ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
+                modifier = Modifier.padding(padding)
             ) {
                 SettingsItem(
                     iconVector = Icons.Filled.Sensors,
@@ -81,17 +78,15 @@ fun SettingsScreen(
                         uriHandler.openUri("https://github.com/ankhiira/context-player/blob/dev/privacyPolicy/Privacy%20Policy.txt")
                     }
                 )
-
                 Divider()
-
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     SettingsButtonItem(
-                        titleText = stringResource(R.string.settings_item_title_recreate_model),
-                        textRes = R.string.settings_button_item_recreate_model,
-                        buttonRes = R.string.settings_item_button_recreate_model,
+                        title = stringResource(R.string.settings_item_title_recreate_model),
+                        description = stringResource(R.string.settings_button_item_recreate_model),
+                        buttonText = stringResource(R.string.settings_item_button_recreate_model),
                         onClick = {
                             //TODO create via Media3
                             PredictionCreator(
@@ -104,9 +99,9 @@ fun SettingsScreen(
                     val openDialog = remember { mutableStateOf(false) }
 
                     SettingsButtonItem(
-                        titleText = stringResource(R.string.settings_item_title_delete_all_saved_data),
-                        textRes = R.string.settings_button_item_delete_data,
-                        buttonRes = R.string.settings_item_button_delete_data,
+                        title = stringResource(R.string.settings_item_title_delete_all_saved_data),
+                        description = stringResource(R.string.settings_button_item_delete_data),
+                        buttonText = stringResource(R.string.settings_item_button_delete_data),
                         onClick = {
                             openDialog.value = true
                         }
@@ -150,9 +145,9 @@ fun SettingsScreen(
                         )
                     }
                     SettingsButtonItem(
-                        titleText = stringResource(R.string.settings_item_title_send_collected_data),
-                        textRes = R.string.settings_button_item_send_data,
-                        buttonRes = R.string.settings_item_button_send_data,
+                        title = stringResource(R.string.settings_item_title_send_collected_data),
+                        description = stringResource(R.string.settings_button_item_send_data),
+                        buttonText = stringResource(R.string.settings_item_button_send_data),
                         onClick = {
                             sendEmail(context)
                         }

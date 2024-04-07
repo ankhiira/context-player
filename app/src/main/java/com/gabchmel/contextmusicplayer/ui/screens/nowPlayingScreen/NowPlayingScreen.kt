@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absolutePadding
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.SkipNext
+import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -176,9 +177,9 @@ fun NowPlayingScreen(
                             },
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_skip_prev),
+                                imageVector = Icons.Rounded.SkipPrevious,
                                 contentDescription = "Skip to previous",
-                                modifier = Modifier.fillMaxHeight(0.4f),
+                                modifier = Modifier.size(45.dp),
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         }
@@ -200,16 +201,15 @@ fun NowPlayingScreen(
                                 contentDescription = "Play button icon"
                             )
                         }
-
                         IconButton(
                             onClick = {
                                 viewModel.next()
                             }
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_skip_next),
+                                imageVector = Icons.Rounded.SkipNext,
                                 contentDescription = "Skip to next",
-                                modifier = Modifier.fillMaxHeight(0.4f),
+                                modifier = Modifier.size(45.dp),
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         }

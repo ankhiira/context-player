@@ -25,7 +25,7 @@ fun SettingsButtonItem(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.weight(1.0f),
+            modifier = Modifier.weight(0.6f),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
@@ -41,7 +41,8 @@ fun SettingsButtonItem(
         }
         OutlinedButton(
             onClick = onClick,
-            modifier = Modifier.padding(start = 16.dp),
+            modifier = Modifier.padding(start = 16.dp)
+                .weight(0.5f),
             shape = RoundedCornerShape(50)
         ) {
             Text(

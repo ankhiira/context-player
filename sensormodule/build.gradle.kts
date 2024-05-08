@@ -1,5 +1,3 @@
-import com.android.build.gradle.ProguardFiles.getDefaultProguardFile
-
 plugins {
     id("com.android.library")
     alias(libs.plugins.kotlin)
@@ -36,32 +34,32 @@ dependencies {
     implementation(project(":predicitonmodule"))
     implementation(project(":common"))
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     // Kotlin coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 
     // Activity detection
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation(libs.play.services.location)
 
 //    implementation "nz.ac.waikato.cms.weka:weka-stable:3.6.13"
 
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")
-    implementation("com.opencsv:opencsv:4.4")
+    implementation(libs.kotlin.csv.jvm)
+    implementation(libs.opencsv)
     implementation(libs.kotlin.stdlib.jdk7)
 
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation(libs.jetbrains.kotlin.reflect)
 
-    implementation("com.github.chrfrantz:DBSCAN:v0.1")
+    implementation(libs.dbscan)
 
     // Preferences DataStore
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation(libs.androidx.datastore.preferences)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime)
 
     implementation(files("libs/cluster-gvm-1.0.jar"))
 }

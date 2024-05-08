@@ -37,7 +37,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.13"
     }
 
     buildTypes {
@@ -93,6 +93,7 @@ dependencies {
 
     implementation(libs.androidx.core.splashscreen)
 
+    implementation(platform(libs.androidx.compose.bom))
     // Compose
     implementation(libs.compose.ui)
     // Tooling support (Previews, etc.)
@@ -100,18 +101,15 @@ dependencies {
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation(libs.compose.foundation)
 
-    implementation(libs.androidx.material3)
+    implementation(libs.compose.material3)
     // Material Design
     implementation(libs.compose.material)
     // Material design icons
-    implementation(libs.androidx.material.icons.core)
-    implementation(libs.androidx.material.icons.extended)
-    // Integration with observables
-    implementation(libs.androidx.runtime.livedata)
-    implementation(libs.androidx.runtime.rxjava2)
+    implementation(libs.compose.material.icons.core)
+    implementation(libs.compose.material.icons.extended)
 
     // Integration with activities
-    implementation(libs.androidx.activity.compose.v181)
+    implementation(libs.androidx.activity.compose)
     // Integration with ViewModels
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -141,7 +139,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     // UI Tests
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.compose.ui.test.junit4)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.junit)

@@ -33,33 +33,33 @@ android {
 }
 
 dependencies {
-    implementation("org.tensorflow:tensorflow-lite-support:0.1.0")
-    implementation("org.tensorflow:tensorflow-lite-metadata:0.1.0")
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
     implementation(project(":common"))
 
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     // onnx runtime
-    implementation("com.microsoft.onnxruntime:onnxruntime-mobile:1.8.0")
+    implementation(libs.onnxruntime.mobile)
 //    implementation "com.github.microsoft:onnxruntime:v1.8.0"
 
-    implementation("org.jpmml:pmml-evaluator:1.5.15")
+    implementation(libs.pmml.evaluator)
 //    implementation "com.github.jpmml.jpmml-android:jpmml-android:master-SNAPSHOT"
 //    implementation "org.jpmml:jpmml-android:1.0-SNAPSHOT"
 
 //    implementation "org.jpmml:pmml-model:1.5.15"
 
-    implementation("com.google.code.gson:gson:2.9.0")
+    implementation(libs.gson)
 
-    implementation("org.pmml4s:pmml4s_2.11:0.9.11")
+    implementation(libs.pmml4s)
 
-    implementation("com.github.haifengl:smile-kotlin:2.6.0")
+    implementation(libs.smile.kotlin)
 
     // Kotlin coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+    implementation(libs.kotlinx.coroutines.core)
 
     implementation(files("libs/wekaSTRIPPED.jar"))
     implementation(libs.kotlin.stdlib.jdk7)

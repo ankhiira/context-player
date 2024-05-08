@@ -1,9 +1,7 @@
 plugins {
     id("com.android.library")
-    id("kotlin-android")
+    alias(libs.plugins.kotlin)
 }
-
-val kotlinVersion: String by rootProject.extra
 
 android {
     compileSdk = 34
@@ -64,7 +62,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
 
     implementation(files("libs/wekaSTRIPPED.jar"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
+    implementation(libs.kotlin.stdlib.jdk7)
 }
 repositories {
     mavenCentral()

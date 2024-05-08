@@ -1,10 +1,10 @@
+import com.android.build.gradle.ProguardFiles.getDefaultProguardFile
+
 plugins {
     id("com.android.library")
-    id("kotlin-android")
+    alias(libs.plugins.kotlin)
     kotlin("plugin.serialization") version "1.9.21"
 }
-
-val kotlinVersion: String by rootProject.extra
 
 android {
     compileSdk = 34
@@ -51,7 +51,7 @@ dependencies {
 
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.2")
     implementation("com.opencsv:opencsv:4.4")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
+    implementation(libs.kotlin.stdlib.jdk7)
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 

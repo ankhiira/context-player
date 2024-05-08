@@ -1,10 +1,8 @@
 plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("androidx.navigation.safeargs.kotlin")
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.android.navsafe.args)
 }
-
-val kotlinVersion: String by rootProject.extra
 
 android {
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -85,77 +83,72 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":predicitonmodule"))
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation(libs.androidx.work.testing)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
 
     // Navigation
-    val navVersion = "2.7.5"
-    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
-    implementation("androidx.navigation:navigation-compose:$navVersion")
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.compose)
 
-    implementation("androidx.core:core-splashscreen:1.1.0-rc01")
+    implementation(libs.androidx.core.splashscreen)
 
     // Compose
-    val composeVersion = "1.6.5"
-    implementation("androidx.compose.ui:ui:$composeVersion")
+    implementation(libs.compose.ui)
     // Tooling support (Previews, etc.)
-    implementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    implementation(libs.compose.ui.tooling)
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation("androidx.compose.foundation:foundation:$composeVersion")
+    implementation(libs.compose.foundation)
 
-    implementation("androidx.compose.material3:material3:1.1.2")
+    implementation(libs.androidx.material3)
     // Material Design
-    implementation("androidx.compose.material:material:$composeVersion")
+    implementation(libs.compose.material)
     // Material design icons
-    implementation("androidx.compose.material:material-icons-core:$composeVersion")
-    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
     // Integration with observables
-    implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
-    implementation("androidx.compose.runtime:runtime-rxjava2:$composeVersion")
+    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.runtime.rxjava2)
 
     // Integration with activities
-    implementation("androidx.activity:activity-compose:1.8.1")
+    implementation(libs.androidx.activity.compose.v181)
     // Integration with ViewModels
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
-    val lifecycleVersion = "2.6.2"
-    implementation("androidx.lifecycle:lifecycle-process:$lifecycleVersion")
+    implementation(libs.androidx.lifecycle.process)
 
     // Accompanist
-    implementation("com.google.accompanist:accompanist-glide:0.11.1")
+    implementation(libs.accompanist.glide)
 
-    val media3Version = "1.2.0"
-    implementation("androidx.media3:media3-session:$media3Version")
-    implementation("androidx.media3:media3-exoplayer:$media3Version")
-    implementation("androidx.media3:media3-common:$media3Version")
+    implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.common)
 
     // WorkManager - Kotlin + coroutines
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation(libs.androidx.work.runtime.ktx)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.7.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+    implementation(libs.kotlinx.coroutines.guava)
+    implementation(libs.kotlinx.datetime)
 
     // For occurring error of duplicate library?
-    implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
+    implementation(libs.listenablefuture)
 
     // For iterating through class properties
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation(libs.kotlin.reflect)
 
     // Preferences DataStore
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation(libs.androidx.datastore.preferences)
 
     // UI Tests
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
+    androidTestImplementation(libs.androidx.ui.test.junit4)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("androidx.test:rules:1.5.0")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.rules)
 
-    testImplementation("androidx.test:core-ktx:1.5.0")
-    testImplementation("androidx.test.ext:junit-ktx:1.1.5")
+    testImplementation(libs.core.ktx)
+    testImplementation(libs.androidx.junit.ktx)
 }

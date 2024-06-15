@@ -37,6 +37,7 @@ tensorflowLite = "0.4.4"
 runner = "1.5.2"
 workTesting = "2.9.0"
 junit = "4.13.2"
+workTestingVersion = "2.9.0"
 
 [libraries]
 accompanist-glide = { module = "com.google.accompanist:accompanist-glide", version.ref = "accompanist" }
@@ -91,6 +92,7 @@ androidx-rules = { module = "androidx.test:rules", version.ref = "coreKtx" }
 core-ktx = { module = "androidx.test:core-ktx", version.ref = "coreKtx" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
 androidx-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "junitKtx" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "workTestingVersion" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

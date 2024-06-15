@@ -142,6 +142,7 @@ dependencies {
 
     // Preferences DataStore
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.testing)
 
     // UI Tests
     androidTestImplementation(libs.compose.ui.test.junit4)

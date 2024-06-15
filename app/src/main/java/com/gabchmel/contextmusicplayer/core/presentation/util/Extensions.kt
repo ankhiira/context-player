@@ -6,18 +6,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.vectorResource
 import androidx.media3.common.MediaMetadata
+import coil.compose.rememberAsyncImagePainter
 import com.gabchmel.contextmusicplayer.R
-import com.google.accompanist.glide.rememberGlidePainter
 
 @Composable
 fun MediaMetadata?.getArtworkPainter(): Painter {
     return when {
         this?.artworkUri != null -> {
-            rememberGlidePainter(this.artworkUri)
+            rememberAsyncImagePainter(this.artworkUri)
         }
 
         this?.artworkData != null -> {
-            rememberGlidePainter(this.artworkData)
+            rememberAsyncImagePainter(this.artworkData)
         }
 
         else -> {

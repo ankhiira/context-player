@@ -121,8 +121,7 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.process)
 
-    // Accompanist
-    implementation(libs.accompanist.glide)
+    implementation(libs.coil.compose)
 
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.media3.exoplayer)

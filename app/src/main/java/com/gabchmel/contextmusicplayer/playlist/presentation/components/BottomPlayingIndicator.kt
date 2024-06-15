@@ -25,8 +25,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaMetadata
+import coil.compose.rememberAsyncImagePainter
 import com.gabchmel.contextmusicplayer.R
-import com.google.accompanist.glide.rememberGlidePainter
 
 @Composable
 fun BottomPlayingIndicator(
@@ -50,9 +50,9 @@ fun BottomPlayingIndicator(
             ) {
                 Image(
                     painter = songMetadata?.artworkData?.let {
-                        rememberGlidePainter(it)
+                        rememberAsyncImagePainter(it)
                     }
-                        ?: rememberVectorPainter(
+                        ?: rememberAsyncImagePainter(
                             ImageVector.vectorResource(
                                 R.drawable.ic_album_cover_vector3_colored
                             )

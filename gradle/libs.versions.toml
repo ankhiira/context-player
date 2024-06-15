@@ -1,15 +1,15 @@
 [versions]
 agp = "8.4.1"
+coilCompose = "2.6.0"
 kotlin = "2.0.0"
 kotlinxCoroutines = "1.8.1"
 kotlinxDatetime = "0.6.0"
 kotlinxSerializationJson = "1.7.0"
-composeBom = "2024.05.00"
+composeBom = "2024.06.00"
 gson = "2.10.1"
 dbscan = "v0.1"
 kotlinCsvJvm = "1.9.3"
 navSafeArgsPlugin = "2.7.7"
-accompanist = "0.15.0"
 android-compileSdk = "34"
 android-minSdk = "21"
 android-targetSdk = "34"
@@ -40,7 +40,6 @@ junit = "4.13.2"
 workTestingVersion = "2.9.0"
 
 [libraries]
-accompanist-glide = { module = "com.google.accompanist:accompanist-glide", version.ref = "accompanist" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleVersion" }
@@ -48,6 +47,7 @@ androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-ru
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleVersion" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleVersion" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material = { module = "androidx.compose.material:material" }
 compose-material-icons-core = { module = "androidx.compose.material:material-icons-core" }

@@ -15,15 +15,3 @@ allprojects{
         maven("https://jitpack.io")
     }
 }
-
-//buildscript {
-//    dependencies {
-////        classpath("com.android.tools.build:gradle:8.3.1")
-//        classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.7.5")
-//        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-//    }
-//}
-
-//tasks.register<Delete>("clean").configure {
-//    delete(rootProject.layout.buildDirectory)
-//}

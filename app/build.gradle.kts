@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlin)
@@ -33,8 +35,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+             jvmTarget = JvmTarget.JVM_17
+        }
     }
 
     buildTypes {
@@ -68,6 +72,10 @@ android {
     android {
         testOptions.unitTests.isIncludeAndroidResources = true
     }
+
+        packaging {
+            exclude("META-INF/native-image/**")
+        }
 
     namespace = "com.gabchmel.contextmusicplayer"
 }

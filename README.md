@@ -11,9 +11,9 @@ A smart music player that predicts a song depending on the user's context. Whene
 ## Screenshots
 
 <p float="left">
-<img src="https://github.com/ankhiira/context-player/blob/master/screenshots/NowPlayingScreen.png" height="400">
-<img src="https://github.com/ankhiira/context-player/blob/master/screenshots/SongListScreen.png" height="400">
-  <img src="https://github.com/ankhiira/context-player/blob/master/screenshots/Notifications.png" height="400">
+<img src="https://github.com/ankhiira/context-player/blob/main/screenshots/NowPlayingScreen.png" height="400">
+<img src="https://github.com/ankhiira/context-player/blob/main/screenshots/SongListScreen.png" height="400">
+  <img src="https://github.com/ankhiira/context-player/blob/main/screenshots/Notifications.png" height="400">
 </p>
 
 ## Versions

@@ -11,9 +11,9 @@ A smart music player that predicts a song depending on the user's context. Whene
 ## Screenshots
 
 <p float="left">
-<img src="https://github.com/4Gabby4/context-player/blob/master/screenshots/NowPlayingScreen.png" height="400">
-<img src="https://github.com/4Gabby4/context-player/blob/master/screenshots/SongListScreen.png" height="400">
-  <img src="https://github.com/4Gabby4/context-player/blob/master/screenshots/Notifications.png" height="400">
+<img src="https://github.com/ankhiira/context-player/blob/master/screenshots/NowPlayingScreen.png" height="400">
+<img src="https://github.com/ankhiira/context-player/blob/master/screenshots/SongListScreen.png" height="400">
+  <img src="https://github.com/ankhiira/context-player/blob/master/screenshots/Notifications.png" height="400">
 </p>
 
 ## Versions
@@ -21,7 +21,7 @@ A smart music player that predicts a song depending on the user's context. Whene
 - in the `dev` branch is debug version of the application
   - in this version predictions are triggered each minute, not depending on the context change
   - data are collected every 10 seconds when the song is playing
-- in the `master` branch in release version
+- in the `main` branch in release version
   - this version triggers prediction every 10 minutes and only if the context changed
   - data are collected every 40 seconds when the song is playing and it starts 10 seconds after the song started
 

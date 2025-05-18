@@ -37,7 +37,7 @@ android {
 
     kotlin {
         compilerOptions {
-             jvmTarget = JvmTarget.JVM_17
+            jvmTarget = JvmTarget.JVM_17
         }
     }
 
@@ -72,9 +72,13 @@ android {
         testOptions.unitTests.isIncludeAndroidResources = true
     }
 
-        packaging {
-            exclude("META-INF/native-image/**")
+    packaging {
+        resources {
+            excludes += "META-INF/native-image/**"
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/NOTICE.md"
         }
+    }
 
     namespace = "com.gabchmel.contextmusicplayer"
 }

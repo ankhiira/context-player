@@ -55,7 +55,6 @@ import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.io.File
@@ -64,6 +63,8 @@ import kotlin.math.acos
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import kotlin.reflect.full.memberProperties
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 
 class SensorDataProcessingService : Service() {
@@ -240,6 +241,7 @@ class SensorDataProcessingService : Service() {
         return null
     }
 
+    @OptIn(ExperimentalTime::class)
     private suspend fun SensorDataProcessingService.readAdditionalInformation() {
         _sensorValues.value.also {
             it.currentTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)

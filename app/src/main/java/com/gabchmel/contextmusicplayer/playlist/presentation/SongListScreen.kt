@@ -48,12 +48,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.core.data.song.Song
 import com.gabchmel.contextmusicplayer.core.domain.isPermissionNotGranted
 import com.gabchmel.contextmusicplayer.playlist.presentation.components.BottomPlayingIndicator
 import com.gabchmel.contextmusicplayer.playlist.presentation.components.SongItem
+import com.gabchmel.contextmusicplayer.ui.NowPlaying
+import com.gabchmel.contextmusicplayer.ui.Settings
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
 
 @OptIn(
@@ -62,7 +63,8 @@ import com.gabchmel.contextmusicplayer.ui.theme.spacing
 )
 @Composable
 fun SongListScreen(
-    navController: NavHostController
+    navigateToNowPlaying: (entry: NowPlaying) -> Unit = {},
+    navigateToSettings: (entry: Settings) -> Unit = {}
 ) {
     val viewModel: SongListViewModel = viewModel()
     val songs by viewModel.songs.collectAsState()
@@ -103,8 +105,8 @@ fun SongListScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            navController.navigate("settings")
-                        },
+                            navigateToSettings(Settings)
+                        }
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
@@ -181,7 +183,8 @@ fun SongListScreen(
                                     SongItem(
                                         song,
                                         onItemSelected = {
-                                            navController.navigate("now_playing/${songUri}")
+                                            val entry = NowPlaying(songUri = songUri)
+                                            navigateToNowPlaying(entry)
                                         }
                                     )
                                 }

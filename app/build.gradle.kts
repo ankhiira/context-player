@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.android.navsafe.args)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
 android {
@@ -154,6 +155,11 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.rules)
+
+    // Navigation 3 library
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     testImplementation(libs.core.ktx)
     testImplementation(libs.androidx.junit.ktx)

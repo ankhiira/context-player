@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.core.presentation.components.NavigationTopAppBar
 import com.gabchmel.sensorprocessor.utils.OnDeviceSensors
@@ -22,7 +21,7 @@ import com.gabchmel.sensorprocessor.utils.OnDeviceSensors
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnDeviceSensorsScreen(
-    navController: NavHostController
+    popBackStack: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val sensorReader = OnDeviceSensors(context)
@@ -32,7 +31,7 @@ fun OnDeviceSensorsScreen(
             NavigationTopAppBar(
                 title = stringResource(id = R.string.settings_item_on_device_sensors),
                 onNavigateBack = {
-                    navController.popBackStack()
+                    popBackStack()
                 }
             )
         },

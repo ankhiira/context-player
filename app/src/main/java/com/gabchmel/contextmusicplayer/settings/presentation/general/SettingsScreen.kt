@@ -25,19 +25,22 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.gabchmel.common.utils.convertedArffFileName
 import com.gabchmel.common.utils.dataCsvFileName
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.songPrediction.domain.PredictionCreator
-import com.gabchmel.contextmusicplayer.core.presentation.components.NavigationTopAppBar
 import com.gabchmel.contextmusicplayer.core.domain.convertFileForSend
+import com.gabchmel.contextmusicplayer.core.presentation.components.NavigationTopAppBar
+import com.gabchmel.contextmusicplayer.songPrediction.domain.PredictionCreator
+import com.gabchmel.contextmusicplayer.ui.CollectedSensorData
+import com.gabchmel.contextmusicplayer.ui.OnDeviceSensors
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    navController: NavHostController
+    navigateToOnDeviceSensors: (entry: OnDeviceSensors) -> Unit = {},
+    navigateToCollectedSensorData: (entry: CollectedSensorData) -> Unit = {},
+    popBackStack: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -48,7 +51,7 @@ fun SettingsScreen(
             NavigationTopAppBar(
                 title = stringResource(id = R.string.settings_title),
                 onNavigateBack = {
-                    navController.popBackStack()
+                    popBackStack()
                 }
             )
         },
@@ -61,14 +64,14 @@ fun SettingsScreen(
                     iconVector = Icons.Filled.Sensors,
                     textRes = R.string.settings_item_sensors,
                     onClick = {
-                        navController.navigate("on_device_sensors")
+                        navigateToOnDeviceSensors(OnDeviceSensors)
                     }
                 )
                 SettingsItem(
                     iconVector = Icons.Filled.Analytics,
                     textRes = R.string.settings_item_data,
                     onClick = {
-                        navController.navigate("collected_sensor_data")
+                        navigateToCollectedSensorData(CollectedSensorData)
                     }
                 )
                 SettingsItem(

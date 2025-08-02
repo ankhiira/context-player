@@ -7,25 +7,34 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.gabchmel.common.data.SensorValues
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.core.presentation.components.NavigationTopAppBar
 
 @Composable
 fun CollectedSensorDataScreen(
-    navController: NavHostController,
-    sensorData: SensorValues
+    viewModel: CollectedSensorDataViewModel,
+    popBackStack: () -> Unit = {}
 ) {
+    val sensorData by viewModel.sensorData.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.getSensorData(context)
+    }
+
     Scaffold(
         topBar = {
             NavigationTopAppBar(
                 title = stringResource(id = R.string.settings_item_data),
                 onNavigateBack = {
-                    navController.popBackStack()
+                    popBackStack()
                 }
             )
         },

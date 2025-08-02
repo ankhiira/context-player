@@ -42,17 +42,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.core.presentation.util.getArtworkPainter
+import com.gabchmel.contextmusicplayer.ui.Settings
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NowPlayingScreen(
-    navController: NavHostController
+    viewModel: NowPlayingViewModel = viewModel(),
+    navigateToSettings: (entry: Settings) -> Unit = {},
+    popBackStack: () -> Unit = {}
 ) {
-    val viewModel: NowPlayingViewModel = viewModel()
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
     val playbackPosition by viewModel.songProgress.collectAsStateWithLifecycle()
     val songDuration by viewModel.songDuration.collectAsStateWithLifecycle()
@@ -88,7 +89,7 @@ fun NowPlayingScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        navController.popBackStack()
+                        popBackStack()
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.ArrowBack,
@@ -101,7 +102,7 @@ fun NowPlayingScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            navController.navigate("settings")
+                            navigateToSettings(Settings)
                         }
                     ) {
                         Icon(

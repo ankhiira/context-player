@@ -2,8 +2,8 @@ package com.gabchmel.contextmusicplayer.playback.presentation.nowPlaying
 
 import android.app.Application
 import android.content.ComponentName
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -13,6 +13,7 @@ import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionToken
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.core.domain.service.MusicService
+import com.gabchmel.contextmusicplayer.ui.NowPlaying
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,11 +21,9 @@ import kotlinx.coroutines.guava.asDeferred
 import kotlinx.coroutines.launch
 
 class NowPlayingViewModel(
-    val app: Application,
-    savedStateHandle: SavedStateHandle
-) : AndroidViewModel(app) {
-
-    private val uri: String = checkNotNull(savedStateHandle["uri"])
+    val key: NowPlaying,
+    val app: Application
+) : ViewModel() {
 
     private var mediaBrowserLocal: MediaBrowser? = null
     private val sessionToken = SessionToken(app, ComponentName(app, MusicService::class.java))
@@ -44,7 +43,7 @@ class NowPlayingViewModel(
                     .buildAsync().asDeferred().await()
 
             val mediaItem = MediaItem.Builder()
-                .setUri(uri)
+                .setUri(key.songUri)
                 .build()
 
             mediaBrowserLocal = mediaBrowser
@@ -111,5 +110,14 @@ class NowPlayingViewModel(
 
     fun setMusicProgress(progress: Float) {
         mediaBrowserLocal?.seekTo(progress.toLong())
+    }
+
+    class Factory(
+        private val key: NowPlaying,
+        private val app: Application
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return NowPlayingViewModel(key, app) as T
+        }
     }
 }

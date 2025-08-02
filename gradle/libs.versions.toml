@@ -26,7 +26,6 @@ androidx-test-junit = "1.2.1"
 lifecycleVersion = "2.9.0"
 listenablefuture = "9999.0-empty-to-avoid-conflict-with-guava"
 media3 = "1.7.1"
-navigation = "2.9.0"
 onnxruntimeMobile = "1.18.0"
 opencsv = "5.11"
 playServicesLocation = "21.3.0"
@@ -62,8 +61,6 @@ compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-media3-common = { module = "androidx.media3:media3-common", version.ref = "media3" }
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
 androidx-media3-session = { module = "androidx.media3:media3-session", version.ref = "media3" }
-androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workTesting" }
 dbscan = { module = "com.github.chrfrantz:DBSCAN", version.ref = "dbscan" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }

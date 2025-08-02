@@ -26,9 +26,9 @@ import androidx.work.WorkManager
 import com.gabchmel.common.data.dataStore.DataStore.dataStore
 import com.gabchmel.common.data.dataStore.GlobalPreferences
 import com.gabchmel.common.utils.bindService
-import com.gabchmel.contextmusicplayer.core.domain.isPermissionNotGranted
-import com.gabchmel.contextmusicplayer.ui.ContextPlayerApp
+import com.gabchmel.contextmusicplayer.permissions.domain.isPermissionNotGranted
 import com.gabchmel.contextmusicplayer.songPrediction.domain.worker.PredictionWorker
+import com.gabchmel.contextmusicplayer.ui.ContextPlayerApp
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

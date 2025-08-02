@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.dp
 import com.gabchmel.common.utils.convertedArffFileName
 import com.gabchmel.common.utils.dataCsvFileName
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.core.domain.convertFileForSend
 import com.gabchmel.contextmusicplayer.core.presentation.components.NavigationTopAppBar
+import com.gabchmel.contextmusicplayer.settings.domain.convertFileForSend
 import com.gabchmel.contextmusicplayer.songPrediction.domain.PredictionCreator
 import com.gabchmel.contextmusicplayer.ui.CollectedSensorData
 import com.gabchmel.contextmusicplayer.ui.OnDeviceSensors

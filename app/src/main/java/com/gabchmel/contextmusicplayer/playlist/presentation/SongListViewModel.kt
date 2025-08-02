@@ -19,7 +19,7 @@ import androidx.media3.session.SessionToken
 import com.gabchmel.common.data.LocalBinder
 import com.gabchmel.contextmusicplayer.core.data.song.MetaDataReaderImpl
 import com.gabchmel.contextmusicplayer.core.data.song.Song
-import com.gabchmel.contextmusicplayer.core.domain.service.MusicService
+import com.gabchmel.contextmusicplayer.playback.musicService.MusicService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay

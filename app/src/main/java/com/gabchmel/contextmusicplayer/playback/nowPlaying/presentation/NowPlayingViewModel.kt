@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.playback.presentation.nowPlaying
+package com.gabchmel.contextmusicplayer.playback.nowPlaying.presentation
 
 import android.app.Application
 import android.content.ComponentName
@@ -12,7 +12,7 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionToken
 import com.gabchmel.common.utils.bindService
-import com.gabchmel.contextmusicplayer.core.domain.service.MusicService
+import com.gabchmel.contextmusicplayer.playback.musicService.MusicService
 import com.gabchmel.contextmusicplayer.ui.NowPlaying
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.flow.MutableStateFlow

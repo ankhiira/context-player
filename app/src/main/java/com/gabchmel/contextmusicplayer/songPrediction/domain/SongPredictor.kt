@@ -6,7 +6,7 @@ import androidx.lifecycle.lifecycleScope
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.core.data.song.MetaDataReaderImpl
 import com.gabchmel.contextmusicplayer.core.data.song.Song
-import com.gabchmel.contextmusicplayer.songPrediction.presentation.notification.PredictionNotificationCreator
+import com.gabchmel.contextmusicplayer.songPrediction.presentation.PredictionNotificationCreator
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emitAll

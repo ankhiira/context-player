@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.playback.presentation.nowPlaying
+package com.gabchmel.contextmusicplayer.playback.nowPlaying.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gabchmel.contextmusicplayer.R
-import com.gabchmel.contextmusicplayer.core.presentation.util.getArtworkPainter
+import com.gabchmel.contextmusicplayer.playlist.presentation.getArtworkPainter
 import com.gabchmel.contextmusicplayer.ui.Settings
 import kotlinx.coroutines.delay
 

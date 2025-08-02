@@ -50,9 +50,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.core.data.song.Song
-import com.gabchmel.contextmusicplayer.core.domain.isPermissionNotGranted
+import com.gabchmel.contextmusicplayer.permissions.domain.isPermissionNotGranted
 import com.gabchmel.contextmusicplayer.playlist.presentation.components.BottomPlayingIndicator
-import com.gabchmel.contextmusicplayer.playlist.presentation.components.SongItem
+import com.gabchmel.contextmusicplayer.playlist.presentation.components.SongListItem
 import com.gabchmel.contextmusicplayer.ui.NowPlaying
 import com.gabchmel.contextmusicplayer.ui.Settings
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
@@ -180,7 +180,7 @@ fun SongListScreen(
                             ) {
                                 items(songs, key = { it.uri }) { song ->
                                     val songUri = Uri.encode(song.uri.toString())
-                                    SongItem(
+                                    SongListItem(
                                         song,
                                         onItemSelected = {
                                             val entry = NowPlaying(songUri = songUri)
@@ -220,7 +220,7 @@ fun SongListScreen(
 @Preview
 @Composable
 fun ExampleSongRow() {
-    SongItem(
+    SongListItem(
         song = Song(
             title = "Title",
             artist = "author",

@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.core.presentation.util
+package com.gabchmel.contextmusicplayer.playlist.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter

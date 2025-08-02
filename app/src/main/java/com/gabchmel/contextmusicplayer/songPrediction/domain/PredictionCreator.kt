@@ -18,8 +18,8 @@ import androidx.media3.session.SessionToken
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.BuildConfig
 import com.gabchmel.contextmusicplayer.core.data.song.Song
-import com.gabchmel.contextmusicplayer.core.domain.service.MusicService
-import com.gabchmel.contextmusicplayer.songPrediction.presentation.notification.PredictionNotificationCreator.NOTIFICATION_ID
+import com.gabchmel.contextmusicplayer.playback.musicService.MusicService
+import com.gabchmel.contextmusicplayer.songPrediction.presentation.PredictionNotificationCreator.NOTIFICATION_ID
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.guava.asDeferred

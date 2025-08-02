@@ -1,24 +1,12 @@
-package com.gabchmel.contextmusicplayer.core.domain
+package com.gabchmel.contextmusicplayer.settings.domain
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import com.gabchmel.contextmusicplayer.BuildConfig
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-
-fun isPermissionNotGranted(
-    context: Context,
-    permission: String
-): Boolean {
-    return ActivityCompat.checkSelfPermission(
-        context,
-        permission
-    ) != PackageManager.PERMISSION_GRANTED
-}
 
 // Copy the file to temp file
 fun convertFileForSend(

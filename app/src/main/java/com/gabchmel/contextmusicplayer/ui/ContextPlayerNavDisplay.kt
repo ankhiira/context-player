@@ -8,8 +8,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.gabchmel.contextmusicplayer.playback.presentation.nowPlaying.NowPlayingScreen
-import com.gabchmel.contextmusicplayer.playback.presentation.nowPlaying.NowPlayingViewModel
+import com.gabchmel.contextmusicplayer.playback.nowPlaying.presentation.NowPlayingScreen
+import com.gabchmel.contextmusicplayer.playback.nowPlaying.presentation.NowPlayingViewModel
 import com.gabchmel.contextmusicplayer.playlist.presentation.SongListScreen
 import com.gabchmel.contextmusicplayer.settings.presentation.general.SettingsScreen
 import com.gabchmel.contextmusicplayer.settings.presentation.sensorData.CollectedSensorDataScreen

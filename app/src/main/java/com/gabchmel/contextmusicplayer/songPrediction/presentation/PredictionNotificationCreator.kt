@@ -1,22 +1,21 @@
-package com.gabchmel.contextmusicplayer.songPrediction.presentation.notification
+package com.gabchmel.contextmusicplayer.songPrediction.presentation
 
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.ContextCompat
+import com.gabchmel.contextmusicplayer.MainActivity
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.core.data.song.Song
 import com.gabchmel.contextmusicplayer.songPrediction.domain.PredictionCreator
-import com.gabchmel.contextmusicplayer.MainActivity
 
 object PredictionNotificationCreator {
 
@@ -51,7 +50,7 @@ object PredictionNotificationCreator {
                 }
 
             val notificationManager: NotificationManager =
-                context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             notificationManager.createNotificationChannel(notificationChannel)
         }
@@ -126,7 +125,10 @@ object PredictionNotificationCreator {
             }
             // Register the channel with the system.
             val notificationManager: NotificationManager =
-                getSystemService(context, NotificationManager::class.java) as NotificationManager
+                ContextCompat.getSystemService(
+                    context,
+                    NotificationManager::class.java
+                ) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }

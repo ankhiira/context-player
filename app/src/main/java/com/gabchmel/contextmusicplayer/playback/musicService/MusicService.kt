@@ -1,4 +1,4 @@
-package com.gabchmel.contextmusicplayer.core.domain.service
+package com.gabchmel.contextmusicplayer.playback.musicService
 
 import android.content.Intent
 import androidx.media3.common.AudioAttributes

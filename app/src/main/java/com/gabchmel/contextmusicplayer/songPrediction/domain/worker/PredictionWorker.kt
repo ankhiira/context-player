@@ -12,6 +12,7 @@ import com.gabchmel.contextmusicplayer.songPrediction.domain.PredictionCreator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 class PredictionWorker(
     private val appContext: Context,
@@ -28,7 +29,7 @@ class PredictionWorker(
             }
 
             val tenMinutesRequest = OneTimeWorkRequestBuilder<PredictionWorker>()
-                .setInitialDelay(1, java.util.concurrent.TimeUnit.MINUTES)
+                .setInitialDelay(1, TimeUnit.MINUTES)
                 .addTag("WIFI_JOB1")
                 .build()
 

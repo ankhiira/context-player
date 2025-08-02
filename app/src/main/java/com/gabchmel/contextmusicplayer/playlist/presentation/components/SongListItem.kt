@@ -21,11 +21,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.core.data.song.Song
+import com.gabchmel.contextmusicplayer.playlist.presentation.getArtworkPainter
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
-import com.gabchmel.contextmusicplayer.core.presentation.util.getArtworkPainter
 
 @Composable
-fun SongItem(
+fun SongListItem(
     song: Song,
     onItemSelected: () -> Unit
 ) {

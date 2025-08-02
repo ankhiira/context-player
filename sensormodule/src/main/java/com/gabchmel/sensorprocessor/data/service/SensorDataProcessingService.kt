@@ -45,9 +45,13 @@ import com.google.android.gms.location.ActivityTransitionRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -56,8 +60,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.io.File
 import java.io.IOException
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.math.acos
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -241,7 +243,7 @@ class SensorDataProcessingService : Service() {
     private suspend fun SensorDataProcessingService.readAdditionalInformation() {
         _sensorValues.value.also {
             it.currentTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)
-            it.wifiSsid = getConnectedWiFiSsid()
+            it.wifiSsid = getConnectedWiFiSsid().last()
             it.networkConnectionType = getCurrentNetworkConnectionType(this)
             it.isDeviceCharging = isDeviceCharging()
             it.chargingType = getChargingMethod()
@@ -402,7 +404,7 @@ class SensorDataProcessingService : Service() {
         registerReceiver(broadcastReceiver, receiverFilter)
     }
 
-    private suspend fun getConnectedWiFiSsid(): UInt? {
+    private fun getConnectedWiFiSsid(): Flow<UInt?> {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val request = NetworkRequest.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -410,33 +412,47 @@ class SensorDataProcessingService : Service() {
             val connectivityManager =
                 applicationContext.getSystemService(ConnectivityManager::class.java)
 
-            return suspendCoroutine { continuation ->
-                connectivityManager.registerNetworkCallback(request, object : NetworkCallback() {
-                    override fun onAvailable(network: Network) {}
-
+            return callbackFlow {
+                val networkCallback = object : NetworkCallback() {
                     override fun onCapabilitiesChanged(
                         network: Network,
                         networkCapabilities: NetworkCapabilities
                     ) {
-                        val wifiInfo = networkCapabilities.transportInfo as WifiInfo
+                        val wifiInfo = networkCapabilities.transportInfo as? WifiInfo
 
-                        if (wifiInfo.ssid == "<unknown ssid>") {
-                            continuation.resume(null)
+                        // Safely attempt to send the value to the flow collector.
+                        // Using trySend is non-blocking and safe to call from a callback.
+                        if (wifiInfo?.ssid == null || wifiInfo.ssid == "<unknown ssid>") {
+                            trySend(null)
                         } else {
-                            continuation.resume(wifiInfo.ssid.hashCode().toUInt())
+                            trySend(wifiInfo.ssid.hashCode().toUInt())
                         }
                     }
-                })
+
+                    // You might also want to handle the case where the network is lost.
+                    override fun onLost(network: Network) {
+                        // When the Wi-Fi network is lost, we can emit null.
+                        trySend(null)
+                    }
+                }
+
+                connectivityManager.registerNetworkCallback(request, networkCallback)
+
+                awaitClose {
+                    connectivityManager.unregisterNetworkCallback(networkCallback)
+                }
             }
         } else {
-            val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
-            @Suppress("DEPRECATION") val wifiInfo = wifiManager.connectionInfo
+            return callbackFlow {
+                val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
+                @Suppress("DEPRECATION") val wifiInfo = wifiManager.connectionInfo
 
-            if (wifiInfo.ssid == "<unknown ssid>") {
-                return null
+                if (wifiInfo.ssid == "<unknown ssid>") {
+                    trySend(null)
+                }
+
+                trySend(wifiInfo.ssid.hashCode().toUInt())
             }
-
-            return wifiInfo.ssid.hashCode().toUInt()
         }
     }
 

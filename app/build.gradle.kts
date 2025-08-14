@@ -26,11 +26,9 @@ android {
 
     buildFeatures {
         buildConfig = true
-        // Enables Jetpack Compose for this module
         compose = true
     }
 
-    // Set both the Java and Kotlin compilers to target Java 17.
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -98,8 +96,8 @@ dependencies {
 
     implementation(libs.androidx.core.splashscreen)
 
-    implementation(platform(libs.androidx.compose.bom))
     // Compose
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.compose.ui)
     // Tooling support (Previews, etc.)
     implementation(libs.compose.ui.tooling)
@@ -139,9 +137,14 @@ dependencies {
     // For iterating through class properties
     implementation(libs.kotlin.reflect)
 
-    // Preferences DataStore
+    // DataStore
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.work.testing)
+
+    // Navigation 3
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     // UI Tests
     androidTestImplementation(libs.compose.ui.test.junit4)
@@ -151,11 +154,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.rules)
-
-    // Navigation 3
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     testImplementation(libs.core.ktx)
     testImplementation(libs.androidx.junit.ktx)

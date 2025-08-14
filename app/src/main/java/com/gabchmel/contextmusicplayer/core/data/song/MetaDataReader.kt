@@ -13,7 +13,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.MetadataRetriever
 import androidx.media3.exoplayer.source.TrackGroupArray
-import kotlinx.coroutines.guava.asDeferred
+import kotlinx.coroutines.guava.await
 import java.util.concurrent.TimeUnit
 
 interface MetaDataReader {
@@ -60,41 +60,40 @@ class MetaDataReaderImpl(
                 val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
 
                 while (cursor.moveToNext()) {
-                    // Get the song metadata
-                    val songID = cursor.getLong(idColumn)
+                    val songId = cursor.getLong(idColumn)
                     val uri = ContentUris.withAppendedId(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        songID
+                        songId
                     )
 
-                    val metadataRetriever = MediaMetadataRetriever()
-                    metadataRetriever.setDataSource(
-                        context,
-                        Uri.parse(uri.toString())
-                    )
+                    MediaMetadataRetriever().apply {
+                        setDataSource(context, uri)
+                    }
 
                     val mediaItem = MediaItem.fromUri(uri)
-                    val trackGroups = MetadataRetriever.retrieveMetadata(
-                        context.applicationContext,
-                        mediaItem
-                    ).asDeferred().await()
+                    MetadataRetriever.Builder(context, mediaItem)
+                        .build()
+                        .use { metadataRetriever ->
+                            val trackGroups = metadataRetriever.retrieveTrackGroups().await()
+                            val metadata = handleMetadata(trackGroups)
 
-                    val metadata = handleMetadata(trackGroups)
-
-                    songs.add(
-                        Song(
-                            uri = uri,
-                            title = metadata?.title?.toString(),
-                            artist = metadata?.artist?.toString(),
-                            metaData = metadata
-                        )
-                    )
+                            val song = metadata?.toSong(uri)
+                            song?.let { songs.add(it) }
+                        }
                 }
             }
         return songs
     }
 
-    @OptIn(UnstableApi::class) private fun handleMetadata(trackGroups: TrackGroupArray): MediaMetadata? {
+    private fun MediaMetadata.toSong(uri: Uri) = Song(
+        uri = uri,
+        title = title.toString(),
+        artist = artist.toString(),
+        metaData = this
+    )
+
+    @OptIn(UnstableApi::class)
+    private fun handleMetadata(trackGroups: TrackGroupArray): MediaMetadata? {
         for (index in 0..trackGroups.length) {
             val metadata = trackGroups[index].getFormat(0).metadata
             return if (metadata != null) {

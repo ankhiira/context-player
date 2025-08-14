@@ -37,17 +37,14 @@ object PredictionNotificationCreator {
         song: Song
     ): NotificationCompat.Builder {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            var description = "Test notification"
-            val descriptionText = "description"
+            val description = "Test notification"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val notificationChannel =
                 NotificationChannel(
                     CHANNEL_ID,
                     description,
                     importance
-                ).apply {
-                    description = descriptionText
-                }
+                )
 
             val notificationManager: NotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

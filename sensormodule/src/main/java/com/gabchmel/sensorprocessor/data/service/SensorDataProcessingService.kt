@@ -460,7 +460,7 @@ class SensorDataProcessingService : Service() {
 
     private fun getCurrentNetworkConnectionType(context: Context): NetworkType {
         val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val capabilities: NetworkCapabilities?
         // Function activeNetwork requires minimal level 23
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -471,16 +471,16 @@ class SensorDataProcessingService : Service() {
         }
 
         capabilities?.let {
-            when {
+            return when {
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                    return NetworkType.CELLULAR
+                    NetworkType.CELLULAR
                 }
 
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                    return NetworkType.WIFI
+                    NetworkType.WIFI
                 }
 
-                else -> return NetworkType.NONE
+                else -> NetworkType.NONE
             }
         }
 

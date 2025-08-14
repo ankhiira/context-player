@@ -84,7 +84,7 @@ fun CollectedSensorDataScreen(
                     sensorData.proximity
                 )
                 CategoryTitle(
-                    text = stringResource(id = R.string.collected_data_title_conected_devices)
+                    text = stringResource(id = R.string.collected_data_title_connected_devices)
                 )
                 SensorRow(
                     "Cable headphones connected",

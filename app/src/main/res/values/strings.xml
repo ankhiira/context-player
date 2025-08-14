@@ -23,7 +23,7 @@
     <string name="collected_data_title_activity">Activity</string>
     <string name="collected_data_title_physical_values">Physical Sensors</string>
     <string name="collected_data_title_device_position">Device Position</string>
-    <string name="collected_data_title_conected_devices">Connected devices</string>
+    <string name="collected_data_title_connected_devices">Connected devices</string>
     <string name="collected_data_title_network">Network</string>
     <string name="collected_data_title_battery">Battery</string>
     <string name="collected_data_title_health">Health</string>

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.first
 
 class CollectedSensorDataViewModel : ViewModel() {
 
-    private val _sensorData = MutableStateFlow<SensorValues>(SensorValues())
+    private val _sensorData = MutableStateFlow(SensorValues())
     val sensorData = _sensorData.asStateFlow()
 
     suspend fun getSensorData(context: Context) {

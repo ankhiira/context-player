@@ -31,16 +31,14 @@ import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.core.presentation.components.NavigationTopAppBar
 import com.gabchmel.contextmusicplayer.settings.domain.convertFileForSend
 import com.gabchmel.contextmusicplayer.songPrediction.domain.PredictionCreator
-import com.gabchmel.contextmusicplayer.ui.CollectedSensorData
-import com.gabchmel.contextmusicplayer.ui.OnDeviceSensors
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    navigateToOnDeviceSensors: (entry: OnDeviceSensors) -> Unit = {},
-    navigateToCollectedSensorData: (entry: CollectedSensorData) -> Unit = {},
-    popBackStack: () -> Unit = {}
+    navigateToOnDeviceSensors: () -> Unit,
+    navigateToCollectedSensorData: () -> Unit,
+    popBackStack: () -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -63,16 +61,12 @@ fun SettingsScreen(
                 SettingsItem(
                     iconVector = Icons.Filled.Sensors,
                     textRes = R.string.settings_item_sensors,
-                    onClick = {
-                        navigateToOnDeviceSensors(OnDeviceSensors)
-                    }
+                    onClick = navigateToOnDeviceSensors
                 )
                 SettingsItem(
                     iconVector = Icons.Filled.Analytics,
                     textRes = R.string.settings_item_data,
-                    onClick = {
-                        navigateToCollectedSensorData(CollectedSensorData)
-                    }
+                    onClick = navigateToCollectedSensorData
                 )
                 SettingsItem(
                     iconVector = Icons.Filled.Description,

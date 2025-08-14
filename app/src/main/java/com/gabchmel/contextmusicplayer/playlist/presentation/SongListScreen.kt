@@ -53,8 +53,6 @@ import com.gabchmel.contextmusicplayer.core.data.song.Song
 import com.gabchmel.contextmusicplayer.permissions.domain.isPermissionNotGranted
 import com.gabchmel.contextmusicplayer.playlist.presentation.components.BottomPlayingIndicator
 import com.gabchmel.contextmusicplayer.playlist.presentation.components.SongListItem
-import com.gabchmel.contextmusicplayer.ui.NowPlaying
-import com.gabchmel.contextmusicplayer.ui.Settings
 import com.gabchmel.contextmusicplayer.ui.theme.spacing
 
 @OptIn(
@@ -63,8 +61,8 @@ import com.gabchmel.contextmusicplayer.ui.theme.spacing
 )
 @Composable
 fun SongListScreen(
-    navigateToNowPlaying: (entry: NowPlaying) -> Unit = {},
-    navigateToSettings: (entry: Settings) -> Unit = {}
+    navigateToNowPlaying: (songUri: String) -> Unit,
+    navigateToSettings: () -> Unit
 ) {
     val viewModel: SongListViewModel = viewModel()
     val songs by viewModel.songs.collectAsState()
@@ -79,7 +77,6 @@ fun SongListScreen(
                 isPermissionGranted = true
             }
         }
-
 
     Scaffold(
         modifier = Modifier.background(
@@ -104,9 +101,7 @@ fun SongListScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = {
-                            navigateToSettings(Settings)
-                        }
+                        onClick = navigateToSettings
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
@@ -181,10 +176,9 @@ fun SongListScreen(
                                 items(songs, key = { it.uri }) { song ->
                                     val songUri = Uri.encode(song.uri.toString())
                                     SongListItem(
-                                        song,
+                                        song = song,
                                         onItemSelected = {
-                                            val entry = NowPlaying(songUri = songUri)
-                                            navigateToNowPlaying(entry)
+                                            navigateToNowPlaying(songUri)
                                         }
                                     )
                                 }

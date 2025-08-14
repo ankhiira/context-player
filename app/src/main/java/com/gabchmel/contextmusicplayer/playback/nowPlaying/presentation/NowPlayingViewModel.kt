@@ -13,7 +13,6 @@ import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionToken
 import com.gabchmel.common.utils.bindService
 import com.gabchmel.contextmusicplayer.playback.musicService.MusicService
-import com.gabchmel.contextmusicplayer.ui.NowPlaying
 import com.gabchmel.sensorprocessor.data.service.SensorDataProcessingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +20,7 @@ import kotlinx.coroutines.guava.asDeferred
 import kotlinx.coroutines.launch
 
 class NowPlayingViewModel(
-    val key: NowPlaying,
+    val songUri: String,
     val app: Application
 ) : ViewModel() {
 
@@ -43,7 +42,7 @@ class NowPlayingViewModel(
                     .buildAsync().asDeferred().await()
 
             val mediaItem = MediaItem.Builder()
-                .setUri(key.songUri)
+                .setUri(songUri)
                 .build()
 
             mediaBrowserLocal = mediaBrowser
@@ -113,11 +112,11 @@ class NowPlayingViewModel(
     }
 
     class Factory(
-        private val key: NowPlaying,
+        private val songUri: String,
         private val app: Application
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return NowPlayingViewModel(key, app) as T
+            return NowPlayingViewModel(songUri, app) as T
         }
     }
 }

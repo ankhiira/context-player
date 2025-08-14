@@ -44,14 +44,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gabchmel.contextmusicplayer.R
 import com.gabchmel.contextmusicplayer.playlist.presentation.getArtworkPainter
-import com.gabchmel.contextmusicplayer.ui.Settings
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NowPlayingScreen(
     viewModel: NowPlayingViewModel = viewModel(),
-    navigateToSettings: (entry: Settings) -> Unit = {},
+    navigateToSettings: () -> Unit = {},
     popBackStack: () -> Unit = {}
 ) {
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
@@ -88,9 +87,9 @@ fun NowPlayingScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        popBackStack()
-                    }) {
+                    IconButton(
+                        onClick = popBackStack
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.ArrowBack,
                             contentDescription = "Back",
@@ -101,9 +100,7 @@ fun NowPlayingScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = {
-                            navigateToSettings(Settings)
-                        }
+                        onClick = navigateToSettings
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
